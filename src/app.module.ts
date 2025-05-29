@@ -27,7 +27,7 @@ import { ServiceDetailsModule } from './modules/service-details/service-details.
     MessageModule,
     UserModule,
     VehicleModule,
-    ServiceDetailsModule,
+    ServiceDetailsModule
   ],
 })
 export class AppModule {}
