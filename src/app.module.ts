@@ -12,11 +12,16 @@ import { MessageModule } from './modules/message/message.module';
 import { UserModule } from './modules/user/user.module';
 import { VehicleModule } from './modules/vehicle/vehicle.module';
 import { ServiceDetailsModule } from './modules/service-details/service-details.module';
-
+import { ConfigModule } from '@nestjs/config';
+import configuration from './config/configuration';
 @Module({
   controllers: [AppController],
   providers: [AppService],
   imports: [
+    ConfigModule.forRoot({
+      load: [configuration],
+      isGlobal: true,
+    }),
     ServiceRequestModule,
     ReviewModule,
     ServicesModule,
