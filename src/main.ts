@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import configuration from './config/configuration';
 import { setupSwagger } from './swagger/swagger.setup';
+import 'reflect-metadata';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);

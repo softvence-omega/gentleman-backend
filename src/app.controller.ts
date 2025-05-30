@@ -15,4 +15,9 @@ export class AppController {
       data: this.appService.getHello(),
     });
   }
+
+  @Get('db')
+  async checkDb() {
+    return this.appService.checkDb();
+  }
 }
