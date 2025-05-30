@@ -6,7 +6,7 @@ import { DataSource } from 'typeorm';
 export class AppService {
   constructor(private dataSource: DataSource) {}
 
-  getHello(): string {
+  getHello() {
     return 'Hello World!';
   }
 
