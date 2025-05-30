@@ -6,6 +6,7 @@ import { Location } from 'src/modules/location/entities/location.entity';
 import { ServiceDetailEntity } from 'src/modules/service-details/entity/serviceDetail.entity';
 import { ServiceRequestEntity } from 'src/modules/service-request/entity/serviceRequest.entity';
 import { CategoryEntity } from 'src/modules/category/entity/category.entity';
+import { VehicleEntity } from 'src/modules/vehicle/entity/vehicle.entity';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { CategoryEntity } from 'src/modules/category/entity/category.entity';
             ServiceDetailEntity,
             ServiceRequestEntity,
             CategoryEntity,
+            VehicleEntity,
           ],
           synchronize: true,
         };
