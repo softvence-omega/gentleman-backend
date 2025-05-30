@@ -14,6 +14,7 @@ import { VehicleModule } from './modules/vehicle/vehicle.module';
 import { ServiceDetailsModule } from './modules/service-details/service-details.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigurationModule } from './config/config.module';
+import { LocationModule } from './modules/location/location.module';
 // Import other modules here...
 
 @Module({
@@ -34,6 +35,7 @@ import { ConfigurationModule } from './config/config.module';
     UserModule,
     VehicleModule,
     ServiceDetailsModule,
+    LocationModule,
   ],
 })
 export class AppModule {}

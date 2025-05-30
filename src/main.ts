@@ -3,10 +3,13 @@ import { AppModule } from './app.module';
 import configuration from './config/configuration';
 import { setupSwagger } from './swagger/swagger.setup';
 import 'reflect-metadata';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap(): Promise<void> {
   const app = await NestFactory.create(AppModule);
-
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
   // Optional: Use configuration if needed
   const config = configuration();
   const port = config.port || 3000;
