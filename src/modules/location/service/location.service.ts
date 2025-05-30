@@ -22,5 +22,4 @@ export class LocationService {
     await this.locationRepo.save(location);
     return location;
   }
-
 }

@@ -5,6 +5,7 @@ import { User } from 'src/modules/user/entities/user.entity';
 import { Location } from 'src/modules/location/entities/location.entity';
 import { ServiceDetailEntity } from 'src/modules/service-details/entity/serviceDetail.entity';
 import { ServiceRequestEntity } from 'src/modules/service-request/entity/serviceRequest.entity';
+import { CategoryEntity } from 'src/modules/category/entity/category.entity';
 
 @Module({
   imports: [
@@ -20,7 +21,13 @@ import { ServiceRequestEntity } from 'src/modules/service-request/entity/service
           username: dbConfig.user,
           password: dbConfig.password,
           database: dbConfig.name,
-          entities: [User, Location, ServiceDetailEntity, ServiceRequestEntity],
+          entities: [
+            User,
+            Location,
+            ServiceDetailEntity,
+            ServiceRequestEntity,
+            CategoryEntity,
+          ],
           synchronize: true,
         };
       },
