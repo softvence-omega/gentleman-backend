@@ -18,11 +18,7 @@ import { ServiceEntity } from 'src/modules/services/entity/service.entity';
         const dbConfig = configService.get('database');
         return {
           type: 'postgres',
-          host: dbConfig.host,
-          port: dbConfig.port,
-          username: dbConfig.user,
-          password: dbConfig.password,
-          database: dbConfig.name,
+          url: dbConfig.url,
           entities: [
             User,
             Location,
@@ -33,7 +29,6 @@ import { ServiceEntity } from 'src/modules/services/entity/service.entity';
             ServiceEntity,
           ],
           synchronize: true,
-          
         };
       },
     }),
