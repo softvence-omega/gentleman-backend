@@ -12,11 +12,18 @@ import { MessageModule } from './modules/message/message.module';
 import { UserModule } from './modules/user/user.module';
 import { VehicleModule } from './modules/vehicle/vehicle.module';
 import { ServiceDetailsModule } from './modules/service-details/service-details.module';
+import { DatabaseModule } from './database/database.module';
+import { ConfigurationModule } from './config/config.module';
+import { LocationModule } from './modules/location/location.module';
+// Import other modules here...
 
 @Module({
   controllers: [AppController],
   providers: [AppService],
   imports: [
+    ConfigurationModule,
+    DatabaseModule,
+    // Your feature modules
     ServiceRequestModule,
     ReviewModule,
     ServicesModule,
@@ -28,6 +35,7 @@ import { ServiceDetailsModule } from './modules/service-details/service-details.
     UserModule,
     VehicleModule,
     ServiceDetailsModule,
+    LocationModule,
   ],
 })
 export class AppModule {}
