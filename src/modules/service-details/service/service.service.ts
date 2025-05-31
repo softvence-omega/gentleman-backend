@@ -26,6 +26,7 @@ export class ServiceDetail {
 
     const serviceDetail = new ServiceDetailEntity({
       ...dto,
+      locationId: dto.locationId,
     });
     await this.entityManager.save(serviceDetail);
     console.log(serviceDetail);
