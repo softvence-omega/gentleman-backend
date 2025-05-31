@@ -17,7 +17,11 @@ export class ServiceDetailEntity extends AbstractionEntity {
     cascade: true,
   })
   @JoinColumn()
+  @JoinColumn({ name: 'locationId' })
   location: Location;
+
+  @Column()
+  locationId: string;
   constructor(entity?: Partial<ServiceDetailEntity>) {
     super();
     Object.assign(this, entity);

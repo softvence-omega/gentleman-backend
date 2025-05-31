@@ -3,7 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ServiceRequestModule } from './modules/service-request/service-request.module';
 import { ReviewModule } from './modules/review/review.module';
-import { ServicesModule } from './modules/services/services.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import { NotificationModule } from './modules/notification/notification.module';
 import { CategoryModule } from './modules/category/category.module';
@@ -15,6 +14,7 @@ import { ServiceDetailsModule } from './modules/service-details/service-details.
 import { DatabaseModule } from './database/database.module';
 import { ConfigurationModule } from './config/config.module';
 import { LocationModule } from './modules/location/location.module';
+import { ServiceModule } from './modules/services/services.module';
 // Import other modules here...
 
 @Module({
@@ -26,7 +26,7 @@ import { LocationModule } from './modules/location/location.module';
     // Your feature modules
     ServiceRequestModule,
     ReviewModule,
-    ServicesModule,
+    ServiceModule,
     PaymentModule,
     NotificationModule,
     CategoryModule,
