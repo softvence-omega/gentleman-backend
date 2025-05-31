@@ -7,6 +7,7 @@ import { ServiceDetailEntity } from 'src/modules/service-details/entity/serviceD
 import { ServiceRequestEntity } from 'src/modules/service-request/entity/serviceRequest.entity';
 import { CategoryEntity } from 'src/modules/category/entity/category.entity';
 import { VehicleEntity } from 'src/modules/vehicle/entity/vehicle.entity';
+import { ServiceEntity } from 'src/modules/services/entity/service.entity';
 
 @Module({
   imports: [
@@ -29,8 +30,10 @@ import { VehicleEntity } from 'src/modules/vehicle/entity/vehicle.entity';
             ServiceRequestEntity,
             CategoryEntity,
             VehicleEntity,
+            ServiceEntity,
           ],
           synchronize: true,
+          
         };
       },
     }),
