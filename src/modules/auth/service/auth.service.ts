@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { LoginDto } from '../dto/login.dto';
 
 @Injectable()
 export class AuthService {
-    async login(): Promise<any>{
-        return await "login successfull!";
+    async login(payload: LoginDto): Promise<any>{
+        return console.dir(payload);
     }
 
     async register(): Promise<any>{

@@ -10,7 +10,7 @@ export class AuthController {
     @Public()
     @Post("login")
     async login(@Body() payload: LoginDto): Promise<any>{
-        console.dir(payload);
+        const result = this.authService.login(payload);
     }
 
 
