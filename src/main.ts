@@ -1,26 +1,31 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import configuration from './config/configuration';
 import { setupSwagger } from './swagger/swagger.setup';
-import 'reflect-metadata';
+import "reflect-metadata";
+import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
-  );
-  // Optional: Use configuration if needed
-  const config = configuration();
-  const port = config.port || 3000;
-  const node_env = config.node_env || 'development';
+  const app = await NestFactory.create(AppModule, {cors: true});
 
+  const config = app.get(ConfigService);
+  const port = config.get('port') || 3000;
+  const node_env = config.get('node_env') || 'development';
   if (node_env !== 'production') {
     setupSwagger(app);
   }
 
+   app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,      
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
+  app.setGlobalPrefix('/api/v1/')
+
   await app.listen(port);
-  console.log(`🚀 Application is running on: http://localhost:${port}`);
+  console.log(`🚀 Application is running successfully!`);
 }
 
 bootstrap().catch((err) => {
