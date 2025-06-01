@@ -14,14 +14,22 @@ import { VehicleModule } from './modules/vehicle/vehicle.module';
 import { ServiceDetailsModule } from './modules/service-details/service-details.module';
 import { DatabaseModule } from './database/database.module';
 import { ConfigurationModule } from './config/config.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { AuthGuard } from './modules/auth/auth.guard';
+import { JwtModule } from '@nestjs/jwt';
 // Import other modules here...
 
 @Module({
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, {
+    provide: APP_GUARD,
+    useClass: AuthGuard
+  }],
   imports: [
     ConfigurationModule,
     DatabaseModule,
+    JwtModule,
     // Your feature modules
     ServiceRequestModule,
     ReviewModule,
@@ -34,6 +42,7 @@ import { ConfigurationModule } from './config/config.module';
     UserModule,
     VehicleModule,
     ServiceDetailsModule,
+    AuthModule,
   ],
 })
 export class AppModule {}
