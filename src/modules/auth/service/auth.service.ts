@@ -38,10 +38,12 @@ export class AuthService {
 
         const jwtPayload = {
             userId: user.id,
-            role: user.role,
+            role: user.role
         }
 
-        const accessToken = await this.jwtService.signAsync(jwtPayload);
+        const accessToken = await this.jwtService.signAsync(jwtPayload, {
+            expiresIn: this.config.get("jwt_expired_in") || '5m'
+        });
 
         return {
             accessToken

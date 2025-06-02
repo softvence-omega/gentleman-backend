@@ -1,10 +1,7 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
 import {
   Entity,
-  PrimaryGeneratedColumn,
   Column,
-  CreateDateColumn,
-  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
