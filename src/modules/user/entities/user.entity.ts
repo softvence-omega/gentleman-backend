@@ -23,7 +23,7 @@ export class User {
   @Column({ nullable: true })
   phone?: string;
 
-  @Column({ nullable: true })
+  @Column({ enum: ['customer', 'provider', 'admin'], default: 'customer' })
   role?: string;
 
   @Column({ nullable: true })
@@ -37,6 +37,15 @@ export class User {
 
   @Column({nullable: true})
   profileImage?: string;
+
+  @Column({enum: ['blocked', 'active', 'inactive'], default: 'inactive'})
+  status: string;
+
+  @Column({default: false})
+  email_verified: boolean;
+
+  @Column({default: false})
+  isDeleted: boolean;
 
   @CreateDateColumn()
   createdAt: Date;

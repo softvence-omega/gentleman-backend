@@ -1,22 +1,20 @@
 import { HttpStatus } from '@nestjs/common';
+import { Response } from 'express';
 
 type TResponse<T> = {
-  statusCode?: number;
-  success?: boolean;
+  statusCode: number;
+  success: boolean;
   message?: string;
   data: T;
 };
 
-export const sendResponse = <T>({
-  statusCode = HttpStatus.OK,
-  success = true,
-  message = '',
-  data,
-}: TResponse<T>) => {
-  return {
-    statusCode,
-    success,
-    message,
-    data,
-  };
+const sendResponse = <T>(res: Response, data: TResponse<T>) => {
+  res.status(data?.statusCode).json({
+    statusCode: data?.statusCode,
+    success: data?.success,
+    message: data?.message,
+    data: data.data,
+  });
 };
+
+export default sendResponse;
