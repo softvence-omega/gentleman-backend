@@ -34,9 +34,9 @@ async function bootstrap(): Promise<void> {
   const config = app.get(ConfigService);
   const port = config.get('port') || 3000;
   const node_env = config.get('node_env') || 'development';
-  if (node_env !== 'production') {
+  // if (node_env !== 'production') {
     setupSwagger(app);
-  }
+  // }
 
   await app.listen(port);
   console.log(`🚀 Application is running successfully!`);
