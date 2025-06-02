@@ -4,6 +4,7 @@ import {
   Injectable,
   BadRequestException,
   InternalServerErrorException,
+  RawBodyRequest,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -70,13 +71,19 @@ export class PaymentService {
     return { url: session.url };
   }
 
-  async handleWebhook(req: Request) {
+  async handleWebhook(req: RawBodyRequest<Request>) {
     const signature = req.headers['stripe-signature'] as string;
     let event: Stripe.Event;
 
+    const rawBody = req.rawBody;
+
+if (!rawBody) {
+  throw new BadRequestException('No webhook payload was provided.');
+}
+
     try {
       event = this.stripe.webhooks.constructEvent(
-        req.body,
+        rawBody,
         signature,
         this.configService.get('stripe_webhook_secret') as string,
       );

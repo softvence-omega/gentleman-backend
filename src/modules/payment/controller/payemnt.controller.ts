@@ -8,11 +8,13 @@ import {
   Get,
   Param,
   Headers,
+  RawBodyRequest,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { sendResponse } from 'src/common/utils/sendResponse';
 import { CreatePaymentDto } from '../dto/payment.dto';
 import { PaymentService } from '../service/payment.service';
+import Stripe from 'stripe';
 
 
 @Controller('payments')
@@ -26,9 +28,11 @@ export class PaymentController {
   }
 
   @Post('/webhook')
-  async webhook(@Req() req: Request, @Headers('stripe-signature') sig: string) {
+  async webhook(@Headers('stripe-signature') signature: string, @Req() req: RawBodyRequest<Request>) {
     return this.paymentService.handleWebhook(req);
   }
+
+
 
   @Post('/refund/:paymentIntentId')
   refund(@Param('paymentIntentId') id: string) {

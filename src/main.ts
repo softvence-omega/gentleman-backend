@@ -9,7 +9,12 @@ import { ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from './common/errors/all-exceptions.filter';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule,{
+     rawBody: true,
+    bodyParser: true,
+  });
+
+  app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
   );
