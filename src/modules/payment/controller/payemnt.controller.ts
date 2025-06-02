@@ -9,12 +9,15 @@ import {
   Param,
   Headers,
   RawBodyRequest,
+  Res,
+  HttpStatus,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { sendResponse } from 'src/common/utils/sendResponse';
 import { CreatePaymentDto } from '../dto/payment.dto';
 import { PaymentService } from '../service/payment.service';
 import Stripe from 'stripe';
+import sendResponse from 'src/common/utils/sendResponse';
+import { Response } from 'express';
 
 
 @Controller('payments')
@@ -35,11 +38,12 @@ export class PaymentController {
 
 
   @Post('/refund/:paymentIntentId')
-  refund(@Param('paymentIntentId') id: string) {
-    return  sendResponse({
+  async refund(@Param('paymentIntentId') id: string, @Res() res: Response) {
+    return  sendResponse(res,{
+        statusCode:HttpStatus.OK,
+        success:true,
+        message: "refund money succfully",
         data: this.paymentService.refund(id),
-        statusCode: 200,
-        message: 'Refund initiated successfully',
     })
   }
 }
