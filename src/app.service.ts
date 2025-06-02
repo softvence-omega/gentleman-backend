@@ -7,6 +7,7 @@ export class AppService {
   constructor(private dataSource: DataSource) {}
 
   getHello() {
+  getHello(): string {
     return 'Hello World!';
   }
 

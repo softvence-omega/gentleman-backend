@@ -1,9 +1,15 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
 
   @Column()
   name: string;
@@ -13,4 +19,28 @@ export class User {
 
   @Column()
   password: string;
+
+  @Column({ nullable: true })
+  phone?: string;
+
+  @Column({ nullable: true })
+  role?: string;
+
+  @Column({ nullable: true })
+  otp?: string;
+
+  @Column({ nullable: true })
+  serviceCategoryId?: string;
+
+  @Column({ nullable: true })
+  workShopName?: string;
+
+  @Column({nullable: true})
+  profileImage?: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

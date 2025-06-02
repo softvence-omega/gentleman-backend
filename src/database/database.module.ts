@@ -1,6 +1,3 @@
-
-
-
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -23,7 +20,6 @@ import { PaymentEntity } from 'src/modules/payment/entity/payment.entity';
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
         url: configService.get<string>('DATABASE_URL'),
-        
         entities: [
           User,
           Location,
@@ -36,7 +32,6 @@ import { PaymentEntity } from 'src/modules/payment/entity/payment.entity';
         ],
         synchronize: configService.get<string>('NODE_ENV') !== 'production',
         autoLoadEntities: true,
-        
       }),
     }),
   ],
