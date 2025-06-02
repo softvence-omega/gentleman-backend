@@ -31,6 +31,8 @@ export class PaymentService {
   }
 
   async createPayment(dto: CreatePaymentDto) {
+
+     
     const { amount,email } = dto;
 
     const payment = this.paymentRepo.create({
@@ -39,6 +41,8 @@ export class PaymentService {
     });
 
     await this.paymentRepo.save(payment);
+
+    
 
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -64,7 +68,7 @@ export class PaymentService {
         },
       },
     });
-
+     
     if (!session?.url)
       throw new BadRequestException('Stripe session creation failed');
 
@@ -93,12 +97,12 @@ if (!rawBody) {
 
     const data = event.data.object as Stripe.PaymentIntent;
     const metadata = data.metadata;
-
+    console.log(data)
     if (event.type === 'payment_intent.succeeded') {
-      // await this.paymentRepo.update(metadata.transactionId, {
-      //   status: PaymentStatus.COMPLETED,
-      //   senderPaymentTransaction: data.id,
-      // });
+      await this.paymentRepo.update(data.id, {
+        status: PaymentStatus.COMPLETED,
+        senderPaymentTransaction: data.id,
+      });
       console.log('Payment succeeded:', data.id);
     }
 

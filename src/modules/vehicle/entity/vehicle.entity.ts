@@ -1,5 +1,6 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
-import { Column, Entity } from 'typeorm';
+import { VehicleTypeEntity } from 'src/modules/vehicleTypes/entity/vehicle-type.entity';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity()
 export class VehicleEntity extends AbstractionEntity {
@@ -16,7 +17,11 @@ export class VehicleEntity extends AbstractionEntity {
   year: string;
 
   @Column()
-  vhicalImage: string;
+  vehicleImage: string;
+
+ @ManyToOne(() => VehicleTypeEntity, (vehicleType) => vehicleType.vehicleTypes, { eager: false })
+vehicleType: VehicleTypeEntity;
+
 
   constructor(entity?: Partial<VehicleEntity>) {
     super();

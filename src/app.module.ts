@@ -19,6 +19,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './modules/auth/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
+import { VehicleTypeModule } from './modules/vehicleTypes/vehicleTypes.module';
 // Import other modules here...
 
 @Module({
@@ -46,6 +47,7 @@ import { JwtModule } from '@nestjs/jwt';
     LocationModule,
     AuthModule,
     UserModule,
+    VehicleTypeModule
   ],
 })
 export class AppModule {}

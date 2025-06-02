@@ -10,9 +10,9 @@ export class Location extends AbstractionEntity {
 
   @Column('decimal', { precision: 9, scale: 6 })
   longitude: number;
-  // @OneToOne(
-  //   () => ServiceDetailEntity,
-  //   (serviceDetail) => serviceDetail.location,
-  // )
+  @OneToOne(
+    () => ServiceDetailEntity,
+    (serviceDetail) => serviceDetail.location,
+  )
   serviceDetail: ServiceDetailEntity;
 }

@@ -1,32 +1,25 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { VehicleService } from '../service/vehicle.service';
-import { VehicleDto } from '../dto/vehicle.dto';
-import { Response } from 'express';
-import sendResponse from 'src/common/utils/sendResponse';
+import { VehicleEntity } from '../entity/vehicle.entity';
+import { CreateVehicleDto } from '../dto/vehicle.dto';
+
 
 @Controller('vehicles')
 export class VehicleController {
   constructor(private readonly vehicleService: VehicleService) {}
 
-  @Post('/')
-  async create(@Body() dto: VehicleDto ,@Res() res:Response) {
-    const data = await this.vehicleService.createVehicle(dto);
-    return sendResponse(res,{
-            statusCode:HttpStatus.OK,
-            success:true,
-            message: "refund money succfully",
-            data: data
-        })
+  @Post()
+  async create(@Body() dto: CreateVehicleDto): Promise<VehicleEntity> {
+    return this.vehicleService.create(dto);
   }
 
-  @Get('/:id')
-  async getById(@Param('id') id: string,@Res() res:Response) {
-    const data = await this.vehicleService.getVehicleById(id);
-    return sendResponse(res,{
-        statusCode:HttpStatus.OK,
-        success:true,
-        message: "successfully get vehicle data",
-        data: data
-    });
+  @Get()
+  async findAll(): Promise<VehicleEntity[]> {
+    return this.vehicleService.findAll();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<VehicleEntity> {
+    return this.vehicleService.findOne(id);
   }
 }

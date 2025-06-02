@@ -12,6 +12,7 @@ export class CategoryEntity extends AbstractionEntity {
 
   @ManyToOne(() => ServiceEntity, (service) => service.categories, {
     nullable: false,
+    eager:true
   })
   @JoinColumn({ name: 'serviceId' })
   service: ServiceEntity;

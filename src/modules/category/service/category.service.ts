@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CategoryEntity } from '../entity/category.entity';
@@ -16,14 +20,33 @@ export class CategoryService {
   ) {}
 
   async createCategory(dto: CategoryDto) {
+    // Step 1: Check if the related service exists
     const service = await this.serviceRepo.findOneBy({ id: dto.serviceId });
     if (!service) {
       throw new NotFoundException('Service not found');
     }
 
+    // Step 2: Check for duplicate category title within the same service
+    const existingCategory = await this.categoryRepo.findOne({
+      where: {
+        title: dto.title,
+        service: {
+          id: dto.serviceId,
+        },
+      },
+      relations: ['service'], // Ensure service is joined for filtering
+    });
+
+    if (existingCategory) {
+      throw new BadRequestException(
+        'Category with this title already exists for the specified service',
+      );
+    }
+
+    // Step 3: Create and save the new category
     const category = this.categoryRepo.create({
       title: dto.title,
-      serviceId: dto.serviceId,
+      service: service,
     });
 
     await this.categoryRepo.save(category);

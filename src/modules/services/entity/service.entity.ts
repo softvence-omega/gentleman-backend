@@ -4,10 +4,10 @@ import { Column, Entity, OneToMany } from 'typeorm';
 
 @Entity()
 export class ServiceEntity extends AbstractionEntity {
-  @Column()
+  @Column({unique:true})
   title: string;
 
-  @OneToMany(() => CategoryEntity, (category) => category.service)
+  @OneToMany(() => CategoryEntity, (category) => category.service,)
   categories: CategoryEntity[];
 
   constructor(entity?: Partial<ServiceEntity>) {
