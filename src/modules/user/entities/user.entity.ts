@@ -1,3 +1,4 @@
+import { AbstractionEntity } from 'src/database/abstraction.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,9 +8,8 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+export class User extends AbstractionEntity  {
+ 
 
   @Column()
   name: string;
@@ -47,9 +47,8 @@ export class User {
   @Column({default: false})
   isDeleted: boolean;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
+  constructor(entity?: Partial<User>) {
+    super();
+    Object.assign(this, entity);
+  }
 }

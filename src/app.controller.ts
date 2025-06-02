@@ -1,17 +1,18 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Res } from '@nestjs/common';
 import { AppService } from './app.service';
-import { sendResponse } from './common/utils/sendResponse';
+import sendResponse from './common/utils/sendResponse';
+import { Response } from 'express';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
   @Get()
-  getHello() {
-    return sendResponse({
-      statusCode: 200,
-      success: true,
-      message: 'Welcome to the Service Marketplace API',
-      data: this.appService.getHello(),
-    });
+  getHello(@Res() res:Response) {
+    return sendResponse(res,{
+            statusCode:HttpStatus.OK,
+            success:true,
+            message: "refund money succfully",
+            data: this.appService.getHello()
+        });
   }
 }
