@@ -17,3 +17,4 @@ export class Review extends AbstractionEntity {
     Object.assign(this, entity);
   }
 }
+   

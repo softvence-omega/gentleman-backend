@@ -47,7 +47,8 @@ import { VehicleTypeModule } from './modules/vehicleTypes/vehicleTypes.module';
     LocationModule,
     AuthModule,
     UserModule,
-    VehicleTypeModule
+    VehicleTypeModule,
+    BookingModule,
   ],
 })
 export class AppModule {}
