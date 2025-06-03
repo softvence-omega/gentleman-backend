@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Review } from '../enitity/review.entity';
+import { Booking } from 'src/modules/booking/entity/booking.entity';
 import { CreateReviewDto } from '../dto/create-review.dto';
 
 
@@ -9,40 +10,38 @@ import { CreateReviewDto } from '../dto/create-review.dto';
 export class ReviewService {
   constructor(
     @InjectRepository(Review)
-    private reviewRepository: Repository<Review>,
+    private reviewRepo: Repository<Review>,
+
+    @InjectRepository(Booking)
+    private bookingRepo: Repository<Booking>,
   ) {}
 
-  create(createReviewDto: CreateReviewDto) {
-    const review = this.reviewRepository.create(createReviewDto);
-    return this.reviewRepository.save(review);
-  }
-
-  findAll() {
-    return this.reviewRepository.find();
-  }
-
-  findOne(id: string) {
-    return this.reviewRepository.findOneBy({ id });
-  }
-
-  async update(id: string, updateReviewDto: CreateReviewDto) {
-    const review = await this.reviewRepository.preload({
-      id,
-      ...updateReviewDto,
+  async create(createReviewDto: CreateReviewDto): Promise<Review> {
+    const booking = await this.bookingRepo.findOne({
+      where: { id: createReviewDto.bookingId },
     });
 
-    if (!review) {
-      throw new NotFoundException(`Review with ID ${id} not found`);
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
     }
 
-    return this.reviewRepository.save(review);
+    const review = this.reviewRepo.create({
+      comment: createReviewDto.comment,
+      rating: createReviewDto.rating,
+      booking,
+    });
+
+    return await this.reviewRepo.save(review);
   }
 
-  async remove(id: string) {
-    const review = await this.findOne(id);
-    if (!review) {
-      throw new NotFoundException(`Review with ID ${id} not found`);
-    }
-    return this.reviewRepository.remove(review);
+  async findAll(): Promise<Review[]> {
+    return await this.reviewRepo.find({ relations: ['booking'] });
+  }
+
+  async findByBookingId(bookingId: string): Promise<Review[]> {
+    return await this.reviewRepo.find({
+      where: { booking: { id: bookingId } },
+      relations: ['booking'],
+    });
   }
 }

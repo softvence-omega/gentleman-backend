@@ -5,6 +5,7 @@ import {
   BadRequestException,
   InternalServerErrorException,
   RawBodyRequest,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -15,6 +16,7 @@ import { Request } from 'express';
 import { CreatePaymentDto } from '../dto/payment.dto';
 import { PaymentStatus } from '../entity/payment.enum';
 import { PaymentEntity } from '../entity/payment.entity';
+import { bookingInfoEntity } from 'src/modules/bookingInfo/entity/bookingInfo.entity';
 
 @Injectable()
 export class PaymentService {
@@ -24,6 +26,8 @@ export class PaymentService {
     private configService: ConfigService,
     @InjectRepository(PaymentEntity)
     private paymentRepo: Repository<PaymentEntity>,
+      @InjectRepository(bookingInfoEntity)
+    private readonly bookingInfoRepo: Repository<bookingInfoEntity>,
   ) {
     this.stripe = new Stripe(
       this.configService.get('stripe_secret_key') as string,
@@ -35,9 +39,21 @@ export class PaymentService {
      
     const { amount,email } = dto;
 
+    const bookingInfo = await this.bookingInfoRepo.findOne({
+      where: { id: ''},
+    });
+
+    if (!bookingInfo) {
+      throw new NotFoundException('Booking Info not found');
+    }
+
+
+    
+
     const payment = this.paymentRepo.create({
       ...dto,
       status: PaymentStatus.PENDING,
+      bookingInfo
     });
 
     await this.paymentRepo.save(payment);

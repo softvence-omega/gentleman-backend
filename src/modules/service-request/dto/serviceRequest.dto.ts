@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber } from 'class-validator';
+import { IsString, IsNumber, IsUUID } from 'class-validator';
 
 export class ServiceRequestDto {
   @ApiProperty({
@@ -22,4 +22,11 @@ export class ServiceRequestDto {
   })
   @IsNumber()
   price: number;
+
+  @ApiProperty({
+    example: '9e89f5c2-26a4-4f3f-b7b3-e2a24501ce32',
+    description: 'UUID of the provider',
+  })
+  @IsUUID()
+  providerId: string;
 }

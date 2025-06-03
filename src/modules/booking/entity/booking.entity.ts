@@ -1,5 +1,7 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
-import { Column, Entity } from 'typeorm';
+import { bookingInfoEntity } from 'src/modules/bookingInfo/entity/bookingInfo.entity';
+import { Review } from 'src/modules/review/enitity/review.entity';
+import { Column, Entity, JoinColumn, OneToOne, OneToMany } from 'typeorm';
 
 export enum BookingStatus {
   Pending = 'Pending',
@@ -36,10 +38,17 @@ export class Booking extends AbstractionEntity {
   })
   status: BookingStatus;
 
+  @OneToOne(() => bookingInfoEntity, (bookingInfoEntity) => bookingInfoEntity.booking)
+  @JoinColumn()
+  bookingInfo: bookingInfoEntity;
+
   @Column({
     type: 'enum',
     enum: BookingWorkStatus,
     default: BookingWorkStatus.Booked,
   })
   workStatus: BookingWorkStatus;
+
+  @OneToMany(() => Review, (review) => review.booking)
+  reviews: Review[];
 }

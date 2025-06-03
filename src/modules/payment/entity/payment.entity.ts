@@ -6,9 +6,12 @@ import {
   Column,
   CreateDateColumn,
   ManyToOne,
+  OneToOne,
+  JoinColumn,
 } from 'typeorm';
 import { PaymentStatus } from './payment.enum';
 import { AbstractionEntity } from 'src/database/abstraction.entity';
+import { bookingInfoEntity } from 'src/modules/bookingInfo/entity/bookingInfo.entity';
 
 @Entity()
 export class PaymentEntity extends AbstractionEntity {
@@ -23,11 +26,12 @@ export class PaymentEntity extends AbstractionEntity {
   })
   status: PaymentStatus;
 
-//   @Column()
-//   bookingId: string;
 
-//   @ManyToOne(() => User, (user) => user.payments)
-//   user: User;
+  
+@OneToOne(() => bookingInfoEntity, (bookingInfoEntity) => bookingInfoEntity.serviceDetail)
+@JoinColumn()
+bookingInfo:bookingInfoEntity;
+
 
   @Column({ nullable: true })
   senderPaymentTransaction?: string;
