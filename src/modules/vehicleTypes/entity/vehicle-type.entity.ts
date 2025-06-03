@@ -1,4 +1,5 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
+import { bookingInfoEntity } from 'src/modules/bookingInfo/entity/bookingInfo.entity';
 import { VehicleEntity } from 'src/modules/vehicle/entity/vehicle.entity';
 import {
   Entity,
@@ -7,6 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  OneToOne,
 } from 'typeorm';
 
 @Entity()
@@ -20,6 +22,11 @@ export class VehicleTypeEntity extends AbstractionEntity {
 
     @OneToMany(() => VehicleTypeEntity, (vehicleTypeEntity) => vehicleTypeEntity.vehicleTypes )
     vehicleTypes: VehicleTypeEntity[]
+
+    @OneToOne(()=> bookingInfoEntity,(bookingInfoEntity) => bookingInfoEntity.vehicleTypes )
+    @JoinColumn()
+    bookingInfo: bookingInfoEntity
+    
 
  constructor(entity?: Partial<VehicleTypeEntity>) {
     super();

@@ -1,6 +1,7 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
+import { bookingInfoEntity } from 'src/modules/bookingInfo/entity/bookingInfo.entity';
 import { VehicleTypeEntity } from 'src/modules/vehicleTypes/entity/vehicle-type.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 
 @Entity()
 export class VehicleEntity extends AbstractionEntity {
@@ -21,6 +22,12 @@ export class VehicleEntity extends AbstractionEntity {
 
  @ManyToOne(() => VehicleTypeEntity, (vehicleType) => vehicleType.vehicleTypes, { eager: false })
 vehicleType: VehicleTypeEntity;
+
+@OneToOne(() => bookingInfoEntity, (bookingInfoEntity) => bookingInfoEntity.vehicle)
+@JoinColumn()
+bookingInfo:bookingInfoEntity;
+
+
 
 
   constructor(entity?: Partial<VehicleEntity>) {

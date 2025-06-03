@@ -4,6 +4,7 @@ import { VehicleEntity } from '../entity/vehicle.entity';
 import { Repository } from 'typeorm';
 import { VehicleTypeEntity } from 'src/modules/vehicleTypes/entity/vehicle-type.entity';
 import { CreateVehicleDto } from '../dto/vehicle.dto';
+import { bookingInfoEntity } from 'src/modules/bookingInfo/entity/bookingInfo.entity';
 
 
 @Injectable()
@@ -14,6 +15,9 @@ export class VehicleService {
 
     @InjectRepository(VehicleTypeEntity)
     private readonly vehicleTypeRepo: Repository<VehicleTypeEntity>,
+
+     @InjectRepository(bookingInfoEntity)
+    private readonly bookingInfoRepo: Repository<bookingInfoEntity>,
   ) {}
 
   async create(dto: CreateVehicleDto): Promise<VehicleEntity> {
@@ -23,6 +27,14 @@ export class VehicleService {
 
     if (!vehicleType) {
       throw new NotFoundException('Vehicle type not found');
+    }
+
+     const bookingInfo = await this.bookingInfoRepo.findOne({
+      where: { id:"" },
+    });
+
+    if (!bookingInfo) {
+      throw new NotFoundException('Booking Info not found');
     }
 
     const vehicle = this.vehicleRepo.create({

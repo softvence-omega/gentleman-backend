@@ -4,16 +4,32 @@ import { Repository } from 'typeorm';
 import { Booking } from '../entity/booking.entity';
 import { CreateBookingDto } from '../dto/create-booking.dto';
 import { UpdateBookingDto } from '../dto/update-booking.dto';
+import { bookingInfoEntity } from 'src/modules/bookingInfo/entity/bookingInfo.entity';
 
 @Injectable()
 export class BookingService {
   constructor(
     @InjectRepository(Booking)
     private bookingRepo: Repository<Booking>,
+
+    @InjectRepository(bookingInfoEntity)
+    private readonly bookingInfoRepo: Repository<bookingInfoEntity>,
   ) {}
 
-  create(createBookingDto: CreateBookingDto) {
-    const booking = this.bookingRepo.create(createBookingDto);
+ async  create(createBookingDto: CreateBookingDto) {
+
+    const bookingInfo = await this.bookingInfoRepo.findOne({
+      where: { id: "" },
+    });
+
+    if (!bookingInfo) {
+      throw new NotFoundException('Booking Info not found');
+    }
+
+    const booking = this.bookingRepo.create({
+       ...createBookingDto,
+       bookingInfo
+    });
     return this.bookingRepo.save(booking);
   }
 
