@@ -5,8 +5,8 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class User extends AbstractionEntity  {
- 
+export class User extends AbstractionEntity {
+
 
   @Column()
   name: string;
@@ -32,16 +32,19 @@ export class User extends AbstractionEntity  {
   @Column({ nullable: true })
   workShopName?: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   profileImage?: string;
 
-  @Column({enum: ['blocked', 'active', 'inactive'], default: 'inactive'})
+  @Column({ nullable: true })
+  certificate?: string;
+
+  @Column({ enum: ['blocked', 'active', 'inactive'], default: 'inactive' })
   status: string;
 
-  @Column({default: false})
+  @Column({ default: false })
   email_verified: boolean;
 
-  @Column({default: false})
+  @Column({ default: false })
   isDeleted: boolean;
 
   constructor(entity?: Partial<User>) {
