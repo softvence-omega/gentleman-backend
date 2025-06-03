@@ -1,27 +1,27 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID } from 'class-validator';
 
-export class VehicleDto {
-  @ApiProperty({ example: 'Corolla', description: 'Name of the vehicle' })
+export class CreateVehicleDto {
   @IsString()
+  @IsNotEmpty()
   name: string;
 
-  @ApiProperty({ example: 'Toyota', description: 'Brand of the vehicle' })
   @IsString()
+  @IsNotEmpty()
   brand: string;
 
-  @ApiProperty({ example: 'LE', description: 'Model of the vehicle' })
   @IsString()
+  @IsNotEmpty()
   model: string;
 
-  @ApiProperty({ example: '2020', description: 'Manufacturing year' })
   @IsString()
+  @IsNotEmpty()
   year: string;
 
-  @ApiProperty({
-    example: 'https://example.com/car.jpg',
-    description: 'URL to the vehicle image',
-  })
   @IsString()
-  vhicalImage: string;
+  @IsNotEmpty()
+  vehicleImage: string;
+
+  @IsUUID()
+  @IsNotEmpty()
+  vehicleTypeId: string;
 }

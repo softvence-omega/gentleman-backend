@@ -11,6 +11,8 @@ export default () => ({
   smtp_auth_user: process.env.SMTP_AUTH_USER,
   smtp_auth_pass: process.env.SMTP_AUTH_PASS,
   reset_pass_ui_link: process.env.RESET_PASS_UI_LINK,
+  client_url: process.env.ClIENT_URL,
+  stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
   database: {
     url: process.env.DATABASE_URL
   }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query, Req, Res } from '@nestjs/common';
 import { ServiceDto } from '../dto/ service.dto';
 import { ServiceService } from '../service/services.service';
 import { Response } from 'express';
@@ -19,14 +19,36 @@ export class ServiceController {
         });
   }
 
-  @Get('/:id')
-  async getById(@Param('id') id: string ,@Res() res:Response) {
-    const data = await this.serviceService.getServiceById(id);
-    return sendResponse(res,{
-        statusCode:HttpStatus.OK,       
-        success:true,
-        message: "services successfully",
-        data: data
-    });
-  }
+@Get('/')
+async getAll(
+  @Res() res: Response,
+  @Query('limit') limit: string,
+  @Query('page') page: string,
+) {
+  const limitNum = parseInt(limit) || 10;
+  const pageNum = parseInt(page) || 1;
+
+  const data = await this.serviceService.getAllService(limitNum, pageNum);
+
+  return sendResponse(res, {
+    statusCode: HttpStatus.OK,
+    success: true,
+    message: "Services fetched successfully",
+    data: data,
+  });
+}
+
+@Get(':id')
+async getOne(@Param('id') id: string, @Res() res: Response) {
+  const service = await this.serviceService.getSingleService(id);
+
+  return sendResponse(res, {
+    statusCode: HttpStatus.OK,
+    success: true,
+    message: 'Single service fetched successfully',
+    data: service,
+  });
+}
+
+
 }

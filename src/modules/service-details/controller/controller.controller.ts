@@ -9,11 +9,13 @@ export class ServiceDetailController {
   constructor(private readonly serviceDetail: ServiceDetail) {}
   @Post('/')
   async create(@Body() dto: ServiceDetailDto,@Res() res:Response) {
+    const data = await this.serviceDetail.createServiceDetail(dto)
+     console.log(data)
     return sendResponse(res,{
             statusCode:HttpStatus.OK,
             success:true,
-            message: "refund money succfully",
-            data: this.serviceDetail.createServiceDetail(dto)
+            message: 'Service detail created successfully',
+            data
         });
   }
 }

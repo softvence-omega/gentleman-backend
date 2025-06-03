@@ -29,7 +29,7 @@ export class ServiceDetail {
       locationId: dto.locationId,
     });
     await this.entityManager.save(serviceDetail);
-    console.log(serviceDetail);
+    
     return serviceDetail;
   }
 }
