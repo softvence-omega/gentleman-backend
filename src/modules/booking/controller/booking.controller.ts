@@ -1,7 +1,14 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { BookingService } from '../service/booking.service';
 import { CreateBookingDto } from '../dto/create-booking.dto';
-import { UpdateBookingDto } from '../dto/update-booking.dto';
+import { UpdateBookingDto, UpdateBookingStatusDto, UpdateBookingWorkStatusDto, UpdatePaymentStatusDto } from '../dto/update-booking.dto';
 
 
 @Controller('bookings')
@@ -9,27 +16,37 @@ export class BookingController {
   constructor(private readonly bookingService: BookingService) {}
 
   @Post()
-  create(@Body() dto: CreateBookingDto) {
-    return this.bookingService.create(dto);
-  }
-
-  @Get()
-  findAll() {
-    return this.bookingService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.bookingService.findOne(id);
+  createBooking(@Body() dto: CreateBookingDto) {
+    return this.bookingService.createBooking(dto);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: UpdateBookingDto) {
-    return this.bookingService.update(id, dto);
+  updateBooking(@Param('id') id: string, @Body() dto: UpdateBookingDto) {
+    return this.bookingService.updateBooking(id, dto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bookingService.remove(id);
+  @Patch(':id/status')
+  updateBookingStatus(@Param('id') id: string, @Body() dto: UpdateBookingStatusDto) {
+    return this.bookingService.updateBookingStatus(id, dto);
+  }
+
+  @Patch(':id/work-status')
+  updateWorkStatus(@Param('id') id: string, @Body() dto: UpdateBookingWorkStatusDto) {
+    return this.bookingService.updateWorkStatus(id, dto);
+  }
+
+  @Patch(':id/payment-status')
+  updatePaymentStatus(@Param('id') id: string, @Body() dto: UpdatePaymentStatusDto) {
+    return this.bookingService.updatePaymentStatus(id, dto);
+  }
+
+  @Get('pending')
+  getPendingBookings() {
+    return this.bookingService.getPendingBookings();
+  }
+
+  @Get(':id')
+  getBookingById(@Param('id') id: string) {
+    return this.bookingService.getBookingById(id);
   }
 }

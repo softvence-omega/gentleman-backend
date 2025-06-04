@@ -8,7 +8,8 @@ export class CreatePaymentDto {
   @ApiProperty({ example: 100, description: 'Amount to be paid' })
   @IsNumber()
   amount: number;
-
+  
+  bookingId:string;
 
   @ApiProperty({ example: 'user@example.com', description: 'User email associated with the payment' })
   @IsEmail()

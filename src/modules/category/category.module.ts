@@ -4,10 +4,10 @@ import { CategoryService } from './service/category.service';
 import { CategoryController } from './controller/category.controller';
 import { CategoryEntity } from './entity/category.entity';
 import { ServiceModule } from '../services/services.module';
-import { bookingInfoEntity } from '../bookingInfo/entity/bookingInfo.entity';
+import { Booking } from '../booking/entity/booking.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CategoryEntity,bookingInfoEntity]), ServiceModule],
+  imports: [TypeOrmModule.forFeature([CategoryEntity,Booking]), ServiceModule],
   controllers: [CategoryController],
   providers: [CategoryService],
   exports: [CategoryService, TypeOrmModule],
