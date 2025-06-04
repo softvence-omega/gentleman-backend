@@ -9,6 +9,8 @@ import { User } from '../user/entities/user.entity';
 import { PaymentEntity } from '../payment/entity/payment.entity';
 import { CategoryEntity } from '../category/entity/category.entity';
 import { Review } from '../review/enitity/review.entity';
+import { DashboardController } from './controller/bookingdashbor.controller';
+import { DashboardService } from './service/providerbooking.service';
 
 @Module({
   imports: [
@@ -21,8 +23,8 @@ import { Review } from '../review/enitity/review.entity';
       Review,
     ]),
   ],
-  controllers: [BookingController],
-  providers: [BookingService],
+  controllers: [BookingController,DashboardController],
+  providers: [BookingService,DashboardService],
   exports: [TypeOrmModule, BookingService],
 })
 export class BookingModule {}

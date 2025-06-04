@@ -29,7 +29,7 @@ export class PaymentController {
   create(@Body() dto: CreatePaymentDto) {
     // For demo/test purposes: pass dummy user object or fetch from context/session manually
     
-    
+    return this.paymentService.createPayment(dto);
   }
   @Public()
   @Post('/webhook')

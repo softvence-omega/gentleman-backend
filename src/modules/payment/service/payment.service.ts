@@ -41,15 +41,19 @@ export class PaymentService {
     let amount:number;
    
    const booking = await this.bookingRepo.findOne({ where: { id: bookingId } });
-
+  console.log(booking)
 if (!booking) {
   throw new NotFoundException(`Booking with ID ${bookingId} not found`);
 }
-    
+if (!booking) {
+  throw new NotFoundException(`This booking ${bookingId} is  `);
+}
+ 
  amount = Number(booking.price);
-
+ console.log(amount)
   const payment = this.paymentRepo.create({
   ...dto,
+  amount,
   status: mainPaymentStatus.PENDING,
   booking, 
 });
@@ -110,7 +114,7 @@ if (!rawBody) {
 
     const data = event.data.object as Stripe.PaymentIntent;
     const metadata = data.metadata;
-    console.log(data)
+    
     if (event.type === 'payment_intent.succeeded') {
       await this.paymentRepo.update(metadata.id, {
         status: mainPaymentStatus.COMPLETED,
@@ -152,14 +156,17 @@ if (!rawBody) {
     );
   }
 
-  async getUserPayments(userId: string) {
-    const payments = await this.paymentRepo.find({
-    //   where: { user: { id: userId } },
-      order: { createdAt: 'DESC' },
-    });
+ async refundPayment(apiId: string, userId: string) {
+  
+  const refund = await this.stripe.refunds.create({
+    payment_intent: apiId, 
+  });
 
-    const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
 
-    return { payments, totalAmount };
-  }
+  return {
+    message: 'Payment refunded successfully',
+    refund,
+  };
+}
+
 }

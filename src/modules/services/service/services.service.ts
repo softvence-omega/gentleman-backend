@@ -26,24 +26,28 @@ export class ServiceService {
     return service;
   }
 
-  async getAllService(limit: number, page: number) {
-  const [services, total] = await this.serviceRepo.findAndCount({
-    take: limit,
-    skip: (page - 1) * limit,
-  });
+ async getAllService(limit: number, page: number) {
+    // Use query builder to get services with their categories and count of categories
+    const [services, total] = await this.serviceRepo
+      .createQueryBuilder('service')
+      .leftJoinAndSelect('service.categories', 'category')
+      .loadRelationCountAndMap('service.categoryCount', 'service.categories')
+      .take(limit)
+      .skip((page - 1) * limit)
+      .getManyAndCount();
 
-  if (!services.length) {
-    throw new NotFoundException('No services found');
-  }
+    if (!services.length) {
+      throw new NotFoundException('No services found');
+    }
 
-  return {
-    items: services,
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
-  };
-}
+    return {
+      items: services,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+ }
 
 async getSingleService(id: string) {
    const service = await this.serviceRepo.findOne({
@@ -57,6 +61,8 @@ async getSingleService(id: string) {
 
   return service;
 }
+
+
 
 
 }

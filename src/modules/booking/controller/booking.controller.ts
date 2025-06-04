@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
 } from '@nestjs/common';
 import { BookingService } from '../service/booking.service';
 import { CreateBookingDto } from '../dto/create-booking.dto';
@@ -25,12 +26,16 @@ export class BookingController {
     return this.bookingService.updateBooking(id, dto);
   }
 
-  @Patch(':id/status')
+  @Patch('status/:id')
   updateBookingStatus(@Param('id') id: string, @Body() dto: UpdateBookingStatusDto) {
     return this.bookingService.updateBookingStatus(id, dto);
   }
+  @Patch('cancelBooking/:id')
+  canCelBookingStatus(@Param('id') id: string,) {
+    return this.bookingService.cancelBooking(id);
+  }
 
-  @Patch(':id/work-status')
+  @Patch('work-status/:id')
   updateWorkStatus(@Param('id') id: string, @Body() dto: UpdateBookingWorkStatusDto) {
     return this.bookingService.updateWorkStatus(id, dto);
   }
@@ -41,8 +46,14 @@ export class BookingController {
   }
 
   @Get('pending')
-  getPendingBookings() {
-    return this.bookingService.getPendingBookings();
+  getPendingBookings(@Req() req) {
+     const userId = req.user.id;
+    return this.bookingService.getPendingBookings(userId);  
+  }
+  @Get('completed')
+  getCompletedBookings(@Req() req) {
+     const userId = req.user.id;
+    return this.bookingService.getPendingBookings(userId);  
   }
 
   @Get(':id')
@@ -60,4 +71,6 @@ export class BookingController {
   getUserBookingLocations(@Param('userId') userId: string) {
     return this.bookingService.getUserBookingLocations(userId);
   }
+
+  
 }
