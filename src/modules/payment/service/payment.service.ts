@@ -167,6 +167,26 @@ if (!rawBody) {
     message: 'Payment refunded successfully',
     refund,
   };
-}
+ }
+
+  async getAllPayments(
+    page: number,
+    limit: number,
+    order: 'ASC' | 'DESC',
+  ) {
+    const [data, total] = await this.paymentRepo.findAndCount({
+      order: { createdAt: order },
+      take: limit,
+      skip: (page - 1) * limit,
+      relations: ['booking'], // optional: include related booking
+    });
+
+    return {
+      total,
+      page,
+      limit,
+      data,
+    };
+  }
 
 }

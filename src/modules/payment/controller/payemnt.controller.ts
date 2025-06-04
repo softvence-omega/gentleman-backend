@@ -11,6 +11,7 @@ import {
   RawBodyRequest,
   Res,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { CreatePaymentDto } from '../dto/payment.dto';
@@ -47,5 +48,14 @@ export class PaymentController {
         message: "refund money succfully",
         data: this.paymentService.refund(id),
     })
+  }
+
+  @Get("all")
+  async getAllPayments(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query('order') order: 'ASC' | 'DESC' = 'DESC',
+  ) {
+    return this.paymentService.getAllPayments(+page, +limit, order);
   }
 }
