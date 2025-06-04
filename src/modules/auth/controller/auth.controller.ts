@@ -2,7 +2,7 @@ import { Body, Controller, HttpStatus, Post, Req, Res, UploadedFile, UseIntercep
 import { AuthService } from '../service/auth.service';
 import { Public } from 'src/common/utils/public.decorator';
 import { LoginDto } from '../dto/login.dto';
-import { CreateUserDto } from 'src/modules/user/dto/create-user.dto';
+import { CreateUserDto, UserRole } from 'src/modules/user/dto/create-user.dto';
 import sendResponse from 'src/common/utils/sendResponse';
 import { Response } from 'express';
 import { CreateProviderDto } from 'src/modules/user/dto/create-provider.dto';
@@ -10,6 +10,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ChangePasswordDto } from '../dto/changePassword.dto';
 import { ForgotPasswordDto } from '../dto/forgotPassword.dto';
 import { ResetPasswordDto } from '../dto/resetPassword.dto';
+import { CreateAdminDto } from 'src/modules/user/dto/create-admin.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -41,9 +42,23 @@ export class AuthController {
     }
 
     @Public()
+    @Post("admin-register")
+    async adminRegister(@Body() payload: CreateAdminDto, @Res() res: Response): Promise<any> {
+        payload.role = UserRole.ADMIN;
+        const result = await this.authService.register(payload);
+        sendResponse(res, {
+            statusCode: HttpStatus.ACCEPTED,
+            success: true,
+            message: "Admin created successfully!",
+            data: result
+        })
+    }
+
+    @Public()
     @UseInterceptors(FileInterceptor("certificate"))
     @Post("provider-register")
     async providerRegister(@Body() payload: CreateProviderDto, @UploadedFile() file: Express.Multer.File, @Res() res: Response): Promise<any> {
+        payload.role = UserRole.PROVIDER;
         const result = await this.authService.register(payload, file);
         sendResponse(res, {
             statusCode: HttpStatus.ACCEPTED,

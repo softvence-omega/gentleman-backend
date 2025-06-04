@@ -5,13 +5,12 @@ export const swaggerConfig = new DocumentBuilder()
   .setDescription('API documentation for the vehicles service')
   .setVersion('1.0')
   .addTag('Gentleman')
-  .addBearerAuth(
+  .addApiKey(
     {
-      type: 'http',
-      name: 'Authorization', 
+      type: 'apiKey',
+      name: 'Authorization',
       in: 'header',
-      description: 'Enter JWT token like: Bearer <token>',
     },
-    'access-token'
+    'auth',
   )
   .build();

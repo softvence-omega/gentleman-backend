@@ -80,7 +80,7 @@ export class AuthService {
             }
         }
 
-        const data = { ...payload, password: hashPassword, role: UserRole.PROVIDER, certificate: result ? result['secure_url'] : '' };
+        const data = { ...payload, password: hashPassword, certificate: result ? result['secure_url'] : '' };
         const userEntity = this.userRepository.create(data);
         const savedUser = await this.userRepository.save(userEntity);
 
