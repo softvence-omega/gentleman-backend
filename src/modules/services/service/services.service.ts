@@ -6,7 +6,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ServiceEntity } from '../entity/service.entity'; // removed the extra space
-import { ServiceDto } from '../dto/ service.dto';
+import { ServiceDto } from '../dto/service.dto';
 
 @Injectable()
 export class ServiceService {
