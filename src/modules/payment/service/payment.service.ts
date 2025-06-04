@@ -14,9 +14,9 @@ import Stripe from 'stripe';
 
 import { Request } from 'express';
 import { CreatePaymentDto } from '../dto/payment.dto';
-import { PaymentStatus } from '../entity/payment.enum';
+import { PaymentStatus as mainPaymentStatus } from '../entity/payment.enum';
 import { PaymentEntity } from '../entity/payment.entity';
-import { bookingInfoEntity } from 'src/modules/bookingInfo/entity/bookingInfo.entity';
+import { Booking, PaymentStatus } from 'src/modules/booking/entity/booking.entity';
 
 @Injectable()
 export class PaymentService {
@@ -26,38 +26,33 @@ export class PaymentService {
     private configService: ConfigService,
     @InjectRepository(PaymentEntity)
     private paymentRepo: Repository<PaymentEntity>,
-      @InjectRepository(bookingInfoEntity)
-    private readonly bookingInfoRepo: Repository<bookingInfoEntity>,
+    @InjectRepository(Booking)
+    private bookingRepo: Repository<Booking>,
   ) {
     this.stripe = new Stripe(
       this.configService.get('stripe_secret_key') as string,
     );
   }
 
-  async createPayment(dto: CreatePaymentDto) {
+  async createPayment(dto:CreatePaymentDto) {
 
      
-    const { amount,email } = dto;
+    const { amount,email,bookingId } = dto;
 
-    const bookingInfo = await this.bookingInfoRepo.findOne({
-      where: { id: ''},
-    });
+   
+   const booking = await this.bookingRepo.findOne({ where: { id: bookingId } });
 
-    if (!bookingInfo) {
-      throw new NotFoundException('Booking Info not found');
-    }
-
-
+if (!booking) {
+  throw new NotFoundException(`Booking with ID ${bookingId} not found`);
+}
     
 
-    const payment = this.paymentRepo.create({
-      ...dto,
-      status: PaymentStatus.PENDING,
-      bookingInfo
-    });
-
-    await this.paymentRepo.save(payment);
-
+  const payment = this.paymentRepo.create({
+  ...dto,
+  status: mainPaymentStatus.PENDING,
+  booking, 
+});
+await this.paymentRepo.save(payment);
     
 
     const session = await this.stripe.checkout.sessions.create({
@@ -80,7 +75,8 @@ export class PaymentService {
       cancel_url: this.configService.get('client_url'),
       payment_intent_data: {
         metadata: {
-         
+          id: payment.id,
+          bookingId
         },
       },
     });
@@ -115,16 +111,22 @@ if (!rawBody) {
     const metadata = data.metadata;
     console.log(data)
     if (event.type === 'payment_intent.succeeded') {
-      await this.paymentRepo.update(data.id, {
-        status: PaymentStatus.COMPLETED,
+      await this.paymentRepo.update(metadata.id, {
+        status: mainPaymentStatus.COMPLETED,
         senderPaymentTransaction: data.id,
       });
-      console.log('Payment succeeded:', data.id);
+      await this.bookingRepo.update(metadata.bookingId, {
+         paymentStatus: PaymentStatus.Completed,
+        
+      });
+      
+
+      
     }
 
     if (event.type === 'payment_intent.payment_failed') {
-      await this.paymentRepo.update(metadata.transactionId, {
-        status: PaymentStatus.CANCELLED,
+      await this.paymentRepo.update(metadata.id, {
+        status: mainPaymentStatus.CANCELLED,
       });
     }
 
@@ -145,7 +147,7 @@ if (!rawBody) {
 
     return this.paymentRepo.update(
       { senderPaymentTransaction: paymentIntentId },
-      { status: PaymentStatus.REFUNDED },
+      { status: mainPaymentStatus.REFUNDED },
     );
   }
 

@@ -8,7 +8,6 @@ import { Repository } from 'typeorm';
 import { CategoryEntity } from '../entity/category.entity';
 import { CategoryDto } from '../dto/category.dto';
 import { ServiceEntity } from 'src/modules/services/entity/service.entity';
-import { bookingInfoEntity } from 'src/modules/bookingInfo/entity/bookingInfo.entity';
 
 @Injectable()
 export class CategoryService {
@@ -19,8 +18,7 @@ export class CategoryService {
     @InjectRepository(ServiceEntity)
     private readonly serviceRepo: Repository<ServiceEntity>,
 
-    @InjectRepository(bookingInfoEntity)
-    private readonly bookingInfoRepo: Repository<bookingInfoEntity>,
+    
     
   ) {}
 
@@ -48,20 +46,14 @@ export class CategoryService {
       );
     }
 
-    const bookingInfo = await this.bookingInfoRepo.findOne({
-      where: { id: "" },
-    });
-
-    if (!bookingInfo) {
-      throw new NotFoundException('Booking Info not found');
-    }
+   
 
 
     // Step 3: Create and save the new category
     const category = this.categoryRepo.create({
       title: dto.title,
       service: service,
-      bookingInfo
+     
     });
 
     await this.categoryRepo.save(category);

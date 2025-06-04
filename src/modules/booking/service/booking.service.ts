@@ -1,56 +1,76 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Booking, BookingStatus } from '../entity/booking.entity';
 import { Repository } from 'typeorm';
-import { Booking } from '../entity/booking.entity';
 import { CreateBookingDto } from '../dto/create-booking.dto';
-import { UpdateBookingDto } from '../dto/update-booking.dto';
-import { bookingInfoEntity } from 'src/modules/bookingInfo/entity/bookingInfo.entity';
+import { UpdateBookingDto, UpdateBookingStatusDto, UpdateBookingWorkStatusDto, UpdatePaymentStatusDto } from '../dto/update-booking.dto';
+
 
 @Injectable()
 export class BookingService {
   constructor(
     @InjectRepository(Booking)
-    private bookingRepo: Repository<Booking>,
-
-    @InjectRepository(bookingInfoEntity)
-    private readonly bookingInfoRepo: Repository<bookingInfoEntity>,
+    private readonly bookingRepo: Repository<Booking>,
   ) {}
 
- async  create(createBookingDto: CreateBookingDto) {
-
-    const bookingInfo = await this.bookingInfoRepo.findOne({
-      where: { id: "" },
-    });
-
-    if (!bookingInfo) {
-      throw new NotFoundException('Booking Info not found');
-    }
-
+  async createBooking(dto: CreateBookingDto): Promise<Booking> {
     const booking = this.bookingRepo.create({
-       ...createBookingDto,
-       bookingInfo
+      ...dto,
+      vehicleType: { id: dto.vehicleTypesId },
+      user: { id: dto.userId },
+      provider: { id: dto.providerId },
+      category: { id: dto.categoryId },
     });
     return this.bookingRepo.save(booking);
   }
 
-  findAll() {
-    return this.bookingRepo.find();
+  async updateBooking(id: string, dto: UpdateBookingDto): Promise<Booking> {
+    const booking = await this.getBookingById(id);
+
+    Object.assign(booking, {
+      ...dto,
+      vehicleType: dto.vehicleTypesId ? { id: dto.vehicleTypesId } : booking.vehicleType,
+      user: dto.userId ? { id: dto.userId } : booking.user,
+      provider: dto.providerId ? { id: dto.providerId } : booking.provider,
+      category: dto.categoryId ? { id: dto.categoryId } : booking.category,
+
+    });
+
+    return this.bookingRepo.save(booking);
   }
 
-  async findOne(id: string) {
-    const booking = await this.bookingRepo.findOne({ where: { id } });
+  async updateBookingStatus(id: string, dto: UpdateBookingStatusDto): Promise<Booking> {
+    const booking = await this.getBookingById(id);
+    booking.status = dto.status;
+    return this.bookingRepo.save(booking);
+  }
+
+  async updateWorkStatus(id: string, dto: UpdateBookingWorkStatusDto): Promise<Booking> {
+    const booking = await this.getBookingById(id);
+    booking.workStatus = dto.workStatus;
+    return this.bookingRepo.save(booking);
+  }
+
+  async updatePaymentStatus(id: string, dto: UpdatePaymentStatusDto): Promise<Booking> {
+    const booking = await this.getBookingById(id);
+    booking.paymentStatus = dto.paymentStatus;
+    return this.bookingRepo.save(booking);
+  }
+
+  async getPendingBookings(): Promise<Booking[]> {
+    return this.bookingRepo.find({
+    where: { status: BookingStatus.Pending },
+      relations: ['user', 'provider', 'vehicleType', 'category', 'payment', 'reviews'],
+    });
+  }
+
+  async getBookingById(id: string): Promise<Booking> {
+    const booking = await this.bookingRepo.findOne({
+      where: { id },
+      relations: ['user', 'provider', 'vehicleType', 'category', 'payment', 'reviews'],
+    });
+
     if (!booking) throw new NotFoundException('Booking not found');
     return booking;
-  }
-
-  async update(id: string, updateBookingDto: UpdateBookingDto) {
-    const booking = await this.findOne(id);
-    Object.assign(booking, updateBookingDto);
-    return this.bookingRepo.save(booking);
-  }
-
-  async remove(id: string) {
-    const booking = await this.findOne(id);
-    return this.bookingRepo.remove(booking);
   }
 }

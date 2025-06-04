@@ -1,6 +1,5 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
-import { bookingInfoEntity } from 'src/modules/bookingInfo/entity/bookingInfo.entity';
-import { VehicleEntity } from 'src/modules/vehicle/entity/vehicle.entity';
+import { Booking } from 'src/modules/booking/entity/booking.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -23,9 +22,10 @@ export class VehicleTypeEntity extends AbstractionEntity {
     @OneToMany(() => VehicleTypeEntity, (vehicleTypeEntity) => vehicleTypeEntity.vehicleTypes )
     vehicleTypes: VehicleTypeEntity[]
 
-    @OneToOne(()=> bookingInfoEntity,(bookingInfoEntity) => bookingInfoEntity.vehicleTypes )
+    @OneToOne(()=> Booking , (booking) => booking.vehicleType )
     @JoinColumn()
-    bookingInfo: bookingInfoEntity
+    booking:Booking
+   
     
 
  constructor(entity?: Partial<VehicleTypeEntity>) {

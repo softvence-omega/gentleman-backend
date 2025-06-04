@@ -3,11 +3,11 @@ import { UserService } from './service/user.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { UserController } from './controller/user.controller';
-import { ServiceRequestEntity } from '../service-request/entity/serviceRequest.entity';
+import { Booking } from '../booking/entity/booking.entity';
 import { CloudinaryModule } from 'src/common/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, ServiceRequestEntity]), CloudinaryModule],
+  imports: [TypeOrmModule.forFeature([User, Booking]), CloudinaryModule],
   controllers: [UserController],
   providers: [UserService],
   exports: [TypeOrmModule]

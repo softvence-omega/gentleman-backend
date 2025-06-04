@@ -1,16 +1,56 @@
-import { IsEnum, IsOptional } from 'class-validator';
-import { BookingStatus, BookingWorkStatus, PaymentStatus } from '../entity/booking.entity';
+import { IsDateString, IsOptional, IsString } from "class-validator";
 
 export class CreateBookingDto {
-  @IsOptional()
-  @IsEnum(PaymentStatus)
-  paymentStatus?: PaymentStatus;
+  @IsString()
+  title: string;
+
+  @IsString()
+  description: string;
+
+  @IsString()
+  price: string;
+
+  @IsString()
+  DetailsDescription: string;
+
+ @IsOptional()
+  @IsString()
+  brand?: string;
 
   @IsOptional()
-  @IsEnum(BookingStatus)
-  status?: BookingStatus;
+  @IsString()
+  model?: string;
 
   @IsOptional()
-  @IsEnum(BookingWorkStatus)
-  workStatus?: BookingWorkStatus;
+  @IsDateString()
+  year?: string;
+
+  @IsOptional()
+  @IsString()
+  vehicleImage?: string;
+
+  @IsString()
+  desireDate: string;
+
+  @IsString()
+  dentImg: string;
+
+  @IsString()
+  longitude: string;
+
+  @IsString()
+  latitude: string;
+
+  @IsOptional()
+  @IsString()
+  vehicleTypesId: string;
+
+  @IsString()
+  userId: string;
+
+  @IsString()
+  providerId: string;
+
+  @IsString()
+  categoryId: string;
 }

@@ -1,5 +1,5 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
-import { ServiceRequestEntity } from 'src/modules/service-request/entity/serviceRequest.entity';
+import { Booking } from 'src/modules/booking/entity/booking.entity';
 import { Entity, Column, OneToMany } from 'typeorm';
 
 @Entity()
@@ -43,8 +43,10 @@ export class User extends AbstractionEntity {
   @Column({ default: false })
   isDeleted: boolean;
 
-  @OneToMany(() => ServiceRequestEntity, (serviceRequest) => serviceRequest.provider)
-  servicesRequest: ServiceRequestEntity[];
+
+  @OneToMany(() => Booking, (booking) => booking.user)
+  bookings: Booking[];
+
 
   constructor(entity?: Partial<User>) {
     super();

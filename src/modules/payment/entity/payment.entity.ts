@@ -11,13 +11,16 @@ import {
 } from 'typeorm';
 import { PaymentStatus } from './payment.enum';
 import { AbstractionEntity } from 'src/database/abstraction.entity';
-import { bookingInfoEntity } from 'src/modules/bookingInfo/entity/bookingInfo.entity';
+import { Booking } from 'src/modules/booking/entity/booking.entity';
 
 @Entity()
 export class PaymentEntity extends AbstractionEntity {
 
   @Column()
   amount: number;
+
+  @Column({nullable:true})
+  transactionId:string
 
   @Column({
     type: 'enum',
@@ -27,10 +30,9 @@ export class PaymentEntity extends AbstractionEntity {
   status: PaymentStatus;
 
 
-  
-@OneToOne(() => bookingInfoEntity, (bookingInfoEntity) => bookingInfoEntity.serviceDetail)
+@OneToOne(() => Booking, (booking) => booking.payment)
 @JoinColumn()
-bookingInfo:bookingInfoEntity;
+booking: Booking;
 
 
   @Column({ nullable: true })
