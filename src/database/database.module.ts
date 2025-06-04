@@ -9,22 +9,15 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        url: configService.get<string>('DATABASE_URL'),
-        entities: [
-          User,
-          Location,
-          ServiceDetailEntity,
-          ServiceRequestEntity,
-          CategoryEntity,
-          VehicleEntity,
-          ServiceEntity,
-          PaymentEntity,
-        ],
-        synchronize: configService.get<string>('NODE_ENV') !== 'production',
-        autoLoadEntities: true,
-      }),
+      useFactory: (configService: ConfigService) => {
+        const dbConfig = configService.get('database');
+        return {
+          type: 'postgres',
+          url: dbConfig.url,
+          synchronize: true,
+          autoLoadEntities: true,
+        };
+      },
     }),
   ],
 })

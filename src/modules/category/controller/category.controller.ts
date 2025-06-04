@@ -15,7 +15,7 @@ export class CategoryController {
             statusCode:HttpStatus.OK,
             success:true,
             message: "create category services successfully   ",
-            data: this.categoryService.createCategory(dto)
+            data: data
         });
   }
 

@@ -18,6 +18,7 @@ import { PaymentService } from '../service/payment.service';
 import Stripe from 'stripe';
 import sendResponse from 'src/common/utils/sendResponse';
 import { Response } from 'express';
+import { Public } from 'src/common/utils/public.decorator';
 
 
 @Controller('payments')
@@ -27,9 +28,10 @@ export class PaymentController {
   @Post('/')
   create(@Body() dto: CreatePaymentDto) {
     // For demo/test purposes: pass dummy user object or fetch from context/session manually
-    return this.paymentService.createPayment(dto);
+    
+    
   }
-
+  @Public()
   @Post('/webhook')
   async webhook(@Headers('stripe-signature') signature: string, @Req() req: RawBodyRequest<Request>) {
     return this.paymentService.handleWebhook(req);

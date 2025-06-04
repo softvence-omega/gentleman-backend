@@ -1,13 +1,9 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
-import {
-  Entity,
-  Column,
-} from 'typeorm';
+import { Booking } from 'src/modules/booking/entity/booking.entity';
+import { Entity, Column, OneToMany } from 'typeorm';
 
 @Entity()
-export class User extends AbstractionEntity  {
- 
-
+export class User extends AbstractionEntity {
   @Column()
   name: string;
 
@@ -32,17 +28,25 @@ export class User extends AbstractionEntity  {
   @Column({ nullable: true })
   workShopName?: string;
 
-  @Column({nullable: true})
+  @Column({ nullable: true })
   profileImage?: string;
 
-  @Column({enum: ['blocked', 'active', 'inactive'], default: 'inactive'})
+  @Column({ enum: ['blocked', 'active', 'inactive'], default: 'inactive' })
   status: string;
 
-  @Column({default: false})
+  @Column({ default: false })
   email_verified: boolean;
 
-  @Column({default: false})
+  @Column({ default: false })
   isDeleted: boolean;
+
+
+ @OneToMany(() => Booking, (booking) => booking.user)
+bookings: Booking[];
+
+@OneToMany(() => Booking, (booking) => booking.provider)
+receivedBookings: Booking[];
+
 
   constructor(entity?: Partial<User>) {
     super();

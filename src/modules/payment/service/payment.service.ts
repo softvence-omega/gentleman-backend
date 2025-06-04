@@ -5,6 +5,7 @@ import {
   BadRequestException,
   InternalServerErrorException,
   RawBodyRequest,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -13,8 +14,9 @@ import Stripe from 'stripe';
 
 import { Request } from 'express';
 import { CreatePaymentDto } from '../dto/payment.dto';
-import { PaymentStatus } from '../entity/payment.enum';
+import { PaymentStatus as mainPaymentStatus } from '../entity/payment.enum';
 import { PaymentEntity } from '../entity/payment.entity';
+import { Booking, PaymentStatus } from 'src/modules/booking/entity/booking.entity';
 
 @Injectable()
 export class PaymentService {
@@ -24,21 +26,35 @@ export class PaymentService {
     private configService: ConfigService,
     @InjectRepository(PaymentEntity)
     private paymentRepo: Repository<PaymentEntity>,
+    @InjectRepository(Booking)
+    private bookingRepo: Repository<Booking>,
   ) {
     this.stripe = new Stripe(
       this.configService.get('stripe_secret_key') as string,
     );
   }
 
-  async createPayment(dto: CreatePaymentDto) {
-    const { amount,email } = dto;
+  async createPayment(dto:CreatePaymentDto) {
 
-    const payment = this.paymentRepo.create({
-      ...dto,
-      status: PaymentStatus.PENDING,
-    });
+     
+    const {email,bookingId } = dto;
+    let amount:number;
+   
+   const booking = await this.bookingRepo.findOne({ where: { id: bookingId } });
 
-    await this.paymentRepo.save(payment);
+if (!booking) {
+  throw new NotFoundException(`Booking with ID ${bookingId} not found`);
+}
+    
+ amount = Number(booking.price);
+
+  const payment = this.paymentRepo.create({
+  ...dto,
+  status: mainPaymentStatus.PENDING,
+  booking, 
+});
+await this.paymentRepo.save(payment);
+    
 
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -60,11 +76,12 @@ export class PaymentService {
       cancel_url: this.configService.get('client_url'),
       payment_intent_data: {
         metadata: {
-         
+          id: payment.id,
+          bookingId
         },
       },
     });
-
+     
     if (!session?.url)
       throw new BadRequestException('Stripe session creation failed');
 
@@ -93,18 +110,24 @@ if (!rawBody) {
 
     const data = event.data.object as Stripe.PaymentIntent;
     const metadata = data.metadata;
-
+    console.log(data)
     if (event.type === 'payment_intent.succeeded') {
-      // await this.paymentRepo.update(metadata.transactionId, {
-      //   status: PaymentStatus.COMPLETED,
-      //   senderPaymentTransaction: data.id,
-      // });
-      console.log('Payment succeeded:', data.id);
+      await this.paymentRepo.update(metadata.id, {
+        status: mainPaymentStatus.COMPLETED,
+        senderPaymentTransaction: data.id,
+      });
+      await this.bookingRepo.update(metadata.bookingId, {
+         paymentStatus: PaymentStatus.Completed,
+        
+      });
+      
+
+      
     }
 
     if (event.type === 'payment_intent.payment_failed') {
-      await this.paymentRepo.update(metadata.transactionId, {
-        status: PaymentStatus.CANCELLED,
+      await this.paymentRepo.update(metadata.id, {
+        status: mainPaymentStatus.CANCELLED,
       });
     }
 
@@ -125,7 +148,7 @@ if (!rawBody) {
 
     return this.paymentRepo.update(
       { senderPaymentTransaction: paymentIntentId },
-      { status: PaymentStatus.REFUNDED },
+      { status: mainPaymentStatus.REFUNDED },
     );
   }
 

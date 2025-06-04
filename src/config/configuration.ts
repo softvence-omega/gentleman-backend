@@ -5,17 +5,9 @@ export default () => ({
   jwt_secret: process.env.JWT_SECRET,
   jwt_expired_in: process.env.JWT_EXPIRED_IN,
   stripe_secret_key: process.env.STRIPE_SECRET_KEY,
-  stripe_secret_key: process.env.STRIPE_SECRET_KEY,
-  stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
-  client_url: process.env.CLIENT_URL,
+  client_url: process.env.ClIENT_URL,
+  stripe_webhook_secret:process.env.STRIPE_WEBHOOK_SECRET,
   database: {
     url: process.env.DATABASE_URL
   }
-    url: process.env.DATABASE_URL,
-    name: process.env.DATABASE_NAME,
-    host: process.env.DATABASE_HOST,
-    port: process.env.DATABASE_PORT,
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-  },
 });
