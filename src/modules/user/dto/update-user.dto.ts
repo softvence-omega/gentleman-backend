@@ -1,10 +1,6 @@
 import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
 
 export class UpdateUserDto {
-  @IsNotEmpty()
-  @IsUUID()
-  id: string;
-
   @IsOptional()
   @IsString()
   readonly name: string;

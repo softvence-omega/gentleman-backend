@@ -16,6 +16,9 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './modules/auth/auth.guard';
 import { JwtModule } from '@nestjs/jwt';
 import { VehicleTypeModule } from './modules/vehicleTypes/vehicleTypes.module';
+import { ChatModule } from './modules/chat/chat.module';
+import { RedisService } from './common/redis/redis.service';
+import { RedisModule } from './common/redis/redis.module';
 // Import other modules here...
 
 @Module({
@@ -23,7 +26,7 @@ import { VehicleTypeModule } from './modules/vehicleTypes/vehicleTypes.module';
   providers: [AppService, {
     provide: APP_GUARD,
     useClass: AuthGuard
-  }],
+  }, RedisService],
   imports: [
     ConfigurationModule,
     DatabaseModule,
@@ -41,6 +44,8 @@ import { VehicleTypeModule } from './modules/vehicleTypes/vehicleTypes.module';
     UserModule,
     VehicleTypeModule,
     BookingModule,
+    ChatModule,
+    RedisModule,
   ],
 })
-export class AppModule {}
+export class AppModule { }

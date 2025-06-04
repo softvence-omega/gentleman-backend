@@ -1,13 +1,15 @@
 // src/modules/payment/payment.dto.ts
 
-import { IsEmail, IsNotEmpty, IsNumber, IsString, IsUUID } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { UUID } from 'typeorm/driver/mongodb/bson.typings';
 
 export class CreatePaymentDto {
 
-  @IsUUID()
-  bookingId:string;
+  @ApiProperty({ example: 100, description: 'Amount to be paid' })
+  @IsNumber()
+  amount: number;
+
+  bookingId: string;
 
   @ApiProperty({ example: 'user@example.com', description: 'User email associated with the payment' })
   @IsEmail()

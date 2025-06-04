@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { AbstractionEntity } from 'src/database/abstraction.entity';
 import { Review } from 'src/modules/review/enitity/review.entity';
 import { VehicleTypeEntity } from 'src/modules/vehicleTypes/entity/vehicle-type.entity';
@@ -79,31 +72,32 @@ export class Booking extends AbstractionEntity {
   @Column()
   latitude: string;
 
-  // ➤ Many bookings can be of the same vehicle type
-  @ManyToOne(() => VehicleTypeEntity, { nullable: true })
+
+  @OneToOne(() => VehicleTypeEntity)
   @JoinColumn({ name: 'vehicleTypesId' })
   vehicleType: VehicleTypeEntity;
 
-  // ➤ One user can have many bookings
-  @ManyToOne(() => User, (user) => user.bookings, { nullable: false })
+
+  @ManyToOne(() => User)
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  // ➤ One provider can receive multiple bookings
-  @ManyToOne(() => User, (user) => user.receivedBookings, { nullable: false })
+  @ManyToOne(() => User)
   @JoinColumn({ name: 'providerId' })
   provider: User;
 
-  // ➤ Many bookings can be under the same category
-  @ManyToOne(() => CategoryEntity, (category) => category.bookings, { nullable: true })
+  @OneToOne(() => CategoryEntity)
   @JoinColumn({ name: 'categoryId' })
   category: CategoryEntity;
 
-  // ➤ One booking has one payment
   @OneToOne(() => PaymentEntity, (payment) => payment.booking, { cascade: true })
   payment: PaymentEntity;
 
-  // ➤ One booking can have multiple reviews (from either side, if applicable)
+
+
+
+
+
   @OneToMany(() => Review, (review) => review.booking, { cascade: true })
   reviews: Review[];
 }

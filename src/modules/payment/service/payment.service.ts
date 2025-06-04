@@ -34,31 +34,26 @@ export class PaymentService {
     );
   }
 
-  async createPayment(dto:CreatePaymentDto) {
+  async createPayment(dto: CreatePaymentDto) {
 
-     
-    const {email,bookingId } = dto;
-    let amount:number;
-   
-   const booking = await this.bookingRepo.findOne({ where: { id: bookingId } });
-  console.log(booking)
-if (!booking) {
-  throw new NotFoundException(`Booking with ID ${bookingId} not found`);
-}
-if (!booking) {
-  throw new NotFoundException(`This booking ${bookingId} is  `);
-}
- 
- amount = Number(booking.price);
- console.log(amount)
-  const payment = this.paymentRepo.create({
-  ...dto,
-  amount,
-  status: mainPaymentStatus.PENDING,
-  booking, 
-});
-await this.paymentRepo.save(payment);
-    
+
+    const { amount, email, bookingId } = dto;
+
+
+    const booking = await this.bookingRepo.findOne({ where: { id: bookingId } });
+
+    if (!booking) {
+      throw new NotFoundException(`Booking with ID ${bookingId} not found`);
+    }
+
+
+    const payment = this.paymentRepo.create({
+      ...dto,
+      status: mainPaymentStatus.PENDING,
+      booking,
+    });
+    await this.paymentRepo.save(payment);
+
 
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -85,7 +80,7 @@ await this.paymentRepo.save(payment);
         },
       },
     });
-     
+
     if (!session?.url)
       throw new BadRequestException('Stripe session creation failed');
 
@@ -98,9 +93,9 @@ await this.paymentRepo.save(payment);
 
     const rawBody = req.rawBody;
 
-if (!rawBody) {
-  throw new BadRequestException('No webhook payload was provided.');
-}
+    if (!rawBody) {
+      throw new BadRequestException('No webhook payload was provided.');
+    }
 
     try {
       event = this.stripe.webhooks.constructEvent(
@@ -114,19 +109,19 @@ if (!rawBody) {
 
     const data = event.data.object as Stripe.PaymentIntent;
     const metadata = data.metadata;
-    
+    console.log(data)
     if (event.type === 'payment_intent.succeeded') {
       await this.paymentRepo.update(metadata.id, {
         status: mainPaymentStatus.COMPLETED,
         senderPaymentTransaction: data.id,
       });
       await this.bookingRepo.update(metadata.bookingId, {
-         paymentStatus: PaymentStatus.Completed,
-        
-      });
-      
+        paymentStatus: PaymentStatus.Completed,
 
-      
+      });
+
+
+
     }
 
     if (event.type === 'payment_intent.payment_failed') {

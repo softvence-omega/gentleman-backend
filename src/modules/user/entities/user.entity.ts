@@ -31,6 +31,9 @@ export class User extends AbstractionEntity {
   @Column({ nullable: true })
   profileImage?: string;
 
+  @Column({ nullable: true })
+  certificate?: string;
+
   @Column({ enum: ['blocked', 'active', 'inactive'], default: 'inactive' })
   status: string;
 
@@ -41,11 +44,8 @@ export class User extends AbstractionEntity {
   isDeleted: boolean;
 
 
- @OneToMany(() => Booking, (booking) => booking.user)
-bookings: Booking[];
-
-@OneToMany(() => Booking, (booking) => booking.provider)
-receivedBookings: Booking[];
+  @OneToMany(() => Booking, (booking) => booking.user)
+  bookings: Booking[];
 
 
   constructor(entity?: Partial<User>) {
