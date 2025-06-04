@@ -25,4 +25,4 @@ import { Review } from '../review/enitity/review.entity';
   providers: [BookingService],
   exports: [TypeOrmModule, BookingService],
 })
-export class BookingModule {}
+export class BookingModule { }

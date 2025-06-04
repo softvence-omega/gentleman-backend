@@ -11,7 +11,7 @@ export class BookingService {
   constructor(
     @InjectRepository(Booking)
     private readonly bookingRepo: Repository<Booking>,
-  ) {}
+  ) { }
 
   async createBooking(dto: CreateBookingDto): Promise<Booking> {
     const booking = this.bookingRepo.create({
@@ -59,7 +59,7 @@ export class BookingService {
 
   async getPendingBookings(): Promise<Booking[]> {
     return this.bookingRepo.find({
-    where: { status: BookingStatus.Pending },
+      where: { status: BookingStatus.Pending },
       relations: ['user', 'provider', 'vehicleType', 'category', 'payment', 'reviews'],
     });
   }

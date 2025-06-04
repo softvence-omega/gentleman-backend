@@ -34,26 +34,26 @@ export class PaymentService {
     );
   }
 
-  async createPayment(dto:CreatePaymentDto) {
+  async createPayment(dto: CreatePaymentDto) {
 
-     
-    const { amount,email,bookingId } = dto;
 
-   
-   const booking = await this.bookingRepo.findOne({ where: { id: bookingId } });
+    const { amount, email, bookingId } = dto;
 
-if (!booking) {
-  throw new NotFoundException(`Booking with ID ${bookingId} not found`);
-}
-    
 
-  const payment = this.paymentRepo.create({
-  ...dto,
-  status: mainPaymentStatus.PENDING,
-  booking, 
-});
-await this.paymentRepo.save(payment);
-    
+    const booking = await this.bookingRepo.findOne({ where: { id: bookingId } });
+
+    if (!booking) {
+      throw new NotFoundException(`Booking with ID ${bookingId} not found`);
+    }
+
+
+    const payment = this.paymentRepo.create({
+      ...dto,
+      status: mainPaymentStatus.PENDING,
+      booking,
+    });
+    await this.paymentRepo.save(payment);
+
 
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -80,7 +80,7 @@ await this.paymentRepo.save(payment);
         },
       },
     });
-     
+
     if (!session?.url)
       throw new BadRequestException('Stripe session creation failed');
 
@@ -93,9 +93,9 @@ await this.paymentRepo.save(payment);
 
     const rawBody = req.rawBody;
 
-if (!rawBody) {
-  throw new BadRequestException('No webhook payload was provided.');
-}
+    if (!rawBody) {
+      throw new BadRequestException('No webhook payload was provided.');
+    }
 
     try {
       event = this.stripe.webhooks.constructEvent(
@@ -116,12 +116,12 @@ if (!rawBody) {
         senderPaymentTransaction: data.id,
       });
       await this.bookingRepo.update(metadata.bookingId, {
-         paymentStatus: PaymentStatus.Completed,
-        
-      });
-      
+        paymentStatus: PaymentStatus.Completed,
 
-      
+      });
+
+
+
     }
 
     if (event.type === 'payment_intent.payment_failed') {
@@ -153,7 +153,7 @@ if (!rawBody) {
 
   async getUserPayments(userId: string) {
     const payments = await this.paymentRepo.find({
-    //   where: { user: { id: userId } },
+      //   where: { user: { id: userId } },
       order: { createdAt: 'DESC' },
     });
 

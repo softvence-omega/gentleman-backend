@@ -13,7 +13,7 @@ export class ServiceService {
   constructor(
     @InjectRepository(ServiceEntity)
     private readonly serviceRepo: Repository<ServiceEntity>,
-  ) {}
+  ) { }
 
   async createService(dto: ServiceDto) {
     const existing = await this.serviceRepo.findOneBy({ title: dto.title });
@@ -27,36 +27,36 @@ export class ServiceService {
   }
 
   async getAllService(limit: number, page: number) {
-  const [services, total] = await this.serviceRepo.findAndCount({
-    take: limit,
-    skip: (page - 1) * limit,
-  });
+    const [services, total] = await this.serviceRepo.findAndCount({
+      take: limit,
+      skip: (page - 1) * limit,
+    });
 
-  if (!services.length) {
-    throw new NotFoundException('No services found');
+    if (!services.length) {
+      throw new NotFoundException('No services found');
+    }
+
+    return {
+      items: services,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
-  return {
-    items: services,
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
-  };
-}
+  async getSingleService(id: string) {
+    const service = await this.serviceRepo.findOne({
+      where: { id },
+      relations: ['categories'],
+    });
 
-async getSingleService(id: string) {
-   const service = await this.serviceRepo.findOne({
-  where: { id },
-  relations: ['categories'],
-});
+    if (!service) {
+      throw new NotFoundException('Service not found');
+    }
 
-  if (!service) {
-    throw new NotFoundException('Service not found');
+    return service;
   }
-
-  return service;
-}
 
 
 }

@@ -6,7 +6,6 @@ import { User } from 'src/modules/user/entities/user.entity';
 import { CategoryEntity } from 'src/modules/category/entity/category.entity';
 import { PaymentEntity } from 'src/modules/payment/entity/payment.entity';
 
-
 export enum BookingStatus {
   Pending = 'Pending',
   Accept = 'Accept',
@@ -37,17 +36,17 @@ export class Booking extends AbstractionEntity {
   @Column({ type: 'enum', enum: BookingWorkStatus, default: BookingWorkStatus.Booked })
   workStatus: BookingWorkStatus;
 
- @Column({ nullable: true })
-brand?: string;
+  @Column({ nullable: true })
+  brand?: string;
 
-@Column({ nullable: true })
-model?: string;
+  @Column({ nullable: true })
+  model?: string;
 
-@Column({ type: 'date', nullable: true })
-year?: Date;
+  @Column({ type: 'date', nullable: true })
+  year?: Date;
 
-@Column({ nullable: true })
-vehicleImage?: string;
+  @Column({ nullable: true })
+  vehicleImage?: string;
 
   @Column()
   title: string;
@@ -91,13 +90,13 @@ vehicleImage?: string;
   @JoinColumn({ name: 'categoryId' })
   category: CategoryEntity;
 
- @OneToOne(() => PaymentEntity, (payment) => payment.booking, { cascade: true })
-payment: PaymentEntity;
+  @OneToOne(() => PaymentEntity, (payment) => payment.booking, { cascade: true })
+  payment: PaymentEntity;
 
 
 
 
-  
+
 
   @OneToMany(() => Review, (review) => review.booking, { cascade: true })
   reviews: Review[];

@@ -23,13 +23,13 @@ import { Public } from 'src/common/utils/public.decorator';
 
 @Controller('payments')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(private readonly paymentService: PaymentService) { }
 
   @Post('/')
   create(@Body() dto: CreatePaymentDto) {
     // For demo/test purposes: pass dummy user object or fetch from context/session manually
-    
-    
+
+
   }
   @Public()
   @Post('/webhook')
@@ -41,11 +41,11 @@ export class PaymentController {
 
   @Post('/refund/:paymentIntentId')
   async refund(@Param('paymentIntentId') id: string, @Res() res: Response) {
-    return  sendResponse(res,{
-        statusCode:HttpStatus.OK,
-        success:true,
-        message: "refund money succfully",
-        data: this.paymentService.refund(id),
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: "refund money succfully",
+      data: this.paymentService.refund(id),
     })
   }
 }

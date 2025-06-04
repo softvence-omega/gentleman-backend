@@ -8,7 +8,6 @@ export enum UserRole {
 }
 
 export class CreateUserDto {
-
   @ApiProperty({ example: 'John Doe', description: 'Full name of the user' })
   @IsNotEmpty()
   @IsString()

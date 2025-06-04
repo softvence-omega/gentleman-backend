@@ -13,7 +13,7 @@ import { UpdateBookingDto, UpdateBookingStatusDto, UpdateBookingWorkStatusDto, U
 
 @Controller('bookings')
 export class BookingController {
-  constructor(private readonly bookingService: BookingService) {}
+  constructor(private readonly bookingService: BookingService) { }
 
   @Post()
   createBooking(@Body() dto: CreateBookingDto) {

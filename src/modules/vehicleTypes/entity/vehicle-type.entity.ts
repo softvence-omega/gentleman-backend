@@ -19,16 +19,16 @@ export class VehicleTypeEntity extends AbstractionEntity {
   @Column()
   icon: string;
 
-    @OneToMany(() => VehicleTypeEntity, (vehicleTypeEntity) => vehicleTypeEntity.vehicleTypes )
-    vehicleTypes: VehicleTypeEntity[]
+  @OneToMany(() => VehicleTypeEntity, (vehicleTypeEntity) => vehicleTypeEntity.vehicleTypes)
+  vehicleTypes: VehicleTypeEntity[]
 
-    @OneToOne(()=> Booking , (booking) => booking.vehicleType )
-    @JoinColumn()
-    booking:Booking
-   
-    
+  @OneToOne(() => Booking, (booking) => booking.vehicleType)
+  @JoinColumn()
+  booking: Booking
 
- constructor(entity?: Partial<VehicleTypeEntity>) {
+
+
+  constructor(entity?: Partial<VehicleTypeEntity>) {
     super();
     Object.assign(this, entity);
   }
