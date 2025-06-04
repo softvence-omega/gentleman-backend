@@ -1,15 +1,48 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import {
+  Controller,
+  Body,
+  Req,
+  Res,
+  Patch,
+  UseInterceptors,
+  UploadedFiles,
+  HttpStatus,
+} from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UserService } from '../service/user.service';
-import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
+import sendResponse from 'src/common/utils/sendResponse';
 
 @Controller('users')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
-  @Post()
-  async createUser(
-     @Body() dto:CreateUserDto
+  @Patch()
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'image', maxCount: 1 },
+      { name: 'certificate', maxCount: 1 },
+    ])
+  )
+  async updateUser(
+    @Req() req,
+    @Body() payload: UpdateUserDto,
+    @UploadedFiles()
+    files: {
+      image?: Express.Multer.File[];
+      certificate?: Express.Multer.File[];
+    },
+    @Res() res,
   ) {
-    console.log(dto);
+    const image = files.image?.[0];
+    const certificate = files.certificate?.[0];
+
+    const result = await this.userService.updateUser(req.user, payload, image, certificate);
+    sendResponse(res, {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "User updated successfully!",
+      data: result
+    })
   }
 }

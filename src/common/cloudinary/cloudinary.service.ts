@@ -1,6 +1,6 @@
 // cloudinary.provider.ts
 import { ConfigService } from '@nestjs/config';
-import { v2 as cloudinary, UploadApiResponse } from 'cloudinary';
+import { v2 as cloudinary, UploadApiResponse, DeleteApiResponse } from 'cloudinary';
 import { Injectable } from '@nestjs/common';
 import { Readable } from 'stream';
 
@@ -14,6 +14,7 @@ export class CloudinaryService {
         });
     }
 
+    // Upload an image from a buffer
     async uploadImage(buffer: Buffer, folder = 'nest_uploads'): Promise<UploadApiResponse> {
         return new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
@@ -25,5 +26,21 @@ export class CloudinaryService {
             );
             Readable.from(buffer).pipe(uploadStream);
         });
+    }
+
+    // Delete image by public_id
+    async destroyImage(publicId: string): Promise<DeleteApiResponse> {
+        return new Promise((resolve, reject) => {
+            cloudinary.uploader.destroy(publicId, (error, result) => {
+                if (error) return reject(error);
+                resolve(result as DeleteApiResponse);
+            });
+        });
+    }
+
+    // Optional: Extract public_id from secure_url
+    extractPublicId(secureUrl: string): string | null {
+        const matches = secureUrl.match(/\/upload\/(?:v\d+\/)?(.+?)\.\w+$/);
+        return matches ? matches[1] : null;
     }
 }
