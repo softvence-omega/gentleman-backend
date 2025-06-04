@@ -19,10 +19,12 @@ import { VehicleTypeModule } from './modules/vehicleTypes/vehicleTypes.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { RedisService } from './common/redis/redis.service';
 import { RedisModule } from './common/redis/redis.module';
+import { MetadataController } from './modules/metadata/controller/metadata.controller';
+import { MetadataModule } from './modules/metadata/metadata.module';
 // Import other modules here...
 
 @Module({
-  controllers: [AppController],
+  controllers: [AppController, MetadataController],
   providers: [AppService, {
     provide: APP_GUARD,
     useClass: AuthGuard
@@ -46,6 +48,7 @@ import { RedisModule } from './common/redis/redis.module';
     BookingModule,
     ChatModule,
     RedisModule,
+    MetadataModule
   ],
 })
 export class AppModule { }
