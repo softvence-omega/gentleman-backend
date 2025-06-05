@@ -9,6 +9,7 @@ import { User } from '../user/entities/user.entity';
 import { PaymentEntity } from '../payment/entity/payment.entity';
 import { CategoryEntity } from '../category/entity/category.entity';
 import { Review } from '../review/enitity/review.entity';
+import { CloudinaryModule } from 'src/common/cloudinary/cloudinary.module';
 
 @Module({
   imports: [
@@ -19,7 +20,11 @@ import { Review } from '../review/enitity/review.entity';
       PaymentEntity,
       CategoryEntity,
       Review,
-    ]),
+      
+    ]
+   
+  ),
+   CloudinaryModule,
   ],
   controllers: [BookingController],
   providers: [BookingService],

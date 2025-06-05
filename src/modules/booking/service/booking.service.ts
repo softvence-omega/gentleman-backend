@@ -1,9 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Booking, BookingStatus } from '../entity/booking.entity';
 import { Repository } from 'typeorm';
 import { CreateBookingDto } from '../dto/create-booking.dto';
 import { UpdateBookingDto, UpdateBookingStatusDto, UpdateBookingWorkStatusDto, UpdatePaymentStatusDto } from '../dto/update-booking.dto';
+import ApiError from 'src/common/errors/ApiError';
+import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 
 
 @Injectable()
@@ -11,18 +13,53 @@ export class BookingService {
   constructor(
     @InjectRepository(Booking)
     private readonly bookingRepo: Repository<Booking>,
+     private cloudinary: CloudinaryService
   ) { }
 
-  async createBooking(dto: CreateBookingDto): Promise<Booking> {
-    const booking = this.bookingRepo.create({
-      ...dto,
-      vehicleType: { id: dto.vehicleTypesId },
-      user: { id: dto.userId },
-      provider: { id: dto.providerId },
-      category: { id: dto.categoryId },
-    });
-    return this.bookingRepo.save(booking);
+   async createBooking(
+  dto: CreateBookingDto,
+  images: Express.Multer.File[], 
+   vehicleImage?: Express.Multer.File,
+): Promise<Booking> {
+  let imageUrls: string[] = [];
+    let vehicleImageUrl: string | null | undefined = null;
+
+  if (images.length) {
+    try {
+      const uploadPromises = images.map(file =>
+        this.cloudinary.uploadImage(file.buffer) 
+      );
+
+      const results = await Promise.all(uploadPromises);
+      imageUrls = results.map(res => res.secure_url);
+    } catch (error) {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, 'Image upload failed');
+    }
   }
+
+   if (vehicleImage) {
+    try {
+      const result = await this.cloudinary.uploadImage(vehicleImage.buffer);
+      vehicleImageUrl = result.secure_url;
+    } catch (error) {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, 'Vehicle image upload failed');
+    }
+  }
+
+ dto.vehicleImage = vehicleImageUrl ?? undefined;
+
+  const booking = this.bookingRepo.create({
+    ...dto,
+    vehicleType: { id: dto.vehicleTypesId },
+    user: { id: dto.userId },
+    provider: { id: dto.providerId },
+    category: { id: dto.categoryId },
+    dentImg: imageUrls,
+    
+  });
+
+  return this.bookingRepo.save(booking);
+}
 
   async updateBooking(id: string, dto: UpdateBookingDto): Promise<Booking> {
     const booking = await this.getBookingById(id);
