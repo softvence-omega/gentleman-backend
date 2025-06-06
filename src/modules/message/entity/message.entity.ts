@@ -4,8 +4,10 @@ import {
     Entity,
     Column,
     ManyToOne,
-    JoinColumn
+    JoinColumn,
+    OneToOne
 } from 'typeorm';
+import { OfferMessege } from './offerMessage.entity';
 
 export enum MessageType {
     TEXT = 'text',
@@ -46,4 +48,8 @@ export class Message extends AbstractionEntity {
 
     @Column({ type: 'timestamp', name: 'seen_at', nullable: true })
     seenAt: Date | null;
+
+    @OneToOne(() => OfferMessege, offerMessage => offerMessage.message, { lazy: true })
+    @JoinColumn()
+    offerMessage: Promise<OfferMessege>
 }

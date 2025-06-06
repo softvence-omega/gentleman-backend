@@ -1,5 +1,6 @@
 import { AbstractionEntity } from "src/database/abstraction.entity";
-import { Column, Entity } from "typeorm";
+import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
+import { Message } from "./message.entity";
 
 
 enum Status {
@@ -11,7 +12,7 @@ enum Status {
 
 
 @Entity('offer_messages')
-class OfferMessege extends AbstractionEntity {
+export class OfferMessege extends AbstractionEntity {
     @Column({ type: 'text' })
     description: string;
 
@@ -20,4 +21,8 @@ class OfferMessege extends AbstractionEntity {
 
     @Column({ type: 'enum', enum: Status, default: Status.PENDING })
     status: Status
+
+    @OneToOne(() => Message, message => message.offerMessage, { lazy: true, onDelete: 'CASCADE' })
+    message: Promise<Message>
+
 }
