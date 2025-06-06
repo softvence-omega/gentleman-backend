@@ -10,8 +10,8 @@ export class Review extends AbstractionEntity {
   @Column('float')
   rating: number;
 
-  @ManyToOne(() => Booking, (booking) => booking.reviews, { onDelete: 'CASCADE' })
-  booking: Booking;
+  @ManyToOne(() => Booking, (booking) => booking.reviews, { onDelete: 'CASCADE', lazy: true })
+  booking: Promise<Booking>;
 
   constructor(entity?: Partial<Review>) {
     super();

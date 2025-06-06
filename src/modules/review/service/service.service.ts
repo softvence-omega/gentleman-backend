@@ -14,7 +14,7 @@ export class ReviewService {
 
     @InjectRepository(Booking)
     private bookingRepo: Repository<Booking>,
-  ) {}
+  ) { }
 
   async create(createReviewDto: CreateReviewDto): Promise<Review> {
     const booking = await this.bookingRepo.findOne({
@@ -28,8 +28,9 @@ export class ReviewService {
     const review = this.reviewRepo.create({
       comment: createReviewDto.comment,
       rating: createReviewDto.rating,
-      booking,
     });
+
+    review.booking = Promise.resolve(booking);
 
     return await this.reviewRepo.save(review);
   }

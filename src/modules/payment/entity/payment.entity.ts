@@ -19,8 +19,8 @@ export class PaymentEntity extends AbstractionEntity {
   @Column()
   amount: number;
 
-  @Column({nullable:true})
-  transactionId:string
+  @Column({ nullable: true })
+  transactionId: string
 
   @Column({
     type: 'enum',
@@ -30,18 +30,18 @@ export class PaymentEntity extends AbstractionEntity {
   status: PaymentStatus;
 
 
-@OneToOne(() => Booking, (booking) => booking.payment)
-@JoinColumn()
-booking: Booking;
+  @OneToOne(() => Booking, (booking) => booking.payment, { lazy: true })
+  @JoinColumn()
+  booking: Promise<Booking>;
 
 
   @Column({ nullable: true })
   senderPaymentTransaction?: string;
 
-   constructor(entity?: Partial<PaymentEntity>) {
+  constructor(entity?: Partial<PaymentEntity>) {
     super();
     Object.assign(this, entity);
   }
 
- 
+
 }

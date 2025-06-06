@@ -50,8 +50,9 @@ export class PaymentService {
     const payment = this.paymentRepo.create({
       ...dto,
       status: mainPaymentStatus.PENDING,
-      booking,
     });
+
+    payment.booking = Promise.resolve(booking);
     await this.paymentRepo.save(payment);
 
 

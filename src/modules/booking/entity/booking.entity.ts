@@ -98,6 +98,6 @@ export class Booking extends AbstractionEntity {
 
 
 
-  @OneToMany(() => Review, (review) => review.booking, { cascade: true })
-  reviews: Review[];
+  @OneToMany(() => Review, (review) => review.booking, { cascade: true, lazy: true })
+  reviews: Promise<Review[]>;
 }

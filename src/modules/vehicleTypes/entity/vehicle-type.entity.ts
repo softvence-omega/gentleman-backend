@@ -22,9 +22,9 @@ export class VehicleTypeEntity extends AbstractionEntity {
   @OneToMany(() => VehicleTypeEntity, (vehicleTypeEntity) => vehicleTypeEntity.vehicleTypes)
   vehicleTypes: VehicleTypeEntity[]
 
-  @OneToOne(() => Booking, (booking) => booking.vehicleType)
+  @OneToOne(() => Booking, (booking) => booking.vehicleType, { lazy: true })
   @JoinColumn()
-  booking: Booking
+  booking: Promise<Booking>
 
 
 

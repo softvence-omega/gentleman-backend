@@ -20,7 +20,7 @@ export class CategoryEntity extends AbstractionEntity {
 
   @OneToOne(() => Booking, (booking) => booking.category)
   @JoinColumn()
-  booking: Booking
+  booking: Promise<Booking>
 
 
   constructor(entity?: Partial<CategoryEntity>) {
