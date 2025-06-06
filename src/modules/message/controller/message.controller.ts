@@ -1,8 +1,10 @@
 import {
+    Body,
     Controller,
     Get,
     HttpStatus,
     Param,
+    Post,
     Query,
     Req,
     Res,
@@ -11,6 +13,7 @@ import { MessageService } from '../service/message.service';
 import sendResponse from 'src/common/utils/sendResponse';
 import { PaginationDto } from '../dto/pagination.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { CreateMessageDto } from '../dto/create-message.dto';
 
 @ApiTags('Messages') // groups endpoints in Swagger
 @Controller('message')
@@ -40,5 +43,11 @@ export class MessageController {
             message: 'All Found Messages!',
             data: result,
         });
+    }
+
+
+    @Post()
+    async createMessage(@Req() req, @Res() res, @Body() payload: CreateMessageDto,) {
+
     }
 }
