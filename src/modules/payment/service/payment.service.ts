@@ -152,14 +152,37 @@ export class PaymentService {
     );
   }
 
-  async getUserPayments(userId: string) {
-    const payments = await this.paymentRepo.find({
-      //   where: { user: { id: userId } },
-      order: { createdAt: 'DESC' },
+ async refundPayment(apiId: string, userId: string) {
+  
+  const refund = await this.stripe.refunds.create({
+    payment_intent: apiId, 
+  });
+
+
+  return {
+    message: 'Payment refunded successfully',
+    refund,
+  };
+ }
+
+  async getAllPayments(
+    page: number,
+    limit: number,
+    order: 'ASC' | 'DESC',
+  ) {
+    const [data, total] = await this.paymentRepo.findAndCount({
+      order: { createdAt: order },
+      take: limit,
+      skip: (page - 1) * limit,
+      relations: ['booking'], // optional: include related booking
     });
 
-    const totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
-
-    return { payments, totalAmount };
+    return {
+      total,
+      page,
+      limit,
+      data,
+    };
   }
+
 }

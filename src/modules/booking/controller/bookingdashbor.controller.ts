@@ -1,6 +1,6 @@
 // dashboard.controller.ts
 
-import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
 
 import { DashboardService } from '../service/providerbooking.service';
 
@@ -24,6 +24,22 @@ async getTodaySchedule(@Req() req) {
   const data = await this.dashboardService.getTodaySchedule(providerId);
   return { success: true, data };
 }
+
+
+@Get('summary/paymentAndBooking')
+  async getDashboardSummary() {
+    return this.dashboardService.getDashboardSummary();
+  }
+
+
+    @Get("allBooking")
+  async getAllBookings(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+    @Query('order') order: 'ASC' | 'DESC' = 'DESC',
+  ) {
+    return this.dashboardService.getAllBookings(+page, +limit, order);
+  }
 
 
 

@@ -2,7 +2,7 @@
 
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Between, Repository } from 'typeorm';
+import { Between, Raw, Repository } from 'typeorm';
 import { Review } from 'src/modules/review/enitity/review.entity';
 import { Booking, BookingStatus, BookingWorkStatus } from '../entity/booking.entity';
 import { PaymentStatus } from 'src/modules/payment/entity/payment.enum';
@@ -20,6 +20,8 @@ export class DashboardService {
     private reviewRepo: Repository<Review>,
      @InjectRepository(User)
         private readonly userRepo: Repository<User>,
+        @InjectRepository(PaymentEntity)
+        private paymentRepo: Repository<PaymentEntity>,
   ) {}
 
   async getProviderDashboard(providerId: string) {
@@ -106,50 +108,79 @@ async getTodaySchedule(providerId: string) {
 }
 
 
-async createBooking(createBookingDto: CreateBookingDto): Promise<Booking> {
-    const { userId, providerId, ...bookingData } = createBookingDto;
+async getDashboardSummary() {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-    const user = await this.userRepo.findOne({ where: { id: userId } });
-    if (!user) throw new NotFoundException('User not found');
+    const [activeBookings, completedBookings] = await Promise.all([
+      this.bookingRepo.count({
+        where: {
+          workStatus: Raw(
+            (alias) => `${alias} IN ('Booked', 'OnTheWay', 'Started')`
+          ),
+        },
+      }),
+      this.bookingRepo.count({
+        where: {
+          workStatus: BookingWorkStatus.Completed,
+        },
+      }),
+    ]);
 
-    const provider = await this.userRepo.findOne({ where: { id: providerId } });
-    if (!provider) throw new NotFoundException('Provider not found');
+    const [totalRevenueThisMonth, pendingPaymentsThisMonth] = await Promise.all([
+      this.paymentRepo
+        .createQueryBuilder('payment')
+        .innerJoin('payment.booking', 'booking')
+        .where('payment.status = :status', { status: PaymentStatus.COMPLETED })
+        .andWhere('DATE(booking.createdAt) BETWEEN :start AND :end', {
+          start: startOfMonth.toISOString(),
+          end: endOfMonth.toISOString(),
+        })
+        .select('SUM(payment.amount)', 'sum')
+        .getRawOne(),
 
-    const booking = this.bookingRepo.create({
-      ...bookingData,
-      user,
-      provider,
-      payment: new PaymentEntity({ amount: parseFloat(bookingData.price) }),
-    });
+      this.paymentRepo
+        .createQueryBuilder('payment')
+        .innerJoin('payment.booking', 'booking')
+        .where('payment.status = :status', { status: PaymentStatus.PENDING })
+        .andWhere('DATE(booking.createdAt) BETWEEN :start AND :end', {
+          start: startOfMonth.toISOString(),
+          end: endOfMonth.toISOString(),
+        })
+        .select('SUM(payment.amount)', 'sum')
+        .getRawOne(),
+    ]);
 
-    return this.bookingRepo.save(booking);
+    return {
+      activeBookings,
+      completedBookings,
+      totalRevenueThisMonth: Number(totalRevenueThisMonth.sum) || 0,
+      pendingPaymentsThisMonth: Number(pendingPaymentsThisMonth.sum) || 0,
+    };
   }
 
-  async getAllBookings(userId: string): Promise<Booking[]> {
-    return this.bookingRepo.find({
-      where: [{ user: { id: userId } }, { provider: { id: userId } }],
-      relations: ['user', 'provider', 'payment'],
-    });
-  }
 
-  async getBookingById(id: string): Promise<Booking> {
-    const booking = await this.bookingRepo.findOne({
-      where: { id },
-      relations: ['user', 'provider', 'payment'],
+  async getAllBookings(
+    page: number,
+    limit: number,
+    order: 'ASC' | 'DESC'
+  ) {
+    const [data, total] = await this.bookingRepo.findAndCount({
+      order: { createdAt: order },
+      take: limit,
+      skip: (page - 1) * limit,
+      relations: ['user', 'provider', 'vehicleType', 'category', 'payment'],
     });
-    if (!booking) throw new NotFoundException('Booking not found');
-    return booking;
-  }
 
-  async getTransactionHistory(userId: string): Promise<Booking[]> {
-    return this.bookingRepo.find({
-      where: [
-        { user: { id: userId }, payment: { status: PaymentStatus.CANCELLED} },
-        { provider: { id: userId }, payment: { status:  PaymentStatus.CANCELLED } },
-      ],
-      relations: ['payment'],
-    });
-  }
+    return {
+      total,
+      page,
+      limit,
+      data,
+    };
+  } 
+
 
  
 
