@@ -1,8 +1,9 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Message } from '../entity/message.entity';
+import { Message, MessageType } from '../entity/message.entity';
 import { Repository } from 'typeorm';
 import ApiError from 'src/common/errors/ApiError';
+import { CreateMessageDto } from '../dto/create-message.dto';
 
 @Injectable()
 export class MessageService {
@@ -33,6 +34,15 @@ export class MessageService {
             limit,
             totalPages: Math.ceil(total / limit),
         };
+    }
+
+    async createMessage(user, payload: CreateMessageDto) {
+        const data = { ...payload, sender: user.userId };
+        console.log(data)
+        if (payload.type === MessageType.TEXT) {
+            const message = await this.messageRepository.insert(data);
+            return message;
+        }
     }
 
 }

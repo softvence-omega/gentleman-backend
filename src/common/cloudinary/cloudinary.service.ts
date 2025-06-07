@@ -18,7 +18,7 @@ export class CloudinaryService {
     async uploadImage(buffer: Buffer, folder = 'nest_uploads'): Promise<UploadApiResponse> {
         return new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
-                { folder },
+                { folder, resource_type: 'raw' },
                 (error, result) => {
                     if (error) return reject(error);
                     resolve(result as UploadApiResponse);

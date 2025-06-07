@@ -10,12 +10,13 @@ import {
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { MessageType } from '../entity/message.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 
 export class CreateMessageDto {
     @ApiProperty({ description: 'Receiver user ID', example: 'e51f3d3c-b3b2-4d97-991a-4410e531fbd4' })
     @IsUUID()
     @IsNotEmpty()
-    receiverId: string;
+    receiver: User;
 
     @ApiProperty({ enum: MessageType, description: 'Type of message', example: MessageType.TEXT })
     @IsEnum(MessageType)

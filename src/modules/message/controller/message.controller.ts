@@ -8,14 +8,17 @@ import {
     Query,
     Req,
     Res,
+    UploadedFiles,
+    UseInterceptors,
 } from '@nestjs/common';
 import { MessageService } from '../service/message.service';
 import sendResponse from 'src/common/utils/sendResponse';
 import { PaginationDto } from '../dto/pagination.dto';
-import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiConsumes } from '@nestjs/swagger';
 import { CreateMessageDto } from '../dto/create-message.dto';
+import { FilesInterceptor } from '@nestjs/platform-express';
 
-@ApiTags('Messages') // groups endpoints in Swagger
+@ApiTags('Messages')
 @Controller('message')
 export class MessageController {
     constructor(private service: MessageService) { }
@@ -46,8 +49,18 @@ export class MessageController {
     }
 
 
+    @ApiConsumes('multipart/form-data')
     @Post()
-    async createMessage(@Req() req, @Res() res, @Body() payload: CreateMessageDto,) {
+    @UseInterceptors(FilesInterceptor('attachments'))
+    async createMessage(@Req() req, @Res() res, @Body() payload: CreateMessageDto, @UploadedFiles() files: Express.Multer.File[]) {
+        const result = await this.service.createMessage(req.user, payload);
 
+        return sendResponse(res, {
+            statusCode: HttpStatus.CREATED,
+            success: true,
+            message: "Message saved successfully!",
+            data: result
+        })
+        console.log(req.user, payload, files);
     }
 }
