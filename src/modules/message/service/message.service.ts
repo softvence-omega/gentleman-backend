@@ -97,4 +97,25 @@ export class MessageService {
         return data;
     }
 
+    async destroy(user, id) {
+        const msg = await this.messageRepository.findOneBy({ id });
+        if (!msg) {
+            throw new ApiError(HttpStatus.NOT_FOUND, 'Message not exist!')
+        }
+        if (msg.sender.id != user.userId) {
+            throw new ApiError(HttpStatus.FORBIDDEN, 'Message can\'t be deleted!')
+        }
+
+        if (msg.offerMessage) {
+            const offerMsg = await this.offerMessageRepository.findOneBy({ id: msg.offerMessage.id })
+            await this.offerMessageRepository.remove(offerMsg as OfferMessege);
+        }
+
+        const res = await this.messageRepository.remove(msg);
+
+        return {
+            delete_message_id: res.id
+        };
+    }
+
 }

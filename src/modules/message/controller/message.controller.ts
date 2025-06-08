@@ -1,6 +1,7 @@
 import {
     Body,
     Controller,
+    Delete,
     Get,
     HttpStatus,
     Param,
@@ -50,7 +51,7 @@ export class MessageController {
 
 
     @ApiConsumes('multipart/form-data')
-    @Post()
+    @Post('create')
     @UseInterceptors(FilesInterceptor('attachments'))
     async createMessage(@Req() req, @Res() res, @Body() payload: CreateMessageDto, @UploadedFiles() files: Express.Multer.File[]) {
         const result = await this.service.createMessage(req.user, payload, files);
@@ -59,6 +60,18 @@ export class MessageController {
             statusCode: HttpStatus.CREATED,
             success: true,
             message: "Message saved successfully!",
+            data: result
+        })
+    }
+
+    @Delete('/:id')
+    async deleteMessage(@Req() req, @Res() res, @Param('id') id) {
+        const result = await this.service.destroy(req.user, id);
+        console.log(req.user, id);
+        return sendResponse(res, {
+            statusCode: HttpStatus.OK,
+            success: true,
+            message: "Message deleted successfully!",
             data: result
         })
     }
