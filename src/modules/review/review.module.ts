@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Booking } from '../booking/entity/booking.entity';
-import { Review } from './enitity/review.entity';
+import Booking from '../booking/entity/booking.entity';
 import { ReviewController } from './controller/review.controller';
 import { ReviewService } from './service/service.service';
+import Review from './enitity/review.entity';
 
 
 @Module({
@@ -11,4 +11,4 @@ import { ReviewService } from './service/service.service';
   controllers: [ReviewController],
   providers: [ReviewService],
 })
-export class ReviewModule {}
+export class ReviewModule { }

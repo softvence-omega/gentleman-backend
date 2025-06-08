@@ -53,7 +53,7 @@ export class MessageController {
     @Post()
     @UseInterceptors(FilesInterceptor('attachments'))
     async createMessage(@Req() req, @Res() res, @Body() payload: CreateMessageDto, @UploadedFiles() files: Express.Multer.File[]) {
-        const result = await this.service.createMessage(req.user, payload);
+        const result = await this.service.createMessage(req.user, payload, files);
 
         return sendResponse(res, {
             statusCode: HttpStatus.CREATED,
@@ -61,6 +61,5 @@ export class MessageController {
             message: "Message saved successfully!",
             data: result
         })
-        console.log(req.user, payload, files);
     }
 }

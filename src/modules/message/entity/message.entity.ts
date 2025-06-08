@@ -5,7 +5,8 @@ import {
     Column,
     ManyToOne,
     JoinColumn,
-    OneToOne
+    OneToOne,
+    JoinTable
 } from 'typeorm';
 import { OfferMessege } from './offerMessage.entity';
 
@@ -22,7 +23,7 @@ export enum MessageStatus {
 }
 
 @Entity('messages')
-export class Message extends AbstractionEntity {
+class Message extends AbstractionEntity {
     @ManyToOne(() => User, { eager: true })
     @JoinColumn({ name: 'sender_id' })
     sender: User;
@@ -37,11 +38,11 @@ export class Message extends AbstractionEntity {
     @Column({ type: 'text', nullable: true })
     content: string | null;
 
-    @Column({ type: 'varchar', nullable: true })
-    fileName: string | null;
+    @Column({ type: 'varchar', nullable: true, array: true })
+    fileNames: string[] | null;
 
-    @Column({ type: 'varchar', nullable: true })
-    fileUrl: string | null;
+    @Column({ type: 'varchar', nullable: true, array: true })
+    fileUrls: string[] | null;
 
     @Column({ type: 'enum', enum: MessageStatus, default: MessageStatus.SENT })
     status: MessageStatus;
@@ -49,7 +50,9 @@ export class Message extends AbstractionEntity {
     @Column({ type: 'timestamp', name: 'seen_at', nullable: true })
     seenAt: Date | null;
 
-    @OneToOne(() => OfferMessege, offerMessage => offerMessage.message, { lazy: true })
+    @OneToOne(() => OfferMessege, offerMessage => offerMessage.message, { eager: true })
     @JoinColumn()
-    offerMessage: Promise<OfferMessege>
+    offerMessage: OfferMessege
 }
+
+export default Message;

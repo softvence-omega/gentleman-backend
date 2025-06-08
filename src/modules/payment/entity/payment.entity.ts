@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import { PaymentStatus } from './payment.enum';
 import { AbstractionEntity } from 'src/database/abstraction.entity';
-import { Booking } from 'src/modules/booking/entity/booking.entity';
+import Booking from 'src/modules/booking/entity/booking.entity';
 
 @Entity()
 export class PaymentEntity extends AbstractionEntity {
@@ -30,9 +30,9 @@ export class PaymentEntity extends AbstractionEntity {
   status: PaymentStatus;
 
 
-  @OneToOne(() => Booking, (booking) => booking.payment, { lazy: true })
+  @OneToOne(() => Booking, (booking) => booking.payment)
   @JoinColumn()
-  booking: Promise<Booking>;
+  booking: Booking;
 
 
   @Column({ nullable: true })

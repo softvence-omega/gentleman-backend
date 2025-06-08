@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { v2 as cloudinary, UploadApiResponse, DeleteApiResponse } from 'cloudinary';
 import { Injectable } from '@nestjs/common';
 import { Readable } from 'stream';
+import { basename, extname } from 'path';
 
 @Injectable()
 export class CloudinaryService {
@@ -15,16 +16,25 @@ export class CloudinaryService {
     }
 
     // Upload an image from a buffer
-    async uploadImage(buffer: Buffer, folder = 'nest_uploads'): Promise<UploadApiResponse> {
+    async uploadImage(file: Express.Multer.File, folder = 'nest_uploads'): Promise<UploadApiResponse> {
+        const originalName = file.originalname;
+        const publicId = originalName.replace(/\s+/g, '_');
         return new Promise((resolve, reject) => {
             const uploadStream = cloudinary.uploader.upload_stream(
-                { folder, resource_type: 'raw' },
+                {
+                    folder,
+                    public_id: publicId,
+                    resource_type: 'raw',
+                    use_filename: true
+                },
                 (error, result) => {
                     if (error) return reject(error);
+                    if (!result) return reject(new Error('No result returned from Cloudinary.'));
                     resolve(result as UploadApiResponse);
-                },
+                }
             );
-            Readable.from(buffer).pipe(uploadStream);
+
+            Readable.from(file.buffer).pipe(uploadStream);
         });
     }
 

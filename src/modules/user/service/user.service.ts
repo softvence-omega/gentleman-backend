@@ -30,7 +30,7 @@ export class UserService {
           throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
         }
       }
-      const result = this.cloudinary.uploadImage(image.buffer);
+      const result = this.cloudinary.uploadImage(image);
       user.profileImage = result ? result['secure_url'] : user.profileImage;
     }
     if (certificate) {
@@ -42,7 +42,7 @@ export class UserService {
           throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
         }
       }
-      const result = this.cloudinary.uploadImage(certificate.buffer);
+      const result = this.cloudinary.uploadImage(certificate);
       user.certificate = result ? result['secure_url'] : user.profileImage;
     }
 

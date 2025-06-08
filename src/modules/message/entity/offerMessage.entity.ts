@@ -1,9 +1,9 @@
 import { AbstractionEntity } from "src/database/abstraction.entity";
 import { Column, Entity, JoinColumn, OneToOne } from "typeorm";
-import { Message } from "./message.entity";
+import Message from "./message.entity";
 
 
-enum Status {
+export enum OfferMessegeStatus {
     ACCEPTED = 'accepted',
     CANCELED = 'canceled',
     REJECTED = 'rejected',
@@ -19,10 +19,10 @@ export class OfferMessege extends AbstractionEntity {
     @Column({ type: 'bigint' })
     offerPrice: number;
 
-    @Column({ type: 'enum', enum: Status, default: Status.PENDING })
-    status: Status
+    @Column({ type: 'enum', enum: OfferMessegeStatus, default: OfferMessegeStatus.PENDING })
+    status: OfferMessegeStatus
 
-    @OneToOne(() => Message, message => message.offerMessage, { lazy: true, onDelete: 'CASCADE' })
-    message: Promise<Message>
+    @OneToOne(() => Message, message => message.offerMessage, { onDelete: 'CASCADE' })
+    message: Message
 
 }
