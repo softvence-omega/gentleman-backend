@@ -1,5 +1,3 @@
-// dto/create-message.dto.ts
-
 import {
     IsEnum,
     IsNotEmpty,

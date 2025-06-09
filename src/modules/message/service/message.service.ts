@@ -69,7 +69,7 @@ export class MessageService {
         if (files && files.length > 0 && payload.type === MessageType.FILE) {
             const fileUrls = await Promise.all(
                 files.map(async (file, index) => {
-                    const result = await this.cloudinary.uploadImage(file, 'attachments');
+                    const result = await this.cloudinary.uploadFile(file, 'attachments');
                     return result['secure_url'];
                 })
             )
@@ -97,6 +97,55 @@ export class MessageService {
         return data;
     }
 
+    async update(user, payload, id) {
+        const msg = await this.messageRepository.findOneBy({ id });
+        if (!msg) {
+            throw new ApiError(HttpStatus.NOT_FOUND, 'Message not exist!')
+        }
+        if (msg.sender.id != user.userId) {
+            throw new ApiError(HttpStatus.FORBIDDEN, 'Don\'t have permission to update!')
+        }
+        let offerMessage: null | OfferMessege = null;
+        if (msg.type === MessageType.OFFER) {
+            const offerMsg = await this.offerMessageRepository.findOneBy({ id: msg.offerMessage.id });
+            if (!offerMsg) {
+                throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong!");
+            }
+            offerMsg.description = payload.description ? payload.description : offerMsg.description;
+            offerMsg.offerPrice = payload.offerPrice ? Number(payload.offerPrice) : offerMsg.offerPrice;
+            offerMessage = await this.offerMessageRepository.save(offerMsg);
+        }
+
+        if (msg.type === MessageType.FILE) {
+            throw new ApiError(HttpStatus.FORBIDDEN, 'File message can not update!');
+        }
+
+        msg.content = payload.content ? payload.content : msg.content;
+
+        const updatedMsg = await this.messageRepository.save(msg);
+
+        updatedMsg.offerMessage = offerMessage ? offerMessage : msg.offerMessage;
+
+        const sender = {
+            name: msg.sender.name,
+            email: msg.sender.email,
+            role: msg.sender.role,
+            profileImage: msg.sender.profileImage
+        }
+        const receiver = {
+            id: msg.receiver.id,
+            name: msg.receiver.name,
+            email: msg.receiver.email,
+            role: msg.receiver.role,
+            profileImage: msg.receiver.profileImage
+        }
+
+        const customData = { ...updatedMsg, sender, receiver }
+        return {
+            updated_message: customData
+        }
+    }
+
     async destroy(user, id) {
         const msg = await this.messageRepository.findOneBy({ id });
         if (!msg) {
@@ -111,10 +160,19 @@ export class MessageService {
             await this.offerMessageRepository.remove(offerMsg as OfferMessege);
         }
 
-        const res = await this.messageRepository.remove(msg);
+        if (msg.type === MessageType.FILE && msg.fileUrls && msg.fileUrls.length > 0) {
+            await Promise.all(
+                msg.fileUrls.map(async (url: string) => {
+                    const publicId = this.cloudinary.extractPublicId(url);
+                    await this.cloudinary.destroyFile(String(publicId));
+                })
+            )
+        }
+
+        await this.messageRepository.remove(msg);
 
         return {
-            delete_message_id: res.id
+            delete_message_id: id
         };
     }
 

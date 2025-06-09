@@ -15,8 +15,7 @@ export class CloudinaryService {
         });
     }
 
-    // Upload an image from a buffer
-    async uploadImage(file: Express.Multer.File, folder = 'nest_uploads'): Promise<UploadApiResponse> {
+    async uploadFile(file: Express.Multer.File, folder = 'nest_uploads'): Promise<UploadApiResponse> {
         const originalName = file.originalname;
         const publicId = originalName.replace(/\s+/g, '_');
         return new Promise((resolve, reject) => {
@@ -38,19 +37,23 @@ export class CloudinaryService {
         });
     }
 
-    // Delete image by public_id
-    async destroyImage(publicId: string): Promise<DeleteApiResponse> {
+    async destroyFile(publicId: string): Promise<DeleteApiResponse> {
         return new Promise((resolve, reject) => {
-            cloudinary.uploader.destroy(publicId, (error, result) => {
+            cloudinary.uploader.destroy(publicId, { resource_type: 'raw' }, (error, result) => {
                 if (error) return reject(error);
                 resolve(result as DeleteApiResponse);
             });
         });
     }
 
-    // Optional: Extract public_id from secure_url
-    extractPublicId(secureUrl: string): string | null {
-        const matches = secureUrl.match(/\/upload\/(?:v\d+\/)?(.+?)\.\w+$/);
-        return matches ? matches[1] : null;
+    extractPublicId(url: string): string {
+        const parts = url.split('/upload/');
+        if (parts.length < 2) return '';
+        const publicIdWithVersion = parts[1];
+        const segments = publicIdWithVersion.split('/');
+        segments.shift(); // remove version (e.g. v1749358152)
+        const publicId = decodeURIComponent(segments.join('/'));
+        return publicId;
     }
+
 }

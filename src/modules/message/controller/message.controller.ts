@@ -5,6 +5,7 @@ import {
     Get,
     HttpStatus,
     Param,
+    Patch,
     Post,
     Query,
     Req,
@@ -18,6 +19,7 @@ import { PaginationDto } from '../dto/pagination.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiParam, ApiQuery, ApiConsumes } from '@nestjs/swagger';
 import { CreateMessageDto } from '../dto/create-message.dto';
 import { FilesInterceptor } from '@nestjs/platform-express';
+import { UpdateMessageDto } from '../dto/update-message.dto';
 
 @ApiTags('Messages')
 @Controller('message')
@@ -64,10 +66,20 @@ export class MessageController {
         })
     }
 
+    @Patch('/:id')
+    async updateMessage(@Req() request, @Body() payload: UpdateMessageDto, @Res() response, @Param('id') id) {
+        const result = await this.service.update(request.user, payload, id);
+        return sendResponse(response, {
+            statusCode: HttpStatus.OK,
+            success: true,
+            message: "Message deleted successfully!",
+            data: result
+        })
+    }
+
     @Delete('/:id')
     async deleteMessage(@Req() req, @Res() res, @Param('id') id) {
         const result = await this.service.destroy(req.user, id);
-        console.log(req.user, id);
         return sendResponse(res, {
             statusCode: HttpStatus.OK,
             success: true,

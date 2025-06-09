@@ -25,24 +25,24 @@ export class UserService {
       if (user.profileImage) {
         try {
           const publicId = this.cloudinary.extractPublicId(user.profileImage);
-          await this.cloudinary.destroyImage(publicId as string);
+          await this.cloudinary.destroyFile(publicId as string);
         } catch (e) {
           throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
         }
       }
-      const result = this.cloudinary.uploadImage(image);
+      const result = this.cloudinary.uploadFile(image);
       user.profileImage = result ? result['secure_url'] : user.profileImage;
     }
     if (certificate) {
       if (user.certificate) {
         try {
           const publicId = this.cloudinary.extractPublicId(user.certificate);
-          await this.cloudinary.destroyImage(publicId as string);
+          await this.cloudinary.destroyFile(publicId as string);
         } catch (e) {
           throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
         }
       }
-      const result = this.cloudinary.uploadImage(certificate);
+      const result = this.cloudinary.uploadFile(certificate);
       user.certificate = result ? result['secure_url'] : user.profileImage;
     }
 
