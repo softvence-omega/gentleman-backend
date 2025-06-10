@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/modules/user/entities/user.entity';
-import { Booking } from 'src/modules/booking/entity/booking.entity';
 import { PaymentEntity } from 'src/modules/payment/entity/payment.entity';
 import { Between, Repository } from 'typeorm';
 import { UserRole } from 'src/modules/user/dto/create-user.dto';
 import { PaymentStatus } from 'src/modules/payment/entity/payment.enum';
+import Booking from 'src/modules/booking/entity/booking.entity';
 
 @Injectable()
 export class MetadataService {

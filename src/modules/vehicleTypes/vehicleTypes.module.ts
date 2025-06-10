@@ -6,12 +6,10 @@ import { VehicleTypeService } from './services/vehicleTypes.services';
 import Booking from '../booking/entity/booking.entity';
 import { CloudinaryModule } from 'src/common/cloudinary/cloudinary.module';
 
-@Module({
-  imports: [TypeOrmModule.forFeature([VehicleTypeEntity,Booking]),CloudinaryModule],
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([VehicleTypeEntity, Booking])],
+  imports: [TypeOrmModule.forFeature([VehicleTypeEntity, Booking, ]), CloudinaryModule],
   controllers: [VehicleTypeController],
   providers: [VehicleTypeService],
   exports: [TypeOrmModule]

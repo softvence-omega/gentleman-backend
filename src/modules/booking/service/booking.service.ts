@@ -73,7 +73,7 @@ export class BookingService {
     if (images.length) {
       try {
         const uploadPromises = images.map(file =>
-          this.cloudinary.uploadImage(file.buffer),
+          this.cloudinary.uploadFile(file),
         );
 
         const results = await Promise.all(uploadPromises);
@@ -88,7 +88,7 @@ export class BookingService {
 
     if (vehicleImage) {
       try {
-        const result = await this.cloudinary.uploadImage(vehicleImage.buffer);
+        const result = await this.cloudinary.uploadFile(vehicleImage);
         vehicleImageUrl = result.secure_url;
       } catch (error) {
         throw new ApiError(

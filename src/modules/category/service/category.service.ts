@@ -38,7 +38,7 @@ export class CategoryService {
      let result;
         if (file) {
             try {
-                result = await this.cloudinary.uploadImage(file.buffer);
+                result = await this.cloudinary.uploadFile(file);
             } catch (e) {
                 throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, e.message);
             }

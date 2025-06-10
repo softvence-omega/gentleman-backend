@@ -7,11 +7,10 @@ import { ServiceModule } from '../services/services.module';
 import { CloudinaryModule } from 'src/common/cloudinary/cloudinary.module';
 import Booking from '../booking/entity/booking.entity';
 
-@Module({
-  imports: [TypeOrmModule.forFeature([CategoryEntity,Booking]), ServiceModule,CloudinaryModule],
+
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CategoryEntity, Booking]), ServiceModule],
+  imports: [TypeOrmModule.forFeature([CategoryEntity, Booking]), ServiceModule, CloudinaryModule],
   controllers: [CategoryController],
   providers: [CategoryService],
   exports: [CategoryService, TypeOrmModule],
