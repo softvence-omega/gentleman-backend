@@ -3,12 +3,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, Raw, Repository } from 'typeorm';
-import { Review } from 'src/modules/review/enitity/review.entity';
-import { Booking, BookingStatus, BookingWorkStatus } from '../entity/booking.entity';
+import Booking, { BookingStatus, BookingWorkStatus } from '../entity/booking.entity';
 import { PaymentStatus } from 'src/modules/payment/entity/payment.enum';
 import { CreateBookingDto } from '../dto/create-booking.dto';
 import { PaymentEntity } from 'src/modules/payment/entity/payment.entity';
 import { User } from 'src/modules/user/entities/user.entity';
+import Review from 'src/modules/review/enitity/review.entity';
 
 
 @Injectable()
@@ -18,11 +18,11 @@ export class DashboardService {
     private bookingRepo: Repository<Booking>,
     @InjectRepository(Review)
     private reviewRepo: Repository<Review>,
-     @InjectRepository(User)
-        private readonly userRepo: Repository<User>,
-        @InjectRepository(PaymentEntity)
-        private paymentRepo: Repository<PaymentEntity>,
-  ) {}
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+    @InjectRepository(PaymentEntity)
+    private paymentRepo: Repository<PaymentEntity>,
+  ) { }
 
   async getProviderDashboard(providerId: string) {
     const now = new Date();
@@ -55,7 +55,7 @@ export class DashboardService {
     const jobCount = await this.bookingRepo.count({
       where: {
         provider: { id: providerId },
-        workStatus:  BookingWorkStatus.Completed,
+        workStatus: BookingWorkStatus.Completed,
       },
     });
 
@@ -77,38 +77,38 @@ export class DashboardService {
 
   // dashboard.service.ts
 
-async getTodaySchedule(providerId: string) {
-  const today = new Date();
-  const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-  const endOfDay = new Date(today.setHours(23, 59, 59, 999));
+  async getTodaySchedule(providerId: string) {
+    const today = new Date();
+    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-  const bookings = await this.bookingRepo.find({
-    where: {
-      provider: { id: providerId },
-      desireDate: Between(startOfDay.toISOString(), endOfDay.toISOString()),
-      status: BookingStatus.Accept,
-    },
-    relations: ['user'], // for avatar/info
-    order: { desireDate: 'ASC' },
-  });
+    const bookings = await this.bookingRepo.find({
+      where: {
+        provider: { id: providerId },
+        desireDate: Between(startOfDay.toISOString(), endOfDay.toISOString()),
+        status: BookingStatus.Accept,
+      },
+      relations: ['user'], // for avatar/info
+      order: { desireDate: 'ASC' },
+    });
 
-  return bookings.map((b) => ({
-    time: new Date(b.desireDate).toLocaleTimeString('en-US', {
-      hour: '2-digit',
-      minute: '2-digit',
-    }),
-    title: b.title,
-    address: {latitude:b.latitude,longitude:b.longitude},
-    distance:b.description, 
-    user: {
-      name: b.user.name,
-      avatar: b.user.profileImage
-    },
-  }));
-}
+    return bookings.map((b) => ({
+      time: new Date(b.desireDate).toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+      title: b.title,
+      address: { latitude: b.latitude, longitude: b.longitude },
+      distance: b.description,
+      user: {
+        name: b.user.name,
+        avatar: b.user.profileImage
+      },
+    }));
+  }
 
 
-async getDashboardSummary() {
+  async getDashboardSummary() {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
@@ -179,9 +179,9 @@ async getDashboardSummary() {
       limit,
       data,
     };
-  } 
+  }
 
 
- 
+
 
 }

@@ -16,7 +16,7 @@ import { Request } from 'express';
 import { CreatePaymentDto } from '../dto/payment.dto';
 import { PaymentStatus as mainPaymentStatus } from '../entity/payment.enum';
 import { PaymentEntity } from '../entity/payment.entity';
-import { Booking, PaymentStatus } from 'src/modules/booking/entity/booking.entity';
+import Booking, { PaymentStatus } from 'src/modules/booking/entity/booking.entity';
 
 @Injectable()
 export class PaymentService {
@@ -52,7 +52,7 @@ export class PaymentService {
       status: mainPaymentStatus.PENDING,
     });
 
-    payment.booking = Promise.resolve(booking);
+    payment.booking = booking;
     await this.paymentRepo.save(payment);
 
 
@@ -152,18 +152,18 @@ export class PaymentService {
     );
   }
 
- async refundPayment(apiId: string, userId: string) {
-  
-  const refund = await this.stripe.refunds.create({
-    payment_intent: apiId, 
-  });
+  async refundPayment(apiId: string, userId: string) {
+
+    const refund = await this.stripe.refunds.create({
+      payment_intent: apiId,
+    });
 
 
-  return {
-    message: 'Payment refunded successfully',
-    refund,
-  };
- }
+    return {
+      message: 'Payment refunded successfully',
+      refund,
+    };
+  }
 
   async getAllPayments(
     page: number,

@@ -1,5 +1,5 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
-import { Booking } from 'src/modules/booking/entity/booking.entity';
+import Booking from 'src/modules/booking/entity/booking.entity';
 import { ServiceEntity } from 'src/modules/services/entity/service.entity';
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 
@@ -20,7 +20,7 @@ export class CategoryEntity extends AbstractionEntity {
 
   @OneToOne(() => Booking, (booking) => booking.category)
   @JoinColumn()
-  booking: Promise<Booking>
+  booking: Booking
 
 
   constructor(entity?: Partial<CategoryEntity>) {
