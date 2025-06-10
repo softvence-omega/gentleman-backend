@@ -1,5 +1,5 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
-import { Booking } from 'src/modules/booking/entity/booking.entity';
+import Booking from 'src/modules/booking/entity/booking.entity';
 import { Entity, Column, OneToMany } from 'typeorm';
 
 @Entity()
@@ -44,7 +44,7 @@ export class User extends AbstractionEntity {
   isDeleted: boolean;
 
 
-  @OneToMany(() => Booking, (booking) => booking.user)
+  @OneToMany(() => Booking, (booking) => booking.user, { eager: true })
   bookings: Booking[];
 
 

@@ -1,10 +1,10 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
 import { AbstractionEntity } from 'src/database/abstraction.entity';
-import { Review } from 'src/modules/review/enitity/review.entity';
 import { VehicleTypeEntity } from 'src/modules/vehicleTypes/entity/vehicle-type.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 import { CategoryEntity } from 'src/modules/category/entity/category.entity';
 import { PaymentEntity } from 'src/modules/payment/entity/payment.entity';
+import Review from 'src/modules/review/enitity/review.entity';
 
 export enum BookingStatus {
   Pending = 'Pending',
@@ -26,7 +26,7 @@ export enum PaymentStatus {
 }
 
 @Entity('booking')
-export class Booking extends AbstractionEntity {
+class Booking extends AbstractionEntity {
   @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.Pending })
   paymentStatus: PaymentStatus;
 
@@ -90,14 +90,11 @@ dentImg: string[];
   @JoinColumn({ name: 'categoryId' })
   category: CategoryEntity;
 
-  @OneToOne(() => PaymentEntity, (payment) => payment.booking, { cascade: true })
+  @OneToOne(() => PaymentEntity, (payment) => payment.booking, { cascade: true, eager: true })
   payment: PaymentEntity;
 
-
-
-
-
-
-  @OneToMany(() => Review, (review) => review.booking, { cascade: true })
+  @OneToMany(() => Review, (review) => review.booking, { cascade: true, eager: true })
   reviews: Review[];
 }
+
+export default Booking;
