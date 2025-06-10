@@ -37,9 +37,9 @@ export class PaymentService {
   async createPayment(dto: CreatePaymentDto) {
 
 
-    const { amount, email, bookingId } = dto;
+    const {  email, bookingId } = dto;
 
-
+    console.log(bookingId)
     const booking = await this.bookingRepo.findOne({ where: { id: bookingId } });
 
     if (!booking) {
@@ -49,6 +49,7 @@ export class PaymentService {
 
     const payment = this.paymentRepo.create({
       ...dto,
+      amount: Number(booking.price),
       status: mainPaymentStatus.PENDING,
     });
 
@@ -66,7 +67,7 @@ export class PaymentService {
             product_data: {
               name: 'Instant Payment',
             },
-            unit_amount: amount * 100,
+            unit_amount: Number(booking.price) * 100,
           },
           quantity: 1,
         },

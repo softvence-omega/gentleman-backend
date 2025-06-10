@@ -28,7 +28,8 @@ export class PaymentController {
 
   @Post('/')
   create(@Body() dto: CreatePaymentDto) {
-    // For demo/test purposes: pass dummy user object or fetch from context/session manually
+    console.log(dto)
+    return this.paymentService.createPayment(dto)
 
 
   }
