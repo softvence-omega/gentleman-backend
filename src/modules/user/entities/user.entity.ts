@@ -44,8 +44,11 @@ export class User extends AbstractionEntity {
   isDeleted: boolean;
 
 
-  @OneToMany(() => Booking, (booking) => booking.user)
-  bookings: Booking[];
+ @OneToMany(() => Booking, (booking) => booking.user)
+bookings: Booking[];
+
+@OneToMany(() => Booking, (booking) => booking.provider)
+providedBookings: Booking[];
 
 
   constructor(entity?: Partial<User>) {

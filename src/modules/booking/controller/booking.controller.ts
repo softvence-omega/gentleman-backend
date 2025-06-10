@@ -5,6 +5,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { BookingService } from '../service/booking.service';
 import { CreateBookingDto } from '../dto/create-booking.dto';
 import { UpdateBookingDto, UpdateBookingStatusDto, UpdateBookingWorkStatusDto, UpdatePaymentStatusDto } from '../dto/update-booking.dto';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { Request } from 'express';
 
 
 @Controller('bookings')
@@ -28,8 +30,11 @@ export class BookingController {
 async createBooking(
   @UploadedFiles() files: { image?: Express.Multer.File[], vehicleImage?: Express.Multer.File[]; },
   @Body() dto: CreateBookingDto,
+ @Req() req
 ) {
-  return this.bookingService.createBooking(dto, files.image || [] ,files?.vehicleImage?.[0]  );
+  const userId = req.user.userId;
+  console.log( userId)
+  return this.bookingService.createBooking(dto,userId ,files.image || [] ,files?.vehicleImage?.[0] );
 }
 
 
