@@ -54,4 +54,19 @@ export class MetadataService {
       monthlyRevenue: Number(monthlyRevenueRaw.sum) || 0,
     };
   }
+
+  async getMonthlyBookingStats(): Promise<{ month: string; count: number }[]> {
+    const result = await this.bookingRepo
+      .createQueryBuilder('booking')
+      .select("TO_CHAR(booking.createdAt, 'Mon')", 'month')
+      .addSelect('COUNT(*)', 'count')
+      .groupBy('month')
+      .orderBy("MIN(booking.createdAt)", 'ASC')
+      .getRawMany();
+
+    return result.map(row => ({
+      month: row.month,
+      count: parseInt(row.count, 10),
+    }));
+  }
 }

@@ -43,8 +43,6 @@ export class CreateBookingDto {
   @IsString()
   vehicleTypesId: string;
 
-  @IsString()
-  userId: string;
 
   @IsString()
   providerId: string;

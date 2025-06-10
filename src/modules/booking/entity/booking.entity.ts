@@ -1,4 +1,11 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { AbstractionEntity } from 'src/database/abstraction.entity';
 import { VehicleTypeEntity } from 'src/modules/vehicleTypes/entity/vehicle-type.entity';
 import { User } from 'src/modules/user/entities/user.entity';
@@ -60,8 +67,8 @@ class Booking extends AbstractionEntity {
   @Column()
   DetailsDescription: string;
 
-@Column('text', { array: true, nullable: true })
-dentImg: string[];
+  @Column('text', { array: true, nullable: true })
+  dentImg: string[];
 
   @Column()
   desireDate: string;
@@ -72,28 +79,31 @@ dentImg: string[];
   @Column()
   latitude: string;
 
-
-  @OneToOne(() => VehicleTypeEntity)
+  // ✅ Changed from OneToOne to ManyToOne
+  @ManyToOne(() => VehicleTypeEntity)
   @JoinColumn({ name: 'vehicleTypesId' })
   vehicleType: VehicleTypeEntity;
 
-
-  @ManyToOne(() => User)
+  // ✅ user can create multiple bookings
+  @ManyToOne(() => User, (user) => user.bookings)
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  @ManyToOne(() => User)
+  // ✅ provider can receive multiple bookings
+  @ManyToOne(() => User, (user) => user.providedBookings)
   @JoinColumn({ name: 'providerId' })
   provider: User;
 
-  @OneToOne(() => CategoryEntity)
+  // ✅ Changed from OneToOne to ManyToOne
+  @ManyToOne(() => CategoryEntity)
   @JoinColumn({ name: 'categoryId' })
   category: CategoryEntity;
 
-  @OneToOne(() => PaymentEntity, (payment) => payment.booking, { cascade: true, eager: true })
+  // ✅ Keep as OneToOne — every booking has a unique payment
+  @OneToOne(() => PaymentEntity, (payment) => payment.booking, { cascade: true })
   payment: PaymentEntity;
 
-  @OneToMany(() => Review, (review) => review.booking, { cascade: true, eager: true })
+  @OneToMany(() => Review, (review) => review.booking, { cascade: true })
   reviews: Review[];
 }
 

@@ -6,61 +6,111 @@ import { CreateBookingDto } from '../dto/create-booking.dto';
 import { UpdateBookingDto, UpdateBookingStatusDto, UpdateBookingWorkStatusDto, UpdatePaymentStatusDto } from '../dto/update-booking.dto';
 import ApiError from 'src/common/errors/ApiError';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
+import { VehicleTypeEntity } from 'src/modules/vehicleTypes/entity/vehicle-type.entity';
+import { CategoryEntity } from 'src/modules/category/entity/category.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 
 
 @Injectable()
 export class BookingService {
   constructor(
-    @InjectRepository(Booking)
+ 
+      @InjectRepository(Booking)
     private readonly bookingRepo: Repository<Booking>,
-     private cloudinary: CloudinaryService
+
+    @InjectRepository(VehicleTypeEntity)
+    private readonly vehicleTypeRepo: Repository<VehicleTypeEntity>,
+
+    @InjectRepository(User)
+    private readonly providerRepo: Repository<User>,
+
+    @InjectRepository(CategoryEntity)
+    private readonly categoryRepo: Repository<CategoryEntity>,
+
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+
+    private readonly cloudinary: CloudinaryService,
+
+
+  
+
   ) { }
 
    async createBooking(
-  dto: CreateBookingDto,
-  images: Express.Multer.File[], 
-   vehicleImage?: Express.Multer.File,
-): Promise<Booking> {
-  let imageUrls: string[] = [];
+    dto: CreateBookingDto,
+    userId: string,
+    images: Express.Multer.File[],
+    vehicleImage?: Express.Multer.File,
+  ): Promise<Booking> {
+    // Validate foreign keys exist
+
+    const vehicleTypeExists = await this.vehicleTypeRepo.findOneBy({ id: dto.vehicleTypesId });
+    if (!vehicleTypeExists) {
+      throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid vehicleTypesId: not found');
+    }
+
+    const providerExists = await this.providerRepo.findOneBy({ id: dto.providerId });
+    if (!providerExists) {
+      throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid providerId: not found');
+    }
+
+    const categoryExists = await this.categoryRepo.findOneBy({ id: dto.categoryId });
+    if (!categoryExists) {
+      throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid categoryId: not found');
+    }
+    console.log(userId)
+    const userExists = await this.userRepo.findOneBy({ id: userId });
+    if (!userExists) {
+      throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid userId: not found');
+    }
+
+    // Upload images
+
+    let imageUrls: string[] = [];
     let vehicleImageUrl: string | null | undefined = null;
 
-  if (images.length) {
-    try {
-      const uploadPromises = images.map(file =>
-        this.cloudinary.uploadImage(file.buffer) 
-      );
+    if (images.length) {
+      try {
+        const uploadPromises = images.map(file =>
+          this.cloudinary.uploadImage(file.buffer),
+        );
 
-      const results = await Promise.all(uploadPromises);
-      imageUrls = results.map(res => res.secure_url);
-    } catch (error) {
-      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, 'Image upload failed');
+        const results = await Promise.all(uploadPromises);
+        imageUrls = results.map(res => res.secure_url);
+      } catch (error) {
+        throw new ApiError(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          'Image upload failed',
+        );
+      }
     }
-  }
 
-   if (vehicleImage) {
-    try {
-      const result = await this.cloudinary.uploadImage(vehicleImage.buffer);
-      vehicleImageUrl = result.secure_url;
-    } catch (error) {
-      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, 'Vehicle image upload failed');
+    if (vehicleImage) {
+      try {
+        const result = await this.cloudinary.uploadImage(vehicleImage.buffer);
+        vehicleImageUrl = result.secure_url;
+      } catch (error) {
+        throw new ApiError(
+          HttpStatus.INTERNAL_SERVER_ERROR,
+          'Vehicle image upload failed',
+        );
+      }
     }
+
+    dto.vehicleImage = vehicleImageUrl ?? undefined;
+
+    const booking = this.bookingRepo.create({
+      ...dto,
+      vehicleType: { id: dto.vehicleTypesId },
+      user: { id: userId },
+      provider: { id: dto.providerId },
+      category: { id: dto.categoryId },
+      dentImg: imageUrls,
+    });
+
+    return this.bookingRepo.save(booking);
   }
-
- dto.vehicleImage = vehicleImageUrl ?? undefined;
-
-  const booking = this.bookingRepo.create({
-    ...dto,
-    vehicleType: { id: dto.vehicleTypesId },
-    user: { id: dto.userId },
-    provider: { id: dto.providerId },
-    category: { id: dto.categoryId },
-    dentImg: imageUrls,
-    
-  });
-
-  return this.bookingRepo.save(booking);
-}
-
   async updateBooking(id: string, dto: UpdateBookingDto): Promise<Booking> {
     const booking = await this.getBookingById(id);
 
