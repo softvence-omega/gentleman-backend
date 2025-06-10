@@ -1,16 +1,18 @@
-import { Body, Controller, Get, HttpStatus, Param, Post, Query, Req, Res } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Param, Post, Query, Req, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { ServiceDto } from '../dto/service.dto';
 import { ServiceService } from '../service/services.service';
 import { Response } from 'express';
 import sendResponse from 'src/common/utils/sendResponse';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('services')
 export class ServiceController {
   constructor(private readonly serviceService: ServiceService) { }
 
   @Post('/')
-  async create(@Body() dto: ServiceDto, @Res() res: Response) {
-    const data = await this.serviceService.createService(dto);
+  @UseInterceptors(FileInterceptor("icon"))
+  async create(@Body() dto: ServiceDto, @Res() res: Response,  @UploadedFile() file: Express.Multer.File,) {
+    const data = await this.serviceService.createService(dto , file);
     return sendResponse(res, {
       statusCode: HttpStatus.OK,
       success: true,

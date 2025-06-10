@@ -5,9 +5,10 @@ import { CategoryController } from './controller/category.controller';
 import { CategoryEntity } from './entity/category.entity';
 import { ServiceModule } from '../services/services.module';
 import { Booking } from '../booking/entity/booking.entity';
+import { CloudinaryModule } from 'src/common/cloudinary/cloudinary.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([CategoryEntity,Booking]), ServiceModule],
+  imports: [TypeOrmModule.forFeature([CategoryEntity,Booking]), ServiceModule,CloudinaryModule],
   controllers: [CategoryController],
   providers: [CategoryService],
   exports: [CategoryService, TypeOrmModule],

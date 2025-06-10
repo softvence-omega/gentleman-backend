@@ -4,8 +4,7 @@ export class CreateVehicleTypeDto {
   @IsString()
   name: string;
 
-  @IsString()
-  icon: string;
+
 
   
 }

@@ -11,6 +11,9 @@ export class CategoryEntity extends AbstractionEntity {
   @Column()
   serviceId: string;
 
+  @Column()
+  icon: string;
+
   @ManyToOne(() => ServiceEntity, (service) => service.categories, {
     nullable: false,
     eager: true
