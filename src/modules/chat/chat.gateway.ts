@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { RedisService } from 'src/common/redis/redis.service';
 import { JwtService } from '@nestjs/jwt';
 import { Server, Socket } from 'socket.io';
+import { Events } from './constants';
 
 @Injectable()
 @WebSocketGateway({ cors: { origin: '*' } })
@@ -11,12 +12,14 @@ export class ChatGateway {
   constructor(private redisService: RedisService, private jwtService: JwtService) { }
 
   async handleConnection(client: Socket) {
-    console.log(client.id);
     const redis = this.redisService.getClient();
     const userId = this.extractUserId(client);
-    if (userId) {
-      await redis.set(`user_socket:${userId}`, client.id);
+    if (!userId) {
+      client.emit(Events.FORBIDDEN, "Authorization token not found!");
+      client.disconnect();
+      return;
     }
+    await redis.set(`user_socket:${userId}`, client.id);
   }
 
   async handleDisconnect(client: Socket) {
@@ -44,11 +47,8 @@ export class ChatGateway {
       const token =
         client.handshake.auth?.token ||
         client.handshake.headers?.authorization;
-
       if (!token) return null;
-
-      const cleanedToken = token.replace('Bearer ', '');
-      const decoded: any = this.jwtService.verify(cleanedToken);
+      const decoded: any = this.jwtService.verify(token);
       return decoded.userId;
     } catch (err) {
       console.error('Invalid or missing token:', err.message);

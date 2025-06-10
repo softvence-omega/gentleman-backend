@@ -7,11 +7,11 @@ import {
   OneToOne,
 } from 'typeorm';
 import { AbstractionEntity } from 'src/database/abstraction.entity';
-import { Review } from 'src/modules/review/enitity/review.entity';
 import { VehicleTypeEntity } from 'src/modules/vehicleTypes/entity/vehicle-type.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 import { CategoryEntity } from 'src/modules/category/entity/category.entity';
 import { PaymentEntity } from 'src/modules/payment/entity/payment.entity';
+import Review from 'src/modules/review/enitity/review.entity';
 
 export enum BookingStatus {
   Pending = 'Pending',
@@ -33,7 +33,7 @@ export enum PaymentStatus {
 }
 
 @Entity('booking')
-export class Booking extends AbstractionEntity {
+class Booking extends AbstractionEntity {
   @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.Pending })
   paymentStatus: PaymentStatus;
 
@@ -106,3 +106,5 @@ export class Booking extends AbstractionEntity {
   @OneToMany(() => Review, (review) => review.booking, { cascade: true })
   reviews: Review[];
 }
+
+export default Booking;

@@ -1,9 +1,9 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
-import { Booking } from 'src/modules/booking/entity/booking.entity';
+import Booking from 'src/modules/booking/entity/booking.entity';
 import { Entity, Column, ManyToOne } from 'typeorm';
 
 @Entity()
-export class Review extends AbstractionEntity {
+class Review extends AbstractionEntity {
   @Column('text')
   comment: string;
 
@@ -18,3 +18,5 @@ export class Review extends AbstractionEntity {
     Object.assign(this, entity);
   }
 }
+
+export default Review;
