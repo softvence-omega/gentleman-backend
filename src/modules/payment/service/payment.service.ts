@@ -17,6 +17,7 @@ import { CreatePaymentDto } from '../dto/payment.dto';
 import { PaymentStatus as mainPaymentStatus } from '../entity/payment.enum';
 import { PaymentEntity } from '../entity/payment.entity';
 import Booking, { PaymentStatus } from 'src/modules/booking/entity/booking.entity';
+import { EmailService } from 'src/common/nodemailer/email.service';
 
 @Injectable()
 export class PaymentService {
@@ -28,6 +29,7 @@ export class PaymentService {
     private paymentRepo: Repository<PaymentEntity>,
     @InjectRepository(Booking)
     private bookingRepo: Repository<Booking>,
+    private emailService: EmailService
   ) {
     this.stripe = new Stripe(
       this.configService.get('stripe_secret_key') as string,
@@ -37,9 +39,9 @@ export class PaymentService {
   async createPayment(dto: CreatePaymentDto) {
 
 
-    const { amount, email, bookingId } = dto;
+    const {  email, bookingId } = dto;
 
-
+    
     const booking = await this.bookingRepo.findOne({ where: { id: bookingId } });
 
     if (!booking) {
@@ -47,14 +49,26 @@ export class PaymentService {
     }
 
 
-    const payment = this.paymentRepo.create({
-      ...dto,
+  let payment = await this.paymentRepo.findOne({
+    where: {
+      booking: { id: bookingId },
       status: mainPaymentStatus.PENDING,
+    },
+    relations: ['booking'],
+  });
+
+  if (!payment) {
+    payment = this.paymentRepo.create({
+      ...dto,
+      amount: Number(booking.price),
+      status: mainPaymentStatus.PENDING,
+      booking,
     });
 
-    payment.booking = booking;
     await this.paymentRepo.save(payment);
-
+  }
+    
+     
 
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -66,7 +80,7 @@ export class PaymentService {
             product_data: {
               name: 'Instant Payment',
             },
-            unit_amount: amount * 100,
+            unit_amount: Number(booking.price) * 100,
           },
           quantity: 1,
         },
@@ -84,7 +98,6 @@ export class PaymentService {
 
     if (!session?.url)
       throw new BadRequestException('Stripe session creation failed');
-
     return { url: session.url };
   }
 
@@ -97,7 +110,7 @@ export class PaymentService {
     if (!rawBody) {
       throw new BadRequestException('No webhook payload was provided.');
     }
-
+    console.log(this.configService.get('stripe_webhook_secret') as string,)
     try {
       event = this.stripe.webhooks.constructEvent(
         rawBody,
@@ -121,7 +134,20 @@ export class PaymentService {
 
       });
 
+    const booking = await this.bookingRepo.findOne({
+    where: { id: metadata.bookingId },
+    relations: ['user'],
+     });
 
+    
+    if (booking?.user?.email) {
+    await this.emailService.sendEmail(
+      booking.user.email,
+      'Payment Successful',
+      `<p>Your payment for the booking <strong>${booking.title}</strong> has been successfully completed.</p>`
+    );
+  }
+   
 
     }
 
