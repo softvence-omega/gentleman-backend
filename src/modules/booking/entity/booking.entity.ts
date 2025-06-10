@@ -60,8 +60,8 @@ class Booking extends AbstractionEntity {
   @Column()
   DetailsDescription: string;
 
-  @Column()
-  dentImg: string;
+@Column('text', { array: true, nullable: true })
+dentImg: string[];
 
   @Column()
   desireDate: string;

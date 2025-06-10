@@ -32,8 +32,6 @@ export class CreateBookingDto {
   @IsString()
   desireDate: string;
 
-  @IsString()
-  dentImg: string;
 
   @IsString()
   longitude: string;

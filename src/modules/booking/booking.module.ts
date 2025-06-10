@@ -6,6 +6,7 @@ import { VehicleTypeEntity } from '../vehicleTypes/entity/vehicle-type.entity';
 import { User } from '../user/entities/user.entity';
 import { PaymentEntity } from '../payment/entity/payment.entity';
 import { CategoryEntity } from '../category/entity/category.entity';
+import { CloudinaryModule } from 'src/common/cloudinary/cloudinary.module';
 import Booking from './entity/booking.entity';
 import Review from '../review/enitity/review.entity';
 
@@ -18,7 +19,11 @@ import Review from '../review/enitity/review.entity';
       PaymentEntity,
       CategoryEntity,
       Review,
-    ]),
+      
+    ]
+   
+  ),
+   CloudinaryModule,
   ],
   controllers: [BookingController],
   providers: [BookingService],
