@@ -9,6 +9,8 @@ import { CategoryEntity } from '../category/entity/category.entity';
 import { CloudinaryModule } from 'src/common/cloudinary/cloudinary.module';
 import Booking from './entity/booking.entity';
 import Review from '../review/enitity/review.entity';
+import { DashboardController } from './controller/bookingdashbor.controller';
+import { DashboardService } from './service/providerbooking.service';
 
 @Module({
   imports: [
@@ -25,8 +27,8 @@ import Review from '../review/enitity/review.entity';
   ),
    CloudinaryModule,
   ],
-  controllers: [BookingController],
-  providers: [BookingService],
+  controllers: [BookingController,DashboardController],
+  providers: [BookingService, DashboardService],
   exports: [TypeOrmModule, BookingService],
 })
 export class BookingModule { }
