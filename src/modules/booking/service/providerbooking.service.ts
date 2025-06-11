@@ -181,6 +181,22 @@ export class DashboardService {
     };
   }
 
+async getServiceDistribution() {
+  const result = await this.bookingRepo
+    .createQueryBuilder('booking')
+    .leftJoin('booking.category', 'category')
+    .leftJoin('category.service', 'service')
+    .select('service.title', 'title')
+    .addSelect('COUNT(booking.id)', 'count')
+    .groupBy('service.title')
+    .getRawMany();
+
+  // Transform result to chart format
+  return result.map((r) => ({
+    label: r.title,
+    value: Number(r.count),
+  }));
+}
 
 
 

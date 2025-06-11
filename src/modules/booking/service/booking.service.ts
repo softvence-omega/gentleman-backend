@@ -261,14 +261,5 @@ async getCompletedBookings(userId: string): Promise<Booking[]> {
 
 }
 
-async findAllLocations() {
-    const providers = await this.bookingRepo
-      .createQueryBuilder('booking')
-      .innerJoin('booking.provider', 'provider')
-      .groupBy('provider.id, booking.latitude, booking.longitude')
-      .getRawMany();
-
-    return providers;
-  }
 
 }

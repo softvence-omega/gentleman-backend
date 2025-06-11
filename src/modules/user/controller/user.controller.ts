@@ -7,6 +7,7 @@ import {
   UseInterceptors,
   UploadedFiles,
   HttpStatus,
+  Get,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UserService } from '../service/user.service';
@@ -45,4 +46,14 @@ export class UserController {
       data: result
     })
   }
+
+@Get('/provider/locations')
+async getProviderLocations() {
+  const data = await this.userService.getProviderLocations();
+  return {
+    message: 'Provider locations fetched successfully',
+    data,
+  };
+}
+
 }
