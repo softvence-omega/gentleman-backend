@@ -186,15 +186,14 @@ async getServiceDistribution() {
     .createQueryBuilder('booking')
     .leftJoin('booking.category', 'category')
     .leftJoin('category.service', 'service')
-    .select('service.title', 'title')
+    .select('service.title', 'service')
     .addSelect('COUNT(booking.id)', 'count')
     .groupBy('service.title')
     .getRawMany();
 
-  // Transform result to chart format
-  return result.map((r) => ({
-    label: r.title,
-    value: Number(r.count),
+  return result.map((row) => ({
+    service: row.service,
+    count: parseInt(row.count, 10),
   }));
 }
 
