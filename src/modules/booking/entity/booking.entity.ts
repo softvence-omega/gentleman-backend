@@ -17,6 +17,7 @@ export enum BookingStatus {
   Pending = 'Pending',
   Accept = 'Accept',
   Reject = 'Reject',
+  Completed = 'Completed'
 }
 
 export enum BookingWorkStatus {
@@ -30,6 +31,7 @@ export enum PaymentStatus {
   Pending = 'Pending',
   Cancel = 'Cancel',
   Completed = 'Completed',
+  Refund = "Refund"
 }
 
 @Entity('booking')

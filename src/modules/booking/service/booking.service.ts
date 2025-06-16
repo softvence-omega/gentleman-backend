@@ -1,6 +1,6 @@
 import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import Booking, { BookingStatus } from '../entity/booking.entity';
+import Booking, { BookingStatus, PaymentStatus as bookingPaymentStatus } from '../entity/booking.entity';
 import { Repository } from 'typeorm';
 import { CreateBookingDto } from '../dto/create-booking.dto';
 import { UpdateBookingDto, UpdateBookingStatusDto, UpdateBookingWorkStatusDto, UpdatePaymentStatusDto } from '../dto/update-booking.dto';
@@ -9,10 +9,16 @@ import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { VehicleTypeEntity } from 'src/modules/vehicleTypes/entity/vehicle-type.entity';
 import { CategoryEntity } from 'src/modules/category/entity/category.entity';
 import { User } from 'src/modules/user/entities/user.entity';
+import { PaymentStatus } from 'src/modules/payment/entity/payment.enum';
+import { PaymentEntity } from 'src/modules/payment/entity/payment.entity';
+import Stripe from 'stripe';
+import { ConfigService } from '@nestjs/config';
 
 
 @Injectable()
 export class BookingService {
+
+   private stripe: Stripe;
   constructor(
  
       @InjectRepository(Booking)
@@ -27,15 +33,22 @@ export class BookingService {
     @InjectRepository(CategoryEntity)
     private readonly categoryRepo: Repository<CategoryEntity>,
 
+    @InjectRepository(PaymentEntity)
+    private readonly paymentRepo: Repository<PaymentEntity>,
+
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
 
     private readonly cloudinary: CloudinaryService,
-
+     private configService: ConfigService,
 
   
 
-  ) { }
+  ) {
+    this.stripe = new Stripe(
+      this.configService.get('stripe_secret_key') as string,
+    );
+   }
 
    async createBooking(
     dto: CreateBookingDto,
@@ -132,11 +145,17 @@ export class BookingService {
     return this.bookingRepo.save(booking);
   }
 
-  async updateWorkStatus(id: string, dto: UpdateBookingWorkStatusDto): Promise<Booking> {
-    const booking = await this.getBookingById(id);
-    booking.workStatus = dto.workStatus;
-    return this.bookingRepo.save(booking);
+async updateWorkStatus(id: string, dto: UpdateBookingWorkStatusDto): Promise<Booking> {
+  const booking = await this.getBookingById(id);
+
+  // Only update workStatus if the booking status is "Accept"
+  if (booking.status !== BookingStatus.Accept) {
+    throw new Error('Cannot update work status unless booking is accepted.');
   }
+
+  booking.workStatus = dto.workStatus;
+  return this.bookingRepo.save(booking);
+}
 
   async updatePaymentStatus(id: string, dto: UpdatePaymentStatusDto): Promise<Booking> {
     const booking = await this.getBookingById(id);
@@ -144,12 +163,7 @@ export class BookingService {
     return this.bookingRepo.save(booking);
   }
 
-  async getPendingBookings(): Promise<Booking[]> {
-    return this.bookingRepo.find({
-      where: { status: BookingStatus.Pending },
-      relations: ['user', 'provider', 'vehicleType', 'category', 'payment', 'reviews'],
-    });
-  }
+  
 
   async getBookingById(id: string): Promise<Booking> {
     const booking = await this.bookingRepo.findOne({
@@ -160,4 +174,92 @@ export class BookingService {
     if (!booking) throw new NotFoundException('Booking not found');
     return booking;
   }
+
+
+  async cancelBooking(bookingId: string) {
+  const booking = await this.bookingRepo.findOne({
+    where: { id: bookingId },
+    relations: ['payment'],
+  });
+
+  if (!booking) {
+    throw new NotFoundException('Booking not found');
+  }
+
+  // Always update booking status to Reject
+  booking.status = BookingStatus.Reject;
+
+  // If there is a completed payment, issue refund
+  if (
+    booking.payment &&
+    booking.payment.status === PaymentStatus.COMPLETED &&
+    booking.payment.senderPaymentTransaction
+  ) {
+    // Refund via Stripe
+    await this.stripe.refunds.create({
+      payment_intent: booking.payment.senderPaymentTransaction,
+    });
+
+    booking.paymentStatus = bookingPaymentStatus.Refund ;
+    booking.payment.status = PaymentStatus.REFUNDED;
+
+    await this.paymentRepo.save(booking.payment);
+  } else {
+    // No refund necessary (Pending or no payment)
+    booking.paymentStatus = bookingPaymentStatus.Pending; 
+  }
+
+  await this.bookingRepo.save(booking);
+
+  return {
+    message: 'Booking cancelled successfully',
+    refundIssued: booking.payment?.status === PaymentStatus.REFUNDED,
+    booking,
+  };
+}
+
+ async getAllBookings(
+    page: number,
+    limit: number,
+    order: 'ASC' | 'DESC',
+  ) {
+    const [data, total] = await this.bookingRepo.findAndCount({
+      order: { createdAt: order },
+      take: limit,
+      skip: (page - 1) * limit,
+      relations: ['user', 'payment'], 
+    });
+
+    return {
+      total,
+      page,
+      limit,
+      data,
+    };
+  }
+
+
+ async getPendingBookings(userId: string): Promise<Booking[]> {
+  return this.bookingRepo.find({
+    where: {
+      status: BookingStatus.Pending,
+      user: { id: userId },
+    },
+    relations: ['user', 'provider', 'vehicleType', 'category', 'payment', 'reviews'],
+  });
+} 
+
+
+async getCompletedBookings(userId: string): Promise<Booking[]> {
+  return this.bookingRepo.find({
+    where: {
+      status: BookingStatus.Completed ,
+      user: { id: userId },
+    },
+    relations: ['user', 'provider', 'vehicleType', 'category', 'payment', 'reviews'],
+  });
+
+}
+
+
 }

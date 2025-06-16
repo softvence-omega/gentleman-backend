@@ -1,53 +1,72 @@
-// dashboard.controller.ts
-
-import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
-
+import { Controller, Get, Query, Req, Res } from '@nestjs/common';
+import { Response, Request } from 'express';
 import { DashboardService } from '../service/providerbooking.service';
+import { HttpStatus } from '@nestjs/common';
+import sendResponse from 'src/common/utils/sendResponse';
 
 @Controller('dashboard')
 export class DashboardController {
   constructor(private dashboardService: DashboardService) {}
 
   @Get('provider-summary')
-  async getDashboard(@Req() req) {
+  async getDashboard(@Req() req, @Res() res: Response) {
     const providerId = req.user.id;
     const data = await this.dashboardService.getProviderDashboard(providerId);
-    return {
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
       success: true,
+      message: 'Provider dashboard summary fetched successfully',
       data,
-    };
+    });
   }
 
   @Get('provider-today-schedule')
-async getTodaySchedule(@Req() req) {
-  const providerId = req.user.id;
-  const data = await this.dashboardService.getTodaySchedule(providerId);
-  return { success: true, data };
-}
-
-
-@Get('summary/paymentAndBooking')
-  async getDashboardSummary() {
-    return this.dashboardService.getDashboardSummary();
+  async getTodaySchedule(@Req() req, @Res() res: Response) {
+    const providerId = req.user.id;
+    const data = await this.dashboardService.getTodaySchedule(providerId);
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Today\'s schedule fetched successfully',
+      data,
+    });
   }
 
+  @Get('summary/paymentAndBooking')
+  async getDashboardSummary(@Res() res: Response) {
+    const data = await this.dashboardService.getDashboardSummary();
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Payment and booking summary fetched successfully',
+      data,
+    });
+  }
 
-    @Get("allBooking")
+  @Get('allBooking')
   async getAllBookings(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
+    @Query('page') page = 1,
+    @Query('limit') limit = 10,
     @Query('order') order: 'ASC' | 'DESC' = 'DESC',
+    @Res() res: Response,
   ) {
-    return this.dashboardService.getAllBookings(+page, +limit, order);
+    const data = await this.dashboardService.getAllBookings(+page, +limit, order);
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'All bookings fetched successfully',
+      data,
+    });
   }
 
-
-
-
-
-
+  @Get('/chart/service-distribution')
+  async getServiceDistribution(@Res() res: Response) {
+    const data = await this.dashboardService.getServiceDistribution();
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Service distribution fetched successfully',
+      data,
+    });
+  }
 }
-
-
-
-

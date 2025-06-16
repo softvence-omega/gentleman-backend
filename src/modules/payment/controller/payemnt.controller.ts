@@ -26,13 +26,17 @@ import { Public } from 'src/common/utils/public.decorator';
 export class PaymentController {
   constructor(private readonly paymentService: PaymentService) { }
 
-  @Post('/')
-  create(@Body() dto: CreatePaymentDto) {
-    console.log(dto)
-    return this.paymentService.createPayment(dto)
-
-
+ @Post('/')
+  async create(@Body() dto: CreatePaymentDto, @Res() res: Response) {
+    const data = await this.paymentService.createPayment(dto);
+    return sendResponse(res, {
+      statusCode: HttpStatus.CREATED,
+      success: true,
+      message: 'Payment created successfully',
+      data,
+    });
   }
+  
   @Public()
   @Post('/webhook')
   async webhook(@Headers('stripe-signature') signature: string, @Req() req: RawBodyRequest<Request>) {
@@ -51,12 +55,19 @@ export class PaymentController {
     })
   }
 
-  @Get("all")
+  @Get('all')
   async getAllPayments(
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('order') order: 'ASC' | 'DESC' = 'DESC',
+    @Res() res: Response,
   ) {
-    return this.paymentService.getAllPayments(+page, +limit, order);
+    const data = await this.paymentService.getAllPayments(+page, +limit, order);
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'All payments fetched successfully',
+      data,
+    });
   }
 }

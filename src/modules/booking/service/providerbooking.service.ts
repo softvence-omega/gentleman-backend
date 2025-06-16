@@ -181,6 +181,36 @@ export class DashboardService {
     };
   }
 
+async getServiceDistribution() {
+  const result = await this.bookingRepo
+    .createQueryBuilder('booking')
+    .leftJoin('booking.category', 'category')
+    .leftJoin('category.service', 'service')
+    .select('service.title', 'service')
+    .addSelect('COUNT(booking.id)', 'count')
+    .groupBy('service.title')
+    .getRawMany();
+
+  const total = result.reduce((sum, row) => sum + parseInt(row.count, 10), 0);
+
+  const formatted = result.map((row) => {
+    const count = parseInt(row.count, 10);
+    const percentage = total > 0 ? ((count / total) * 100).toFixed(2) : '0.00';
+    return {
+      service: row.service,
+      count,
+      percentage: `${percentage}%`,
+    };
+  });
+
+  return {
+    statusCode: 200,
+    success: true,
+    message: 'Service distribution fetched successfully',
+    data: formatted,
+  };
+}
+
 
 
 

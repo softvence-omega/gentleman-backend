@@ -56,4 +56,36 @@ export class UserService {
     return;
 
   }
+
+  async getProviderLocations() {
+  const providers = await this.userRepository
+    .createQueryBuilder('user')
+    .leftJoinAndSelect('user.providedBookings', 'booking')
+    .where('user.role = :role', { role: 'provider' })
+    .andWhere('user.isDeleted = false')
+    .andWhere('booking.latitude IS NOT NULL')
+    .andWhere('booking.longitude IS NOT NULL')
+    .select([
+      'user.id',
+      'user.name',
+      'user.profileImage',
+      'booking.latitude',
+      'booking.longitude',
+    ])
+    .getMany();
+
+  // Flatten into array of coordinates
+  const locations = providers.flatMap((user) =>
+    user.providedBookings.map((booking) => ({
+      providerId: user.id,
+      name: user.name,
+      profileImage: user.profileImage,
+      latitude: booking.latitude,
+      longitude: booking.longitude,
+    })),
+  );
+
+  return locations;
+}
+
 }
