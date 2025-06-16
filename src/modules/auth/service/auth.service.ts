@@ -56,7 +56,14 @@ export class AuthService {
         });
 
         return {
-            accessToken
+            accessToken,
+            expires_in: this.config.get("jwt_expired_in"),
+            user: {
+                id: user.id,
+                username: user.name,
+                email: user.email,
+                role: user.role
+            }
         }
 
     }
