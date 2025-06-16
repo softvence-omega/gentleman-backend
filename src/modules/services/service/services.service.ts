@@ -41,24 +41,43 @@ export class ServiceService {
     return service;
   }
 
+  // async getAllService(limit: number, page: number) {
+  //   const [services, total] = await this.serviceRepo.findAndCount({
+      
+  //   });
+
+  //   if (!services.length) {
+  //     throw new NotFoundException('No services found');
+  //   }
+
+  //   // return {
+  //     // items: services,
+  //     // total,
+  //     // page,
+  //     // limit,
+  //     // totalPages: Math.ceil(total / limit),
+    
+  //   // };
+  //   return
+  // }
+
   async getAllService(limit: number, page: number) {
-    const [services, total] = await this.serviceRepo.findAndCount({
-      take: limit,
-      skip: (page - 1) * limit,
-    });
+  const [services, total] = await this.serviceRepo
+    .createQueryBuilder('service')
+    .loadRelationCountAndMap('service.categoryCount', 'service.categories')
+    .skip((page - 1) * limit)
+    .take(limit)
+    .getManyAndCount();
 
-    if (!services.length) {
-      throw new NotFoundException('No services found');
-    }
-
-    return {
-      items: services,
-      total,
-      page,
-      limit,
-      totalPages: Math.ceil(total / limit),
-    };
+  if (!services.length) {
+    throw new NotFoundException('No services found');
   }
+
+  return {
+     services,
+      total,
+  }
+}
 
   async getSingleService(id: string) {
     const service = await this.serviceRepo.findOne({
