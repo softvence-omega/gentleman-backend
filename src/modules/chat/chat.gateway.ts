@@ -1,4 +1,4 @@
-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Injectable } from '@nestjs/common';
 import { RedisService } from 'src/common/redis/redis.service';
 import { JwtService } from '@nestjs/jwt';
@@ -8,6 +8,7 @@ import { Events } from './constants';
 @Injectable()
 @WebSocketGateway({ cors: { origin: '*' } })
 export class ChatGateway {
+  @WebSocketServer()
   private server: Server;
   constructor(private redisService: RedisService, private jwtService: JwtService) { }
 
@@ -20,6 +21,7 @@ export class ChatGateway {
       return;
     }
     await redis.set(`user_socket:${userId}`, client.id);
+    console.log(userId);
   }
 
   async handleDisconnect(client: Socket) {
@@ -34,12 +36,20 @@ export class ChatGateway {
   }
 
   @SubscribeMessage('send_message')
-  async sendMessageToUser(userId: string, message: any) {
-    const redis = this.redisService.getClient();
-    const socketId = await redis.get(`user_socket:${userId}`);
-    if (socketId) {
-      this.server.to(socketId).emit('receive_message', message);
+  async sendMessageToUser(client: Socket, payload: any) {
+    try {
+      payload = JSON.parse(payload);
+      const redis = this.redisService.getClient();
+      const socketId = await redis.get(`user_socket:${payload.receiverId}`);
+      console.log(payload.receiverId);
+      if (socketId) {
+        console.log(socketId);
+        this.server.to(socketId).emit('receive_message', payload.message);
+      }
+    } catch (e) {
+      client.emit("failed_to_send", e.message);
     }
+
   }
 
   private extractUserId(client: Socket): string | null {
