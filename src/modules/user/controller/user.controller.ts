@@ -8,6 +8,7 @@ import {
   UploadedFiles,
   HttpStatus,
   Get,
+  Param,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UserService } from '../service/user.service';
@@ -47,13 +48,25 @@ export class UserController {
     })
   }
 
-@Get('/provider/locations')
-async getProviderLocations() {
-  const data = await this.userService.getProviderLocations();
-  return {
-    message: 'Provider locations fetched successfully',
-    data,
-  };
-}
+  @Get('/provider/locations')
+  async getProviderLocations() {
+    const data = await this.userService.getProviderLocations();
+    return {
+      message: 'Provider locations fetched successfully',
+      data,
+    };
+  }
+
+  @Get('/:id')
+  async getUserById(@Req() req, @Res() res, @Param('id') id) {
+    const result = await this.userService.getUserById(req.user, id);
+
+    return sendResponse(res, {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "User fetched successfully!",
+      data: result
+    })
+  }
 
 }
