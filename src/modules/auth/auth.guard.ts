@@ -12,7 +12,7 @@ import { IS_PUBLIC_KEY } from 'src/common/utils/public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService, private config:ConfigService, private reflector: Reflector) {}
+  constructor(private jwtService: JwtService, private config: ConfigService, private reflector: Reflector) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
@@ -22,7 +22,7 @@ export class AuthGuard implements CanActivate {
     if (isPublic) {
       return true;
     }
-    
+
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     if (!token) {
