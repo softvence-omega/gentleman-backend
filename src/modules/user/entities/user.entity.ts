@@ -34,10 +34,10 @@ export class User extends AbstractionEntity {
   @Column({ nullable: true })
   certificate?: string;
 
-  @Column()
+  @Column({ nullable: true })
   longitude?: string;
 
-  @Column()
+  @Column({ nullable: true })
   latitude?: string;
 
   @Column({ enum: ['blocked', 'active', 'inactive'], default: 'inactive' })
@@ -49,11 +49,11 @@ export class User extends AbstractionEntity {
   @Column({ default: false })
   isDeleted: boolean;
 
- @OneToMany(() => Booking, (booking) => booking.user)
-bookings: Booking[];
+  @OneToMany(() => Booking, (booking) => booking.user)
+  bookings: Booking[];
 
-@OneToMany(() => Booking, (booking) => booking.provider)
-providedBookings: Booking[];
+  @OneToMany(() => Booking, (booking) => booking.provider)
+  providedBookings: Booking[];
 
 
 
