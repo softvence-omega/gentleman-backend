@@ -35,10 +35,10 @@ export class User extends AbstractionEntity {
   certificate?: string;
 
   @Column()
-  longitude: string;
+  longitude?: string;
 
   @Column()
-  latitude: string;
+  latitude?: string;
 
   @Column({ enum: ['blocked', 'active', 'inactive'], default: 'inactive' })
   status: string;

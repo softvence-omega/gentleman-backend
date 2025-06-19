@@ -262,4 +262,20 @@ async getCompletedBookings(userId: string): Promise<Booking[]> {
 }
 
 
+ async getBookingLocations() {
+    return this.bookingRepo
+      .createQueryBuilder('booking')
+      .where('booking.latitude IS NOT NULL')
+      .andWhere('booking.longitude IS NOT NULL')
+      .select([
+        'booking.id',
+        'booking.latitude',
+        'booking.longitude',
+        'booking.status',
+        'booking.workStatus',
+      ])
+      .getMany();
+  }
+
+
 }

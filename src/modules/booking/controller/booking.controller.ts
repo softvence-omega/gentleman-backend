@@ -94,6 +94,17 @@ export class BookingController {
     });
   }
 
+  @Get('/locations')
+  async getBookingLocations(@Res() res: Response) {
+       const data= await this.bookingService.getBookingLocations();
+     return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Booking location get successfully',
+      data,
+    });
+  }
+
  @Patch('work-status/:id')
   async updateWorkStatus(@Param('id') id: string, @Body() dto: UpdateBookingWorkStatusDto, @Res() res: Response) {
     const data = await this.bookingService.updateWorkStatus(id, dto);
