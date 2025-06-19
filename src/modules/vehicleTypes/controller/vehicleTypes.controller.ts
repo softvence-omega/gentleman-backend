@@ -13,6 +13,7 @@ import { VehicleTypeService } from '../services/vehicleTypes.services';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import sendResponse from 'src/common/utils/sendResponse';
+import { Public } from 'src/common/utils/public.decorator';
 
 @Controller('vehicleTypes')
 export class VehicleTypeController {
@@ -33,7 +34,7 @@ export class VehicleTypeController {
       data,
     });
   }
-
+  @Public()
   @Get()
   async findAll(@Res() res: Response) {
     const data = await this.vehicleTypeService.findAll();
