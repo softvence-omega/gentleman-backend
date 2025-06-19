@@ -57,36 +57,31 @@ export class UserService {
 
   }
 
-  async getProviderLocations() {
-    const providers = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.providedBookings', 'booking')
-      .where('user.role = :role', { role: 'provider' })
-      .andWhere('user.isDeleted = false')
-      .andWhere('booking.latitude IS NOT NULL')
-      .andWhere('booking.longitude IS NOT NULL')
-      .select([
-        'user.id',
-        'user.name',
-        'user.profileImage',
-        'booking.latitude',
-        'booking.longitude',
-      ])
-      .getMany();
+async getProviderLocations() {
+  const providers = await this.userRepository
+    .createQueryBuilder('user')
+    .where('user.role = :role', { role: 'provider' })
+    .andWhere('user.isDeleted = false')
+    .andWhere('user.latitude IS NOT NULL')
+    .andWhere('user.longitude IS NOT NULL')
+    .select([
+      'user.id',
+      'user.name',
+      'user.profileImage',
+      'user.latitude',
+      'user.longitude',
+    ])
+    .getMany();
 
-    // Flatten into array of coordinates
-    const locations = providers.flatMap((user) =>
-      user.providedBookings.map((booking) => ({
-        providerId: user.id,
-        name: user.name,
-        profileImage: user.profileImage,
-        latitude: booking.latitude,
-        longitude: booking.longitude,
-      })),
-    );
+  return providers.map((provider) => ({
+    providerId: provider.id,
+    name: provider.name,
+    profileImage: provider.profileImage,
+    latitude: provider.latitude,
+    longitude: provider.longitude,
+  }));
+}
 
-    return locations;
-  }
 
   async getUserById(user, id: string) {
     const userData = await this.userRepository.findOneByOrFail({ id: user.userId });

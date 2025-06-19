@@ -34,6 +34,12 @@ export class User extends AbstractionEntity {
   @Column({ nullable: true })
   certificate?: string;
 
+  @Column()
+  longitude: string;
+
+  @Column()
+  latitude: string;
+
   @Column({ enum: ['blocked', 'active', 'inactive'], default: 'inactive' })
   status: string;
 
