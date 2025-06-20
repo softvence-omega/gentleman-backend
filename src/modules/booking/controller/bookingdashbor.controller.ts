@@ -23,7 +23,8 @@ export class DashboardController {
   @Get('provider-today-schedule')
   async getTodaySchedule(@Req() req, @Res() res: Response) {
     const providerId = req.user.id;
-    const data = await this.dashboardService.getTodaySchedule(providerId);
+    // const data = await this.dashboardService.getTodaySchedule(providerId);
+    const data = await this.dashboardService.getAllBookings(10, 10, 'ASC');
     return sendResponse(res, {
       statusCode: HttpStatus.OK,
       success: true,
