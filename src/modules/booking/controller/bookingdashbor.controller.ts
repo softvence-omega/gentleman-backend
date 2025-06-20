@@ -3,10 +3,14 @@ import { Response, Request } from 'express';
 import { DashboardService } from '../service/providerbooking.service';
 import { HttpStatus } from '@nestjs/common';
 import sendResponse from 'src/common/utils/sendResponse';
+import { BookingService } from '../service/booking.service';
 
 @Controller('dashboard')
 export class DashboardController {
-  constructor(private dashboardService: DashboardService) {}
+  constructor(
+    private dashboardService: DashboardService,
+    private readonly bookingService: BookingService
+  ) {}
 
   @Get('provider-summary')
   async getDashboard(@Req() req, @Res() res: Response) {
@@ -24,7 +28,7 @@ export class DashboardController {
   async getTodaySchedule(@Req() req, @Res() res: Response) {
     const providerId = req.user.id;
     // const data = await this.dashboardService.getTodaySchedule(providerId);
-    const data = await this.dashboardService.getAllBookings(10, 10, 'ASC');
+    const data = await this.bookingService.getAllBookings(10, 10, 'ASC');
     return sendResponse(res, {
       statusCode: HttpStatus.OK,
       success: true,
