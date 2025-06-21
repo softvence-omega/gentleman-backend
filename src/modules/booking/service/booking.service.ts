@@ -115,6 +115,8 @@ export class BookingService {
 
     dto.vehicleImage = vehicleImageUrl ?? undefined;
 
+    console.log(dto)
+
     const booking = this.bookingRepo.create({
       ...dto,
       vehicleType: { id: dto.vehicleTypesId },
@@ -242,10 +244,11 @@ async updateWorkStatus(id: string, dto: UpdateBookingWorkStatusDto): Promise<Boo
 
 
  async getPendingBookings(userId: string): Promise<Booking[]> {
+  console.log(userId)
   return this.bookingRepo.find({
     where: {
       status: BookingStatus.Pending,
-      user: { id: userId },
+      provider: { id: userId },
     },
     relations: ['user', 'provider', 'vehicleType', 'category', 'payment', 'reviews'],
   });
@@ -256,7 +259,7 @@ async getCompletedBookings(userId: string): Promise<Booking[]> {
   return this.bookingRepo.find({
     where: {
       status: BookingStatus.Completed ,
-      user: { id: userId },
+      provider: { id: userId },
     },
     relations: ['user', 'provider', 'vehicleType', 'category', 'payment', 'reviews'],
   });

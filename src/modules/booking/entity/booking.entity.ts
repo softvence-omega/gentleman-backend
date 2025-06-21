@@ -66,7 +66,7 @@ class Booking extends AbstractionEntity {
   @Column()
   price: string;
 
-  @Column()
+  @Column({ nullable: true })
   DetailsDescription: string;
 
   @Column('text', { array: true, nullable: true })
