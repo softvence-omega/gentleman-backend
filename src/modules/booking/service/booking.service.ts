@@ -58,9 +58,11 @@ export class BookingService {
   ): Promise<Booking> {
     // Validate foreign keys exist
 
-    const vehicleTypeExists = await this.vehicleTypeRepo.findOneBy({ id: dto.vehicleTypesId });
+    if(dto.vehicleTypesId){
+      const vehicleTypeExists = await this.vehicleTypeRepo.findOneBy({ id: dto.vehicleTypesId });
     if (!vehicleTypeExists) {
       throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid vehicleTypesId: not found');
+    }
     }
 
     const providerExists = await this.providerRepo.findOneBy({ id: dto.providerId });
