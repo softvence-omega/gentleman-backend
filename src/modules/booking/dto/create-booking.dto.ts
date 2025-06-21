@@ -1,4 +1,4 @@
-import { IsDateString, IsOptional, IsString } from "class-validator";
+import { IsDateString, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class CreateBookingDto {
   @IsString()
@@ -29,8 +29,9 @@ export class CreateBookingDto {
   @IsString()
   vehicleImage?: string;
 
-  @IsString()
-  desireDate: string;
+@IsDateString()
+@IsNotEmpty()
+desireDate: string;
 
 
   @IsString()

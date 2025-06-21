@@ -55,6 +55,8 @@ export class User extends AbstractionEntity {
   @OneToMany(() => Booking, (booking) => booking.provider)
   providedBookings: Booking[];
 
+  
+
 
 
   constructor(entity?: Partial<User>) {

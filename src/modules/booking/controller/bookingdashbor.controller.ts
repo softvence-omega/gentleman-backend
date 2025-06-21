@@ -25,17 +25,16 @@ export class DashboardController {
   }
 
   @Get('provider-today-schedule')
-  async getTodaySchedule(@Req() req, @Res() res: Response) {
-    const providerId = req.user.id;
-    // const data = await this.dashboardService.getTodaySchedule(providerId);
-    const data = await this.bookingService.getAllBookings(1, 10, 'ASC');
-    return sendResponse(res, {
-      statusCode: HttpStatus.OK,
-      success: true,
-      message: 'Today\'s schedule fetched successfully',
-      data,
-    });
-  }
+async getTodaySchedule(@Req() req, @Res() res: Response) {
+  const providerId = req.user.id;
+  const data = await this.dashboardService.getTodaySchedule(providerId);
+  return sendResponse(res, {
+    statusCode: HttpStatus.OK,
+    success: true,
+    message: "Today's schedule fetched successfully",
+    data,
+  });
+}
 
   @Get('summary/paymentAndBooking')
   async getDashboardSummary(@Res() res: Response) {

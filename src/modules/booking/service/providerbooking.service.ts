@@ -75,36 +75,45 @@ export class DashboardService {
     };
   }
 
-  // dashboard.service.ts
 
-  async getTodaySchedule(providerId: string) {
-    const today = new Date();
-    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
-    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
-
+async getTodaySchedule(providerId: string) {
+    
     const bookings = await this.bookingRepo.find({
       where: {
         provider: { id: providerId },
-        desireDate: Between(startOfDay.toISOString(), endOfDay.toISOString()),
-        status: BookingStatus.Accept,
       },
-      relations: ['user'], // for avatar/info
-      order: { desireDate: 'ASC' },
+      relations: ['user'],
     });
 
-    return bookings.map((b) => ({
-      time: new Date(b.desireDate).toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-      title: b.title,
-      address: { latitude: b.latitude, longitude: b.longitude },
-      distance: b.description,
-      user: {
-        name: b.user.name,
-        avatar: b.user.profileImage
-      },
-    }));
+  
+    const now = new Date();
+    const startOfDay = new Date(now.setHours(0, 0, 0, 0));
+    const endOfDay = new Date(now.setHours(23, 59, 59, 999));
+
+   
+    const todayBookings = bookings
+      .filter((booking) => {
+        const bookingTime = new Date(booking.desireDate);
+        return bookingTime >= startOfDay && bookingTime <= endOfDay;
+      })
+      .map((booking) => {
+      
+         
+
+        return {
+          profileImage: booking.user?.profileImage || null,
+          latitude: booking.latitude,
+          longitude: booking.longitude,
+          desireDate: booking.desireDate,
+         
+        };
+      });
+
+    // Step 4: Return result
+    return {
+      total: todayBookings.length,
+      bookings: todayBookings,
+    };
   }
 
 
