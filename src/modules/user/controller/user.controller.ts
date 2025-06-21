@@ -19,6 +19,22 @@ import sendResponse from 'src/common/utils/sendResponse';
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
+
+
+
+   @Get('/allProviders')
+  async getAllProviders(@Req() req, @Res() res) {
+    const result = await this.userService.getAllProviders();
+    console.log(result);
+    return sendResponse(res, {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'All providers fetched successfully!',
+      data: result,
+    });
+  }
+
+
   @Patch()
   @UseInterceptors(
     FileFieldsInterceptor([
@@ -57,6 +73,20 @@ export class UserController {
     };
   }
 
+
+    @Get('singleProvider')
+  async getProviderById(@Req() req, @Res() res) {
+      const providerId = req.user.id;
+    const result = await this.userService.getProviderById(req.user.userId);
+
+    return sendResponse(res, {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Provider fetched successfully!',
+      data: result,
+    });
+  }
+
   @Get('/:id')
   async getUserById(@Req() req, @Res() res, @Param('id') id) {
     const result = await this.userService.getUserById(req.user, id);
@@ -68,5 +98,11 @@ export class UserController {
       data: result
     })
   }
+
+
+
+   
+
+  
 
 }

@@ -82,9 +82,10 @@ class Booking extends AbstractionEntity {
   latitude: string;
 
   // ✅ Changed from OneToOne to ManyToOne
-  @ManyToOne(() => VehicleTypeEntity)
+  @ManyToOne(() => VehicleTypeEntity, { nullable: true })
   @JoinColumn({ name: 'vehicleTypesId' })
   vehicleType: VehicleTypeEntity;
+  
 
   // ✅ user can create multiple bookings
   @ManyToOne(() => User, (user) => user.bookings)

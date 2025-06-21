@@ -1,16 +1,19 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import ApiError from 'src/common/errors/ApiError';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
+import Review from 'src/modules/review/enitity/review.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
+    @InjectRepository(Review)
+    private reviewRepository : Repository<Review>,
     private cloudinary: CloudinaryService
   ) { }
 
@@ -93,5 +96,107 @@ async getProviderLocations() {
       user: userData
     }
   }
+
+
+  async getAllProviders() {
+  const providers = await this.userRepository
+    .createQueryBuilder('provider')
+    .leftJoin('provider.providedBookings', 'booking')
+    .leftJoin('booking.reviews', 'review')
+    .leftJoin('booking.category', 'category') // works via entity relation
+    .leftJoin('category.service', 'service')  // works via entity relation
+    .where('provider.role = :role', { role: 'provider' })
+    .andWhere('provider.isDeleted = false')
+    .select('provider.id', 'id')
+    .addSelect('provider.name', 'name')
+    .addSelect('AVG(review.rating)', 'avgrating')
+    .addSelect((qb) => {
+      return qb
+        .subQuery()
+        .select('srv.title')
+        .from('booking', 'subBook')
+        .leftJoin('category_entity', 'cat', 'subBook.categoryId = cat.id')
+        .leftJoin('service_entity', 'srv', 'cat.serviceId = srv.id')
+        .where('subBook.providerId = provider.id')
+        .andWhere('srv.title IS NOT NULL')
+        .groupBy('srv.title')
+        .orderBy('COUNT(*)', 'DESC')
+        .limit(1);
+    }, 'topservice')
+    .groupBy('provider.id')
+    .addGroupBy('provider.name')
+    .orderBy('avgrating', 'ASC')
+    .getRawMany();
+
+  return providers.map((p) => ({
+    id: p.id,
+    name: p.name,
+    averageRating: parseFloat(p.avgrating) || 0,
+    ...(p.topservice ? { mostBookedService: p.topservice } : {}),
+  }));
+
+  
+}
+
+
+
+async getProviderById(id: string) {
+  const provider = await this.userRepository
+    .createQueryBuilder('provider')
+    .leftJoin('provider.providedBookings', 'booking')
+    .leftJoin('booking.reviews', 'review')
+    .leftJoin('booking.category', 'category')
+    .leftJoin('category.service', 'service')
+    .where('provider.id = :id', { id })
+    .andWhere('provider.role = :role', { role: 'provider' })
+    .andWhere('provider.isDeleted = false')
+    .select('provider.id', 'id')
+    .addSelect('provider.name', 'name')
+    .addSelect('provider.profileImage', 'profileImage') 
+    .addSelect('AVG(review.rating)', 'avgrating')
+    .addSelect((qb) => {
+      return qb
+        .subQuery()
+        .select('srv.title')
+        .from('booking', 'subBook')
+        .leftJoin('category_entity', 'cat', 'subBook.categoryId = cat.id')
+        .leftJoin('service_entity', 'srv', 'cat.serviceId = srv.id')
+        .where('subBook.providerId = :id', { id })
+        .andWhere('srv.title IS NOT NULL')
+        .groupBy('srv.title')
+        .orderBy('COUNT(*)', 'DESC')
+        .limit(1);
+    }, 'topservice')
+    .groupBy('provider.id')
+    .addGroupBy('provider.name')
+    .addGroupBy('provider.profileImage')  
+    .getRawOne();
+
+  if (!provider) {
+    throw new NotFoundException('Provider not found');
+  }
+
+  
+  const recentReviews = await this.reviewRepository
+    .createQueryBuilder('review')
+    .innerJoin('review.booking', 'booking')
+    .where('booking.providerId = :id', { id })
+    .orderBy('review.createdAt', 'DESC')
+    .select(['review.comment', 'review.rating', 'review.createdAt'])
+    .limit(3)
+    .getMany();
+
+  return {
+    id: provider.id,
+    name: provider.name,
+    profileImage: provider.profileImage,  // <-- Return here
+    averageRating: parseFloat(provider.avgrating) || 0,
+    ...(provider.topservice ? { mostBookedService: provider.topservice } : {}),
+    recentReviews,
+  };
+}
+
+
+
 
 }
