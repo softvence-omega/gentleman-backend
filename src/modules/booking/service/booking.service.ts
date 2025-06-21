@@ -115,6 +115,8 @@ export class BookingService {
 
     dto.vehicleImage = vehicleImageUrl ?? undefined;
 
+    console.log(dto)
+
     const booking = this.bookingRepo.create({
       ...dto,
       vehicleType: { id: dto.vehicleTypesId },
