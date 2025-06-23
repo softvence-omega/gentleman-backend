@@ -22,7 +22,7 @@ export class UserController {
 
 
 
-   @Get('/allProviders')
+  @Get('/allProviders')
   async getAllProviders(@Req() req, @Res() res) {
     const result = await this.userService.getAllProviders();
     console.log(result);
@@ -74,10 +74,10 @@ export class UserController {
   }
 
 
-    @Get('singleProvider')
-  async getProviderById(@Req() req, @Res() res) {
-      const providerId = req.user.id;
-    const result = await this.userService.getProviderById(req.user.userId);
+  @Get('singleProvider/:id')
+  async getProviderById(@Res() res, @Param('id') id) {
+    const providerId = id;
+    const result = await this.userService.getProviderById(providerId);
 
     return sendResponse(res, {
       success: true,
@@ -101,8 +101,8 @@ export class UserController {
 
 
 
-   
 
-  
+
+
 
 }
