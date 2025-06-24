@@ -21,6 +21,7 @@ import { RedisService } from './common/redis/redis.service';
 import { RedisModule } from './common/redis/redis.module';
 import { MetadataController } from './modules/metadata/controller/metadata.controller';
 import { MetadataModule } from './modules/metadata/metadata.module';
+import { VehicleModule } from './modules/vehicle/vehicle.module';
 // Import other modules here...
 
 @Module({
@@ -48,7 +49,8 @@ import { MetadataModule } from './modules/metadata/metadata.module';
     BookingModule,
     ChatModule,
     RedisModule,
-    MetadataModule
+    MetadataModule,
+    VehicleModule,
   ],
 })
 export class AppModule { }

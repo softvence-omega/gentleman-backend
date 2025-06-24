@@ -123,7 +123,7 @@ export class PaymentService {
 
     const data = event.data.object as Stripe.PaymentIntent;
     const metadata = data.metadata;
-    console.log(data)
+    
     if (event.type === 'payment_intent.succeeded') {
       await this.paymentRepo.update(metadata.id, {
         status: mainPaymentStatus.COMPLETED,

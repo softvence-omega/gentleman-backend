@@ -68,8 +68,24 @@ export class BookingController {
       data,
     });
   }
-
- 
+@Get('allBooking/provider')
+async getProviderBookings(
+  @Query('page') page = 1,
+  @Query('limit') limit = 10,
+  @Query('order') order: 'ASC' | 'DESC' = 'DESC',
+  @Res() res,
+  @Req() req,
+) {
+  
+    const providerId = req.user.userId;
+  const result = await this.bookingService.getBookingsByProvider(providerId, +page, +limit, order);
+  return sendResponse(res, {
+    success: true,
+    statusCode: HttpStatus.OK,
+    message: 'Bookings fetched successfully!',
+    data: result,
+  });
+}
 
 
   @Patch(':id')

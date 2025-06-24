@@ -1,4 +1,4 @@
-import { IsDateString, IsOptional, IsString } from "class-validator";
+import { IsDateString, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateBookingDto {
   @IsString()
@@ -14,18 +14,13 @@ export class CreateBookingDto {
   @IsString()
   DetailsDescription?: string;
 
- @IsOptional()
-  @IsString()
-  brand?: string;
+ 
 
-  @IsOptional()
-  @IsString()
-  model?: string;
+   @IsOptional()
+  @IsUUID()
+  vehicleId?: string;
 
-  @IsOptional()
-  @IsDateString()
-  year?: string;
-
+  
   @IsOptional()
   @IsString()
   vehicleImage?: string;
