@@ -50,7 +50,7 @@ export class BookingController {
 
 
 
-   @Get('allBooking')
+   @Get('allBooking/admin')
   @ApiQuery({ name: 'page', required: false, type: Number, example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
   @ApiQuery({ name: 'order', required: false, enum: ['ASC', 'DESC'], example: 'DESC' })
@@ -68,7 +68,7 @@ export class BookingController {
       data,
     });
   }
-@Get('allBooking/provider')
+@Get('allBooking')
 async getProviderBookings(
   @Query('page') page = 1,
   @Query('limit') limit = 10,
