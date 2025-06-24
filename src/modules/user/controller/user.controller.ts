@@ -25,7 +25,7 @@ export class UserController {
   @Get('/allProviders')
   async getAllProviders(@Req() req, @Res() res) {
     const result = await this.userService.getAllProviders();
-    console.log(result);
+    
     return sendResponse(res, {
       success: true,
       statusCode: HttpStatus.OK,

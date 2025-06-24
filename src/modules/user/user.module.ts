@@ -7,9 +7,10 @@ import { CloudinaryModule } from 'src/common/cloudinary/cloudinary.module';
 import Booking from '../booking/entity/booking.entity';
 import { ReviewModule } from '../review/review.module';
 import Review from '../review/enitity/review.entity';
+import { VehicleEntity } from '../vehicle/entity/vehicle.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Booking,Review]), CloudinaryModule,ReviewModule],
+  imports: [TypeOrmModule.forFeature([User, Booking,Review,VehicleEntity]), CloudinaryModule,ReviewModule],
   controllers: [UserController],
   providers: [UserService],
   exports: [TypeOrmModule]

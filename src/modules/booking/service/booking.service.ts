@@ -13,6 +13,7 @@ import { PaymentStatus } from 'src/modules/payment/entity/payment.enum';
 import { PaymentEntity } from 'src/modules/payment/entity/payment.entity';
 import Stripe from 'stripe';
 import { ConfigService } from '@nestjs/config';
+import { VehicleEntity } from 'src/modules/vehicle/entity/vehicle.entity';
 
 
 @Injectable()
@@ -39,6 +40,9 @@ export class BookingService {
     @InjectRepository(User)
     private readonly userRepo: Repository<User>,
 
+    @InjectRepository(VehicleEntity)
+    private readonly vehicleRepo: Repository<VehicleEntity>,
+
     private readonly cloudinary: CloudinaryService,
      private configService: ConfigService,
 
@@ -50,84 +54,160 @@ export class BookingService {
     );
    }
 
-   async createBooking(
-    dto: CreateBookingDto,
-    userId: string,
-    images: Express.Multer.File[],
-    vehicleImage?: Express.Multer.File,
-  ): Promise<Booking> {
-    // Validate foreign keys exist
+  //  async createBooking(
+  //   dto: CreateBookingDto,
+  //   userId: string,
+  //   images: Express.Multer.File[],
+  //   vehicleImage?: Express.Multer.File,
+  // ): Promise<Booking> {
+  //   // Validate foreign keys exist
 
-    if(dto.vehicleTypesId){
-      const vehicleTypeExists = await this.vehicleTypeRepo.findOneBy({ id: dto.vehicleTypesId });
+  //   if(dto.vehicleTypesId){
+  //     const vehicleTypeExists = await this.vehicleTypeRepo.findOneBy({ id: dto.vehicleTypesId });
+  //   if (!vehicleTypeExists) {
+  //     throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid vehicleTypesId: not found');
+  //   }
+  //   }
+
+  //   const providerExists = await this.providerRepo.findOneBy({ id: dto.providerId });
+  //   if (!providerExists) {
+  //     throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid providerId: not found');
+  //   }
+
+  //   const categoryExists = await this.categoryRepo.findOneBy({ id: dto.categoryId });
+  //   if (!categoryExists) {
+  //     throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid categoryId: not found');
+  //   }
+  //   console.log(userId)
+  //   const userExists = await this.userRepo.findOneBy({ id: userId });
+  //   if (!userExists) {
+  //     throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid userId: not found');
+  //   }
+
+  //   // Upload images
+
+  //   let imageUrls: string[] = [];
+  //   let vehicleImageUrl: string | null | undefined = null;
+
+  //   if (images.length) {
+  //     try {
+  //       const uploadPromises = images.map(file =>
+  //         this.cloudinary.uploadFile(file),
+  //       );
+
+  //       const results = await Promise.all(uploadPromises);
+  //       imageUrls = results.map(res => res.secure_url);
+  //     } catch (error) {
+  //       throw new ApiError(
+  //         HttpStatus.INTERNAL_SERVER_ERROR,
+  //         'Image upload failed',
+  //       );
+  //     }
+  //   }
+
+  //   if (vehicleImage) {
+  //     try {
+  //       const result = await this.cloudinary.uploadFile(vehicleImage);
+  //       vehicleImageUrl = result.secure_url;
+  //     } catch (error) {
+  //       throw new ApiError(
+  //         HttpStatus.INTERNAL_SERVER_ERROR,
+  //         'Vehicle image upload failed',
+  //       );
+  //     }
+  //   }
+
+  //   dto.vehicleImage = vehicleImageUrl ?? undefined;
+
+  //   console.log(dto)
+
+  //   const booking = this.bookingRepo.create({
+  //     ...dto,
+  //     vehicleType: { id: dto.vehicleTypesId },
+  //     user: { id: userId },
+  //     provider: { id: dto.providerId },
+  //     category: { id: dto.categoryId },
+  //     dentImg: imageUrls,
+  //   });
+
+  //   return this.bookingRepo.save(booking);
+  // }
+
+async createBooking(
+  dto: CreateBookingDto,
+  userId: string,
+  images: Express.Multer.File[],
+  vehicleImage?: Express.Multer.File,
+): Promise<Booking> {
+  // Validate foreign keys
+  if (dto.vehicleTypesId) {
+    const vehicleTypeExists = await this.vehicleTypeRepo.findOneBy({ id: dto.vehicleTypesId });
     if (!vehicleTypeExists) {
       throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid vehicleTypesId: not found');
     }
-    }
-
-    const providerExists = await this.providerRepo.findOneBy({ id: dto.providerId });
-    if (!providerExists) {
-      throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid providerId: not found');
-    }
-
-    const categoryExists = await this.categoryRepo.findOneBy({ id: dto.categoryId });
-    if (!categoryExists) {
-      throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid categoryId: not found');
-    }
-    console.log(userId)
-    const userExists = await this.userRepo.findOneBy({ id: userId });
-    if (!userExists) {
-      throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid userId: not found');
-    }
-
-    // Upload images
-
-    let imageUrls: string[] = [];
-    let vehicleImageUrl: string | null | undefined = null;
-
-    if (images.length) {
-      try {
-        const uploadPromises = images.map(file =>
-          this.cloudinary.uploadFile(file),
-        );
-
-        const results = await Promise.all(uploadPromises);
-        imageUrls = results.map(res => res.secure_url);
-      } catch (error) {
-        throw new ApiError(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          'Image upload failed',
-        );
-      }
-    }
-
-    if (vehicleImage) {
-      try {
-        const result = await this.cloudinary.uploadFile(vehicleImage);
-        vehicleImageUrl = result.secure_url;
-      } catch (error) {
-        throw new ApiError(
-          HttpStatus.INTERNAL_SERVER_ERROR,
-          'Vehicle image upload failed',
-        );
-      }
-    }
-
-    dto.vehicleImage = vehicleImageUrl ?? undefined;
-
-    console.log(dto)
-
-    const booking = this.bookingRepo.create({
-      ...dto,
-      vehicleType: { id: dto.vehicleTypesId },
-      user: { id: userId },
-      provider: { id: dto.providerId },
-      category: { id: dto.categoryId },
-      dentImg: imageUrls,
-    });
-
-    return this.bookingRepo.save(booking);
   }
+
+  const providerExists = await this.providerRepo.findOneBy({ id: dto.providerId });
+  if (!providerExists) {
+    throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid providerId: not found');
+  }
+
+  const categoryExists = await this.categoryRepo.findOneBy({ id: dto.categoryId });
+  if (!categoryExists) {
+    throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid categoryId: not found');
+  }
+
+  const userExists = await this.userRepo.findOneBy({ id: userId });
+  if (!userExists) {
+    throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid userId: not found');
+  }
+
+  if (dto.vehicleId) {
+    const vehicleExists = await this.vehicleRepo.findOneBy({ id: dto.vehicleId });
+    if (!vehicleExists) {
+      throw new ApiError(HttpStatus.BAD_REQUEST, 'Invalid vehicleId: not found');
+    }
+  }
+
+  // Upload images
+  let imageUrls: string[] = [];
+  let vehicleImageUrl: string | undefined = undefined;
+
+  if (images?.length) {
+    try {
+      const uploadPromises = images.map(file => this.cloudinary.uploadFile(file));
+      const results = await Promise.all(uploadPromises);
+      imageUrls = results.map(res => res.secure_url);
+    } catch (error) {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, 'Image upload failed');
+    }
+  }
+
+  if (vehicleImage) {
+    try {
+      const result = await this.cloudinary.uploadFile(vehicleImage);
+      vehicleImageUrl = result.secure_url;
+    } catch (error) {
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, 'Vehicle image upload failed');
+    }
+  }
+
+  dto.vehicleImage = vehicleImageUrl;
+
+  const booking = this.bookingRepo.create({
+    ...dto,
+    vehicleType: dto.vehicleTypesId ? { id: dto.vehicleTypesId } : undefined,
+    user: { id: userId },
+    provider: { id: dto.providerId },
+    category: { id: dto.categoryId },
+    dentImg: imageUrls,
+    vehicle: dto.vehicleId ? { id: dto.vehicleId } : undefined,
+  });
+
+  return this.bookingRepo.save(booking);
+}
+
+
   async updateBooking(id: string, dto: UpdateBookingDto): Promise<Booking> {
     const booking = await this.getBookingById(id);
 
@@ -229,8 +309,6 @@ async updateWorkStatus(id: string, dto: UpdateBookingWorkStatusDto): Promise<Boo
   ) {
     const [data, total] = await this.bookingRepo.findAndCount({
       order: { createdAt: order },
-      take: limit,
-      skip: (page - 1) * limit,
       relations: ['user', 'payment'], 
     });
 
@@ -241,6 +319,27 @@ async updateWorkStatus(id: string, dto: UpdateBookingWorkStatusDto): Promise<Boo
       data,
     };
   }
+
+  async getBookingsByProvider(
+  providerId: string,
+  page: number,
+  limit: number,
+  order: 'ASC' | 'DESC' = 'DESC',
+) {
+  const [bookings, total] = await this.bookingRepo.findAndCount({
+    where: { provider: { id: providerId } },
+    relations: ['user', 'provider', 'payment', 'vehicle', 'category', 'vehicleType'],
+    order: { createdAt: order },
+  });
+
+  return {
+    total,
+    page,
+    limit,
+    data: bookings,
+  };
+}
+
 
 
  async getPendingBookings(userId: string): Promise<Booking[]> {

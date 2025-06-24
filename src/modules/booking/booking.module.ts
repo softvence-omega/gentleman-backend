@@ -11,6 +11,7 @@ import Booking from './entity/booking.entity';
 import Review from '../review/enitity/review.entity';
 import { DashboardController } from './controller/bookingdashbor.controller';
 import { DashboardService } from './service/providerbooking.service';
+import { VehicleEntity } from '../vehicle/entity/vehicle.entity';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { DashboardService } from './service/providerbooking.service';
       PaymentEntity,
       CategoryEntity,
       Review,
+      VehicleEntity
       
     ]
    

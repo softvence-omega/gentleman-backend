@@ -29,7 +29,7 @@ export class CategoryService {
 
   async createCategory(dto: CategoryDto ,file?: Express.Multer.File) {
     // Step 1: Check if the related service exists
-     console.log(dto.serviceId)
+     
     const service = await this.serviceRepo.findOneBy({ id: dto.serviceId });
     if (!service) {
       throw new NotFoundException('Service not found');

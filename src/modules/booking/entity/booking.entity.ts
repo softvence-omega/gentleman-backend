@@ -12,6 +12,7 @@ import { User } from 'src/modules/user/entities/user.entity';
 import { CategoryEntity } from 'src/modules/category/entity/category.entity';
 import { PaymentEntity } from 'src/modules/payment/entity/payment.entity';
 import Review from 'src/modules/review/enitity/review.entity';
+import { VehicleEntity } from 'src/modules/vehicle/entity/vehicle.entity';
 
 export enum BookingStatus {
   Pending = 'Pending',
@@ -45,14 +46,7 @@ class Booking extends AbstractionEntity {
   @Column({ type: 'enum', enum: BookingWorkStatus, default: BookingWorkStatus.Booked })
   workStatus: BookingWorkStatus;
 
-  @Column({ nullable: true })
-  brand?: string;
 
-  @Column({ nullable: true })
-  model?: string;
-
-  @Column({ type: 'date', nullable: true })
-  year?: Date;
 
   @Column({ nullable: true })
   vehicleImage?: string;
@@ -80,6 +74,7 @@ class Booking extends AbstractionEntity {
 
   @Column()
   latitude: string;
+  
 
   // ✅ Changed from OneToOne to ManyToOne
   @ManyToOne(() => VehicleTypeEntity, { nullable: true })
@@ -108,6 +103,11 @@ class Booking extends AbstractionEntity {
 
   @OneToMany(() => Review, (review) => review.booking, { cascade: true })
   reviews: Review[];
+
+@ManyToOne(() => VehicleEntity, { nullable: true })
+@JoinColumn({ name: 'vehicleId' })
+vehicle: VehicleEntity;
+
 }
 
 export default Booking;
