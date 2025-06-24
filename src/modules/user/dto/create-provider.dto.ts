@@ -37,6 +37,9 @@ export class CreateProviderDto {
   @IsString()
   latitude: string;
 
+  @IsString()
+  specialist: string;
+
   @ApiProperty({
     description: 'Phone number of the provider',
     example: '+1234567890',

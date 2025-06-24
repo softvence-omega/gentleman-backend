@@ -40,6 +40,11 @@ export class User extends AbstractionEntity {
   @Column({ nullable: true })
   latitude?: string;
 
+  @Column({ nullable: true })
+  specialist?: string;
+
+  
+
   @Column({ enum: ['blocked', 'active', 'inactive'], default: 'inactive' })
   status: string;
 
