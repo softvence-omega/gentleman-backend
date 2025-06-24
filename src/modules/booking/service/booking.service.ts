@@ -244,7 +244,7 @@ async updateWorkStatus(id: string, dto: UpdateBookingWorkStatusDto): Promise<Boo
 
 
  async getPendingBookings(userId: string): Promise<Booking[]> {
-  console.log(userId)
+  
   return this.bookingRepo.find({
     where: {
       status: BookingStatus.Pending,

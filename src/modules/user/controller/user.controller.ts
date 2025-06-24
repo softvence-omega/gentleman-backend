@@ -74,18 +74,17 @@ export class UserController {
   }
 
 
-    @Get('singleProvider')
-  async getProviderById(@Req() req, @Res() res) {
-      const providerId = req.user.id;
-    const result = await this.userService.getProviderById(req.user.userId);
+  @Get('singleProvider/:id')
+async getProviderById(@Param('id') id: string, @Res() res) {
+  const result = await this.userService.getProviderById(id);
 
-    return sendResponse(res, {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'Provider fetched successfully!',
-      data: result,
-    });
-  }
+  return sendResponse(res, {
+    success: true,
+    statusCode: HttpStatus.OK,
+    message: 'Provider fetched successfully!',
+    data: result,
+  });
+}
 
   @Get('/:id')
   async getUserById(@Req() req, @Res() res, @Param('id') id) {
