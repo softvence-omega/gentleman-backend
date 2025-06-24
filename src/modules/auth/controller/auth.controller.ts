@@ -83,6 +83,18 @@ export class AuthController {
     }
 
     @Public()
+    @Post("verify-otp")
+    async verifyOtp(@Body() payload, @Res() res): Promise<any> {
+        const result = await this.authService.verifyOtp(payload);
+        sendResponse(res, {
+            statusCode: HttpStatus.OK,
+            success: true,
+            message: "OTP verified successfully!",
+            data: result
+        })
+    }
+
+    @Public()
     @Post("reset-password")
     async resetPassword(@Body() payload: ResetPasswordDto, @Res() res): Promise<any> {
         const result = await this.authService.resetPassword(payload);

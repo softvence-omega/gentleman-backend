@@ -31,13 +31,13 @@ export class EmailService {
         });
     }
 
-    async sendEmail(to: string, subject: string, html: string): Promise<void> {
+    async sendEmail(to: string, subject: string, text: string, html: string): Promise<void> {
         try {
             await this.transporter.sendMail({
                 from: `"Support Team" <${this.configService.get<string>('smtp_auth_user')}>`,
                 to,
                 subject,
-                text: 'Reset password within 5 minutes!',
+                text,
                 html,
             });
             this.logger.log(`Email sent to ${to}`);

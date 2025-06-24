@@ -39,9 +39,9 @@ export class PaymentService {
   async createPayment(dto: CreatePaymentDto) {
 
 
-    const {  email, bookingId } = dto;
+    const { email, bookingId } = dto;
 
-    
+
     const booking = await this.bookingRepo.findOne({ where: { id: bookingId } });
 
     if (!booking) {
@@ -49,26 +49,26 @@ export class PaymentService {
     }
 
 
-  let payment = await this.paymentRepo.findOne({
-    where: {
-      booking: { id: bookingId },
-      status: mainPaymentStatus.PENDING,
-    },
-    relations: ['booking'],
-  });
-
-  if (!payment) {
-    payment = this.paymentRepo.create({
-      ...dto,
-      amount: Number(booking.price),
-      status: mainPaymentStatus.PENDING,
-      booking,
+    let payment = await this.paymentRepo.findOne({
+      where: {
+        booking: { id: bookingId },
+        status: mainPaymentStatus.PENDING,
+      },
+      relations: ['booking'],
     });
 
-    await this.paymentRepo.save(payment);
-  }
-    
-     
+    if (!payment) {
+      payment = this.paymentRepo.create({
+        ...dto,
+        amount: Number(booking.price),
+        status: mainPaymentStatus.PENDING,
+        booking,
+      });
+
+      await this.paymentRepo.save(payment);
+    }
+
+
 
     const session = await this.stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -134,20 +134,21 @@ export class PaymentService {
 
       });
 
-    const booking = await this.bookingRepo.findOne({
-    where: { id: metadata.bookingId },
-    relations: ['user'],
-     });
+      const booking = await this.bookingRepo.findOne({
+        where: { id: metadata.bookingId },
+        relations: ['user'],
+      });
 
-    
-    if (booking?.user?.email) {
-    await this.emailService.sendEmail(
-      booking.user.email,
-      'Payment Successful',
-      `<p>Your payment for the booking <strong>${booking.title}</strong> has been successfully completed.</p>`
-    );
-  }
-   
+
+      if (booking?.user?.email) {
+        await this.emailService.sendEmail(
+          booking.user.email,
+          'Payment Successful',
+          'Payment',
+          `<p>Your payment for the booking <strong>${booking.title}</strong> has been successfully completed.</p>`
+        );
+      }
+
 
     }
 

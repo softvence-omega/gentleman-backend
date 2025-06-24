@@ -117,13 +117,48 @@ export class AuthService {
         };
 
         const resetToken = await this.jwtService.signAsync(jwtPayload, {
-            expiresIn: this.config.get('jwt_expired_in')
+            expiresIn: '5m'
         });
 
         const otp = this.emailService.generateOtp();
         user.otp = otp;
         await this.userRepository.save(user);
-        await this.emailService.sendEmail(user.email, "Reset password", `<p>Your password reset OTP: ${otp}</p>`);
+        await this.emailService.sendEmail(user.email, "Reset password OTP", "OTP", `<p>Your password reset OTP use this within 5 minute: ${otp}</p>`);
+        return {
+            resetToken
+        }
+    }
+
+    async verifyOtp(payload) {
+        const isValid = await this.jwtService.verifyAsync(payload.resetToken);
+        if (!isValid) {
+            throw new ApiError(HttpStatus.FORBIDDEN, 'Invalid or expired token!')
+        }
+
+        const decode = this.jwtService.decode(payload.resetToken)
+
+        const user = await this.userRepository.findOneBy({ id: decode.userId });
+
+        if (!user) {
+            throw new ApiError(HttpStatus.FORBIDDEN, "User not found!");
+        }
+
+        if (user?.otp !== payload.otp) {
+            throw new ApiError(HttpStatus.FORBIDDEN, "Otp not matched!");
+        }
+
+        const jwtPayload = {
+            userId: user.id,
+            role: user.role,
+        };
+
+        const resetToken = await this.jwtService.signAsync(jwtPayload, {
+            expiresIn: "5m"
+        });
+
+        user.otp = '';
+        await this.userRepository.save(user);
+
         return {
             resetToken
         }
@@ -164,11 +199,14 @@ export class AuthService {
 
 
     async resetPassword(payload: ResetPasswordDto): Promise<any> {
-        if (await this.jwtService.verifyAsync(payload.resetToken)) {
+        const isValid = await this.jwtService.verifyAsync(payload.resetToken);
+        if (!isValid) {
             throw new ApiError(HttpStatus.FORBIDDEN, "Invalid or expired token!");
         }
 
-        const user = await this.userRepository.findOneBy({ id: payload.id });
+        const decode = this.jwtService.decode(payload.resetToken);
+
+        const user = await this.userRepository.findOneBy({ id: decode.userId });
         if (!user) {
             throw new ApiError(HttpStatus.NOT_FOUND, "User not found!");
         }
