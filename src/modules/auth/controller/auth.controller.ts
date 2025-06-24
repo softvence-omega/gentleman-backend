@@ -94,6 +94,8 @@ export class AuthController {
         })
     }
 
+
+
     @Post("change-password")
     async changePassword(@Req() req, @Body() payload: ChangePasswordDto, @Res() res): Promise<any> {
         const result = await this.authService.changePassword(req.user, payload);
