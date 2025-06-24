@@ -58,9 +58,9 @@ export class AuthController {
     @UseInterceptors(FileInterceptor("certificate"))
     @Post("provider-register")
     async providerRegister(@Body() payload: CreateProviderDto, @UploadedFile() file: Express.Multer.File, @Res() res: Response): Promise<any> {
-         
+
         payload.role = UserRole.PROVIDER;
-         
+
         const result = await this.authService.register(payload, file);
         sendResponse(res, {
             statusCode: HttpStatus.ACCEPTED,
@@ -93,6 +93,8 @@ export class AuthController {
             data: result
         })
     }
+
+
 
     @Post("change-password")
     async changePassword(@Req() req, @Body() payload: ChangePasswordDto, @Res() res): Promise<any> {

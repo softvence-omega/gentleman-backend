@@ -99,13 +99,13 @@ export class AuthService {
         if (!user) {
             throw new ApiError(HttpStatus.NOT_FOUND, "This user is not found !");
         }
-        // checking if the user is already deleted
+
         const isDeleted = user?.isDeleted;
         if (isDeleted) {
             throw new ApiError(HttpStatus.FORBIDDEN, "This user is deleted !");
         }
 
-        // checking if the user is blocked
+
         const userStatus = user?.status;
         if (userStatus === "blocked") {
             throw new ApiError(HttpStatus.FORBIDDEN, "This user is blocked ! !");
@@ -116,15 +116,17 @@ export class AuthService {
             role: user.role,
         };
 
-        const resetToken = await this.jwtService.signAsync(
-            jwtPayload,
-            {
-                expiresIn: this.config.get("jwt_expired_in")
-            }
-        );
+        const resetToken = await this.jwtService.signAsync(jwtPayload, {
+            expiresIn: this.config.get('jwt_expired_in')
+        });
 
-        const resetUILink = `${this.config.get('reset_pass_ui_link')}?id=${user.id}&token=${resetToken}`;
-        this.emailService.sendEmail(user.email, "Reset password", `<p>Your password reset link: ${resetUILink}`)
+        const otp = this.emailService.generateOtp();
+        user.otp = otp;
+        await this.userRepository.save(user);
+        await this.emailService.sendEmail(user.email, "Reset password", `<p>Your password reset OTP: ${otp}</p>`);
+        return {
+            resetToken
+        }
     }
 
     async changePassword(

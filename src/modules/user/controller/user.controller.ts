@@ -22,7 +22,7 @@ export class UserController {
 
 
 
-   @Get('/allProviders')
+  @Get('/allProviders')
   async getAllProviders(@Req() req, @Res() res) {
     const result = await this.userService.getAllProviders();
     console.log(result);
@@ -86,6 +86,7 @@ async getProviderById(@Param('id') id: string, @Res() res) {
   });
 }
 
+
   @Get('/:id')
   async getUserById(@Req() req, @Res() res, @Param('id') id) {
     const result = await this.userService.getUserById(req.user, id);
@@ -100,8 +101,8 @@ async getProviderById(@Param('id') id: string, @Res() res) {
 
 
 
-   
 
-  
+
+
 
 }
