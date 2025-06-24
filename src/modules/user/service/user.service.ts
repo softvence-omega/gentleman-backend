@@ -13,7 +13,7 @@ export class UserService {
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(Review)
-    private reviewRepository : Repository<Review>,
+    private reviewRepository: Repository<Review>,
     private cloudinary: CloudinaryService
   ) { }
 
@@ -60,30 +60,30 @@ export class UserService {
 
   }
 
-async getProviderLocations() {
-  const providers = await this.userRepository
-    .createQueryBuilder('user')
-    .where('user.role = :role', { role: 'provider' })
-    .andWhere('user.isDeleted = false')
-    .andWhere('user.latitude IS NOT NULL')
-    .andWhere('user.longitude IS NOT NULL')
-    .select([
-      'user.id',
-      'user.name',
-      'user.profileImage',
-      'user.latitude',
-      'user.longitude',
-    ])
-    .getMany();
+  async getProviderLocations() {
+    const providers = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.role = :role', { role: 'provider' })
+      .andWhere('user.isDeleted = false')
+      .andWhere('user.latitude IS NOT NULL')
+      .andWhere('user.longitude IS NOT NULL')
+      .select([
+        'user.id',
+        'user.name',
+        'user.profileImage',
+        'user.latitude',
+        'user.longitude',
+      ])
+      .getMany();
 
-  return providers.map((provider) => ({
-    providerId: provider.id,
-    name: provider.name,
-    profileImage: provider.profileImage,
-    latitude: provider.latitude,
-    longitude: provider.longitude,
-  }));
-}
+    return providers.map((provider) => ({
+      providerId: provider.id,
+      name: provider.name,
+      profileImage: provider.profileImage,
+      latitude: provider.latitude,
+      longitude: provider.longitude,
+    }));
+  }
 
 
   async getUserById(user, id: string) {
@@ -98,103 +98,201 @@ async getProviderLocations() {
   }
 
 
+  //   async getAllProviders() {
+  //   const providers = await this.userRepository
+  //     .createQueryBuilder('provider')
+  //     .leftJoin('provider.providedBookings', 'booking')
+  //     .leftJoin('booking.reviews', 'review')
+  //     .leftJoin('booking.category', 'category') // works via entity relation
+  //     .leftJoin('category.service', 'service')  // works via entity relation
+  //     .where('provider.role = :role', { role: 'provider' })
+  //     .andWhere('provider.isDeleted = false')
+  //     .select('provider.id', 'id')
+  //     .addSelect('provider.name', 'name')
+  //     .addSelect('AVG(review.rating)', 'avgrating')
+  //     .addSelect((qb) => {
+  //       return qb
+  //         .subQuery()
+  //         .select('srv.title')
+  //         .from('booking', 'subBook')
+  //         .leftJoin('category_entity', 'cat', 'subBook.categoryId = cat.id')
+  //         .leftJoin('service_entity', 'srv', 'cat.serviceId = srv.id')
+  //         .where('subBook.providerId = provider.id')
+  //         .andWhere('srv.title IS NOT NULL')
+  //         .groupBy('srv.title')
+  //         .orderBy('COUNT(*)', 'DESC')
+  //         .limit(1);
+  //     }, 'topservice')
+  //     .groupBy('provider.id')
+  //     .addGroupBy('provider.name')
+  //     .orderBy('avgrating', 'ASC')
+  //     .getRawMany();
+
+  //   return providers.map((p) => ({
+  //     id: p.id,
+  //     name: p.name,
+  //     averageRating: parseFloat(p.avgrating) || 0,
+  //     ...(p.topservice ? { mostBookedService: p.topservice } : {}),
+  //   }));
+
+
+  // }
+
+
   async getAllProviders() {
-  const providers = await this.userRepository
-    .createQueryBuilder('provider')
-    .leftJoin('provider.providedBookings', 'booking')
-    .leftJoin('booking.reviews', 'review')
-    .leftJoin('booking.category', 'category') // works via entity relation
-    .leftJoin('category.service', 'service')  // works via entity relation
-    .where('provider.role = :role', { role: 'provider' })
-    .andWhere('provider.isDeleted = false')
-    .select('provider.id', 'id')
-    .addSelect('provider.name', 'name')
-    .addSelect('AVG(review.rating)', 'avgrating')
-    .addSelect((qb) => {
-      return qb
-        .subQuery()
-        .select('srv.title')
-        .from('booking', 'subBook')
-        .leftJoin('category_entity', 'cat', 'subBook.categoryId = cat.id')
-        .leftJoin('service_entity', 'srv', 'cat.serviceId = srv.id')
-        .where('subBook.providerId = provider.id')
-        .andWhere('srv.title IS NOT NULL')
-        .groupBy('srv.title')
-        .orderBy('COUNT(*)', 'DESC')
-        .limit(1);
-    }, 'topservice')
-    .groupBy('provider.id')
-    .addGroupBy('provider.name')
-    .orderBy('avgrating', 'ASC')
-    .getRawMany();
+    const providers = await this.userRepository
+      .createQueryBuilder('provider')
+      .leftJoin('provider.providedBookings', 'booking')
+      .leftJoin('booking.reviews', 'review')
+      .leftJoin('booking.category', 'category') // works via entity relation
+      .leftJoin('category.service', 'service')
+      .where('provider.role = :role', { role: 'provider' })
+      .andWhere('provider.isDeleted = false')
+      .select('provider.id', 'id')
+      .addSelect('provider.name', 'name')
+      .addSelect('provider.profileImage', 'profileImage')
+      .addSelect('provider.specialist', 'specialist')
+      .addSelect('AVG(review.rating)', 'avgrating')
+      .groupBy('provider.id')
+      .addGroupBy('provider.name')
+      .addGroupBy('provider.profileImage')
+      .addGroupBy('provider.specialist')
+      .orderBy('avgrating', 'ASC')
+      .getRawMany();
 
-  return providers.map((p) => ({
-    id: p.id,
-    name: p.name,
-    averageRating: parseFloat(p.avgrating) || 0,
-    ...(p.topservice ? { mostBookedService: p.topservice } : {}),
-  }));
-
-  
-}
-
-
-
-async getProviderById(id: string) {
-  const provider = await this.userRepository
-    .createQueryBuilder('provider')
-    .leftJoin('provider.providedBookings', 'booking')
-    .leftJoin('booking.reviews', 'review')
-    .leftJoin('booking.category', 'category')
-    .leftJoin('category.service', 'service')
-    .where('provider.id = :id', { id })
-    .andWhere('provider.role = :role', { role: 'provider' })
-    .andWhere('provider.isDeleted = false')
-    .select('provider.id', 'id')
-    .addSelect('provider.name', 'name')
-    .addSelect('provider.profileImage', 'profileImage') 
-    .addSelect('AVG(review.rating)', 'avgrating')
-    .addSelect((qb) => {
-      return qb
-        .subQuery()
-        .select('srv.title')
-        .from('booking', 'subBook')
-        .leftJoin('category_entity', 'cat', 'subBook.categoryId = cat.id')
-        .leftJoin('service_entity', 'srv', 'cat.serviceId = srv.id')
-        .where('subBook.providerId = :id', { id })
-        .andWhere('srv.title IS NOT NULL')
-        .groupBy('srv.title')
-        .orderBy('COUNT(*)', 'DESC')
-        .limit(1);
-    }, 'topservice')
-    .groupBy('provider.id')
-    .addGroupBy('provider.name')
-    .addGroupBy('provider.profileImage')  
-    .getRawOne();
-
-  if (!provider) {
-    throw new NotFoundException('Provider not found');
+    return providers.map((p) => ({
+      id: p.id,
+      name: p.name,
+      profileImage: p.profileImage || null,
+      specialist: p.specialist || null,
+      averageRating: parseFloat(p.avgrating) || 0,
+    }));
   }
 
-  
-  const recentReviews = await this.reviewRepository
-    .createQueryBuilder('review')
-    .innerJoin('review.booking', 'booking')
-    .where('booking.providerId = :id', { id })
-    .orderBy('review.createdAt', 'DESC')
-    .select(['review.comment', 'review.rating', 'review.createdAt'])
-    .limit(3)
-    .getMany();
 
-  return {
-    id: provider.id,
-    name: provider.name,
-    profileImage: provider.profileImage,  // <-- Return here
-    averageRating: parseFloat(provider.avgrating) || 0,
-    ...(provider.topservice ? { mostBookedService: provider.topservice } : {}),
-    recentReviews,
-  };
-}
+
+
+  // async getProviderById(id: string) {
+  //   const provider = await this.userRepository
+  //     .createQueryBuilder('provider')
+  //     .leftJoin('provider.providedBookings', 'booking')
+  //     .leftJoin('booking.reviews', 'review')
+  //     .leftJoin('booking.category', 'category')
+  //     .leftJoin('category.service', 'service')
+  //     .where('provider.id = :id', { id })
+  //     .andWhere('provider.role = :role', { role: 'provider' })
+  //     .andWhere('provider.isDeleted = false')
+  //     .select('provider.id', 'id')
+  //     .addSelect('provider.name', 'name')
+  //     .addSelect('provider.profileImage', 'profileImage') 
+  //     .addSelect('AVG(review.rating)', 'avgrating')
+  //     .addSelect((qb) => {
+  //       return qb
+  //         .subQuery()
+  //         .select('srv.title')
+  //         .from('booking', 'subBook')
+  //         .leftJoin('category_entity', 'cat', 'subBook.categoryId = cat.id')
+  //         .leftJoin('service_entity', 'srv', 'cat.serviceId = srv.id')
+  //         .where('subBook.providerId = :id', { id })
+  //         .andWhere('srv.title IS NOT NULL')
+  //         .groupBy('srv.title')
+  //         .orderBy('COUNT(*)', 'DESC')
+  //         .limit(1);
+  //     }, 'topservice')
+  //     .groupBy('provider.id')
+  //     .addGroupBy('provider.name')
+  //     .addGroupBy('provider.profileImage')  
+  //     .getRawOne();
+
+  //   if (!provider) {
+  //     throw new NotFoundException('Provider not found');
+  //   }
+
+
+  //   const recentReviews = await this.reviewRepository
+  //     .createQueryBuilder('review')
+  //     .innerJoin('review.booking', 'booking')
+  //     .where('booking.providerId = :id', { id })
+  //     .orderBy('review.createdAt', 'DESC')
+  //     .select(['review.comment', 'review.rating', 'review.createdAt'])
+  //     .limit(3)
+  //     .getMany();
+
+  //   return {
+  //     id: provider.id,
+  //     name: provider.name,
+  //     profileImage: provider.profileImage,  // <-- Return here
+  //     averageRating: parseFloat(provider.avgrating) || 0,
+  //     ...(provider.topservice ? { mostBookedService: provider.topservice } : {}),
+  //     recentReviews,
+  //   };
+  // }
+
+
+  async getProviderById(id: string) {
+    const provider = await this.userRepository
+      .createQueryBuilder('provider')
+      .leftJoin('provider.providedBookings', 'booking')
+      .leftJoin('booking.reviews', 'review')
+      .leftJoin('booking.category', 'category')
+      .leftJoin('category.service', 'service')
+      .where('provider.id = :id', { id })
+      .andWhere('provider.role = :role', { role: 'provider' })
+      .andWhere('provider.isDeleted = false')
+      .select('provider.id', 'id')
+      .addSelect('provider.name', 'name')
+      .addSelect('provider.profileImage', 'profileImage')
+      .addSelect('provider.specialist', 'specialist')
+      .addSelect('AVG(review.rating)', 'avgrating')
+      .groupBy('provider.id')
+      .addGroupBy('provider.name')
+      .addGroupBy('provider.profileImage')
+      .addGroupBy('provider.specialist')
+      .getRawOne();
+
+    if (!provider) {
+      throw new NotFoundException('Provider not found');
+    }
+
+    const recentReviews = await this.reviewRepository
+      .createQueryBuilder('review')
+      .innerJoin('review.booking', 'booking')
+      .innerJoin('booking.user', 'user') // Get reviewer info via booking.user
+      .where('booking.providerId = :id', { id })
+      .orderBy('review.createdAt', 'DESC')
+      .select([
+        'review.comment AS comment',
+        'review.rating AS rating',
+        'review.createdAt AS createdAt',
+        'user.id AS reviewerId',
+        'user.name AS reviewerName',
+        'user.profileImage AS reviewerProfileImage',
+      ])
+      .limit(3)
+      .getRawMany();
+
+
+
+    return {
+      id: provider.id,
+      name: provider.name,
+      profileImage: provider.profileImage,
+      specialist: provider.specialist,
+      averageRating: parseFloat(provider.avgrating) || 0,
+      recentReviews: recentReviews.map((r) => ({
+        comment: r.comment,
+        rating: r.rating,
+        createdAt: r.createdat,
+        reviewer: {
+          id: r.reviewerid,
+          name: r.reviewername,
+          profileImage: r.reviewerprofileimage,
+
+        },
+      })),
+    };
+  }
+
 
 
 
