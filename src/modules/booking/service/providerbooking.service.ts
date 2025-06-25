@@ -101,6 +101,7 @@ async getTodaySchedule(providerId: string) {
          
 
         return {
+          title: booking.title, 
           profileImage: booking.user?.profileImage || null,
           latitude: booking.latitude,
           longitude: booking.longitude,
