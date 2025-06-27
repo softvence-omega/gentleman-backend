@@ -1,5 +1,6 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
 import Booking from 'src/modules/booking/entity/booking.entity';
+import { WithdrawalEntity } from 'src/modules/payment/entity/payment.entity';
 import { VehicleEntity } from 'src/modules/vehicle/entity/vehicle.entity';
 import { Entity, Column, OneToMany } from 'typeorm';
 
@@ -55,6 +56,18 @@ export class User extends AbstractionEntity {
   @Column({ default: false })
   isDeleted: boolean;
 
+  @Column({ nullable: true })
+  stripeAccountId: string;
+
+  @Column({ nullable: true })
+  country: string;
+
+ @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, nullable: true })
+ balance: number;
+
+  @Column({ nullable: true })
+  lastWithdrawalId: string
+
   @OneToMany(() => VehicleEntity, (vehicle) => vehicle.user)
 vehicles: VehicleEntity[];
 
@@ -63,6 +76,10 @@ vehicles: VehicleEntity[];
 
   @OneToMany(() => Booking, (booking) => booking.provider)
   providedBookings: Booking[];
+
+
+  @OneToMany(() => WithdrawalEntity, (withdrawal) => withdrawal.user)
+  withdrawals: WithdrawalEntity[];
 
   
 

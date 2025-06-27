@@ -1,6 +1,6 @@
 // src/modules/payment/payment.dto.ts
 
-import { IsEmail, IsNotEmpty, IsNumber, IsString, IsUUID } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsNumber, IsPositive, IsString, IsUUID } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreatePaymentDto {
@@ -9,7 +9,17 @@ export class CreatePaymentDto {
   @IsUUID()
   bookingId: string;
 
-  @ApiProperty({ example: 'user@example.com', description: 'User email associated with the payment' })
-  @IsEmail()
-  email: string;
 }
+
+
+
+
+export class WithdrawDto {
+  @IsNumber()
+  @IsPositive()
+  amount: number;
+}
+
+
+
+
