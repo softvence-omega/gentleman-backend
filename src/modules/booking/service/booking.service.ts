@@ -288,8 +288,7 @@ export class BookingService {
 
     // Only update workStatus if the booking status is "Accept"
     if (
-      booking.status !== BookingStatus.Accept &&
-      booking.status !== BookingStatus.Completed
+      booking.status !== BookingStatus.Accept
     ) {
       throw new Error(
         'Cannot update work status unless booking is accepted or completed.',
@@ -463,7 +462,7 @@ export class BookingService {
   async getCompletedBookings(userId: string): Promise<Booking[]> {
     return this.bookingRepo.find({
       where: {
-        status: BookingStatus.Completed,
+        status: BookingStatus.Accept,
         provider: { id: userId },
       },
       relations: [
