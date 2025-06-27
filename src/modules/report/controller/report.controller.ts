@@ -82,17 +82,7 @@ export class ReportController {
     }
   }
 
-  @Get()
-  async getAll(@Res() res: Response) {
-    const data = await this.reportService.getAll();
-    return sendResponse(res, {
-      statusCode: HttpStatus.OK,
-      success: true,
-      message: 'All reports fetched',
-      data,
-    });
-  }
-
+ 
   @Get(':id')
   async getOne(@Param('id') id: string, @Res() res: Response) {
     const data = await this.reportService.getOne(id);
@@ -114,4 +104,15 @@ export class ReportController {
       data:null,
     });
   }
+   @Get()
+  async getAll(@Res() res: Response) {
+    const data = await this.reportService.getAll();
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'All reports fetched',
+      data,
+    });
+  }
+
 }
