@@ -445,6 +445,23 @@ export class BookingService {
   async getPendingBookings(userId: string): Promise<Booking[]> {
     return this.bookingRepo.find({
       where: {
+        status: BookingStatus.Accept,
+        provider: { id: userId },
+      },
+      relations: [
+        'user',
+        'provider',
+        'vehicleType',
+        'category',
+        'payment',
+        'reviews',
+      ],
+    });
+  }
+
+   async getAcceptAndRejectedBookings(userId: string): Promise<Booking[]> {
+    return this.bookingRepo.find({
+      where: {
         status: BookingStatus.Pending,
         provider: { id: userId },
       },
@@ -463,6 +480,7 @@ export class BookingService {
     return this.bookingRepo.find({
       where: {
         status: BookingStatus.Accept,
+        workStatus: BookingWorkStatus.Completed,
         provider: { id: userId },
       },
       relations: [
