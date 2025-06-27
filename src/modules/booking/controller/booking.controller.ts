@@ -162,7 +162,12 @@ async getProviderBookings(
       statusCode: HttpStatus.OK,
       success: true,
       message: 'accept-reject bookings fetched successfully',
-      data,
+      data:{
+        "total": 12,
+        "page": 1,
+        "limit": 10,
+         "data": data
+      },
     });
   }
   @Get('completed')
