@@ -154,6 +154,17 @@ async getProviderBookings(
       data,
     });
   }
+  @Get('accept-reject')
+  async getAcceptAndRejectedBookings(@Req() req, @Res() res: Response) {
+    const userId = req.user.userId;
+    const data = await this.bookingService.getAcceptAndRejectedBookings(userId);
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'accept-reject bookings fetched successfully',
+      data,
+    });
+  }
   @Get('completed')
  async getCompletedBooking( @Req() req, @Res() res:Response) {
      const userId = req.user.userId
