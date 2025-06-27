@@ -13,12 +13,12 @@ import { CategoryEntity } from 'src/modules/category/entity/category.entity';
 import { PaymentEntity } from 'src/modules/payment/entity/payment.entity';
 import Review from 'src/modules/review/enitity/review.entity';
 import { VehicleEntity } from 'src/modules/vehicle/entity/vehicle.entity';
+import { Report } from 'src/modules/report/entity/report.entity';
 
 export enum BookingStatus {
   Pending = 'Pending',
   Accept = 'Accept',
   Reject = 'Reject',
-  Completed = 'Completed'
 }
 
 export enum BookingWorkStatus {
@@ -76,33 +76,37 @@ class Booking extends AbstractionEntity {
   latitude: string;
   
 
-  // ✅ Changed from OneToOne to ManyToOne
+
   @ManyToOne(() => VehicleTypeEntity, { nullable: true })
   @JoinColumn({ name: 'vehicleTypesId' })
   vehicleType: VehicleTypeEntity;
   
 
-  // ✅ user can create multiple bookings
+ 
   @ManyToOne(() => User, (user) => user.bookings)
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  // ✅ provider can receive multiple bookings
+  
   @ManyToOne(() => User, (user) => user.providedBookings)
   @JoinColumn({ name: 'providerId' })
   provider: User;
 
-  // ✅ Changed from OneToOne to ManyToOne
+  
   @ManyToOne(() => CategoryEntity)
   @JoinColumn({ name: 'categoryId' })
   category: CategoryEntity;
 
-  // ✅ Keep as OneToOne — every booking has a unique payment
+ 
   @OneToOne(() => PaymentEntity, (payment) => payment.booking, { cascade: true })
   payment: PaymentEntity;
 
   @OneToMany(() => Review, (review) => review.booking, { cascade: true })
   reviews: Review[];
+
+  @OneToMany(() => Report, (report) => report.booking)
+reports: Report[];
+
 
 @ManyToOne(() => VehicleEntity, { nullable: true })
 @JoinColumn({ name: 'vehicleId' })

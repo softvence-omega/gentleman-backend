@@ -1,6 +1,7 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
 import Booking from 'src/modules/booking/entity/booking.entity';
 import { WithdrawalEntity } from 'src/modules/payment/entity/payment.entity';
+import { Report } from 'src/modules/report/entity/report.entity';
 import { VehicleEntity } from 'src/modules/vehicle/entity/vehicle.entity';
 import { Entity, Column, OneToMany } from 'typeorm';
 
@@ -80,6 +81,9 @@ vehicles: VehicleEntity[];
 
   @OneToMany(() => WithdrawalEntity, (withdrawal) => withdrawal.user)
   withdrawals: WithdrawalEntity[];
+
+   @OneToMany(() => Report, (report) => report.user)
+  reports: Report[];
 
   
 

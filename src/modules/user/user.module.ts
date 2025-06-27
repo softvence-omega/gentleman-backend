@@ -9,9 +9,10 @@ import { ReviewModule } from '../review/review.module';
 import Review from '../review/enitity/review.entity';
 import { VehicleEntity } from '../vehicle/entity/vehicle.entity';
 import { WithdrawalEntity } from '../payment/entity/payment.entity';
+import { Report } from '../report/entity/report.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Booking,Review,VehicleEntity,WithdrawalEntity]), CloudinaryModule,ReviewModule],
+  imports: [TypeOrmModule.forFeature([User, Booking,Review,VehicleEntity,WithdrawalEntity,Report]), CloudinaryModule,ReviewModule],
   controllers: [UserController],
   providers: [UserService],
   exports: [TypeOrmModule]
