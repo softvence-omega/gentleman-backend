@@ -19,6 +19,7 @@ export enum BookingStatus {
   Pending = 'Pending',
   Accept = 'Accept',
   Reject = 'Reject',
+  Completed = 'Completed'
 }
 
 export enum BookingWorkStatus {
