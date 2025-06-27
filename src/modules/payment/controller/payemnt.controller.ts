@@ -14,7 +14,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { CreatePaymentDto } from '../dto/payment.dto';
+import { CreatePaymentDto, WithdrawDto } from '../dto/payment.dto';
 import { PaymentService } from '../service/payment.service';
 import Stripe from 'stripe';
 import sendResponse from 'src/common/utils/sendResponse';
@@ -28,7 +28,9 @@ export class PaymentController {
 
  @Post('/')
   async create(@Body() dto: CreatePaymentDto, @Res() res: Response) {
+     console.log('data',dto);
     const data = await this.paymentService.createPayment(dto);
+    
     return sendResponse(res, {
       statusCode: HttpStatus.CREATED,
       success: true,
@@ -69,5 +71,20 @@ export class PaymentController {
       message: 'All payments fetched successfully',
       data,
     });
+  }
+
+
+  @Post("withdraw")
+  async withdraw(@Body() dto: WithdrawDto, @Req() req, @Res() res:Response) {
+
+    const userId = req.user.userId;
+    const data = await this.paymentService.withdraw(userId, dto.amount);
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'successfully withdrawed',
+      data,
+    });
+   
   }
 }

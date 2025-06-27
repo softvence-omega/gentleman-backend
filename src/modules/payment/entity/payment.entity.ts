@@ -12,6 +12,7 @@ import {
 import { PaymentStatus } from './payment.enum';
 import { AbstractionEntity } from 'src/database/abstraction.entity';
 import Booking from 'src/modules/booking/entity/booking.entity';
+import { User } from 'src/modules/user/entities/user.entity';
 
 @Entity()
 export class PaymentEntity extends AbstractionEntity {
@@ -45,3 +46,29 @@ export class PaymentEntity extends AbstractionEntity {
 
 
 }
+
+
+
+
+@Entity('withdrawals')
+export class WithdrawalEntity extends AbstractionEntity {
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  amount: number;
+
+  @Column({ nullable: true })
+  stripeTransferId?: string;
+
+  @ManyToOne(() => User, (user) => user.withdrawals, { onDelete: 'CASCADE' })
+  user: User;
+
+    @Column({ enum: ['pending', 'completed', 'failed'], default: 'pending' })
+  status: 'pending' | 'completed' | 'failed'; 
+
+  constructor(entity?: Partial<WithdrawalEntity>) {
+    super();
+    Object.assign(this, entity);
+  }
+}
+
+
+
