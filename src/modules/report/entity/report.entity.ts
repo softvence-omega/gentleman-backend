@@ -5,8 +5,7 @@ import Booking from 'src/modules/booking/entity/booking.entity';
 
 @Entity('reports')
 export class Report extends AbstractionEntity{
-  @Column()
-  reason: string;
+ 
 
   @Column('text')
   description: string;
@@ -17,8 +16,8 @@ export class Report extends AbstractionEntity{
   @Column()
   refundType: 'FULL' | 'PARTIAL' | 'EXPERIENCE_ONLY';
 
-  @Column('decimal', { precision: 10, scale: 2 })
-  requestedAmount: number;
+  @Column()
+  requestedAmount: string;
 
   @ManyToOne(() => User, (user) => user.reports)
   user: User;

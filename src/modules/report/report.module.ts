@@ -5,6 +5,7 @@ import { ReportController } from './controller/report.controller';
 import { ReportService } from './services/report.service';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import Booking from '../booking/entity/booking.entity';
+import { Report } from './entity/report.entity';
 
 
 @Module({

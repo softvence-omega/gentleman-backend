@@ -34,14 +34,13 @@ export class ReportController {
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'image', maxCount: 5 },
-      { name: 'vehicleImage', maxCount: 1 },
     ]),
   )
   async createReport(
     @Body() dto: CreateReportDto,
     @Req() req,
     @Res() res: Response,
-    @UploadedFiles() files: { image?: Express.Multer.File[]; vehicleImage?: Express.Multer.File[] },
+    @UploadedFiles() files: { image?: Express.Multer.File[]; },
     
   ) {
     const userId = req.user.userId;
@@ -56,15 +55,11 @@ export class ReportController {
         imageUrls = uploadResults.map((r) => r.secure_url);
       }
 
-      if (files.vehicleImage?.[0]) {
-        const uploadResult = await this.cloudinary.uploadFile(files.vehicleImage[0]);
-        vehicleImageUrl = uploadResult.secure_url;
-      }
+     
 
-      dto.imageUrls = imageUrls;
-      if (vehicleImageUrl) dto.vehicleImage = vehicleImageUrl;
+      
 
-      const data = await this.reportService.create(dto, userId);
+      const data = await this.reportService.create(dto, userId, imageUrls);
 
       return sendResponse(res, {
         statusCode: HttpStatus.CREATED,
