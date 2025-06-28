@@ -22,6 +22,7 @@ import { RedisModule } from './common/redis/redis.module';
 import { MetadataController } from './modules/metadata/controller/metadata.controller';
 import { MetadataModule } from './modules/metadata/metadata.module';
 import { VehicleModule } from './modules/vehicle/vehicle.module';
+import { ReportModule } from './modules/report/report.module';
 // Import other modules here...
 
 @Module({
@@ -51,6 +52,7 @@ import { VehicleModule } from './modules/vehicle/vehicle.module';
     RedisModule,
     MetadataModule,
     VehicleModule,
+    ReportModule,
   ],
 })
 export class AppModule { }

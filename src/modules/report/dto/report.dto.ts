@@ -8,9 +8,7 @@ import {
 } from 'class-validator';
 
 export class CreateReportDto {
-  @IsString()
-  @IsNotEmpty()
-  reason: string;
+ 
 
   @IsString()
   @IsNotEmpty()
@@ -21,16 +19,14 @@ export class CreateReportDto {
   })
   refundType: 'FULL' | 'PARTIAL' | 'EXPERIENCE_ONLY';
 
-  @IsNumber()
-  requestedAmount: number;
+  @IsString()
+  requestedAmount:string;
 
   @IsUUID()
   @IsNotEmpty()
   bookingId: string;
 
-  @IsOptional()
-  imageUrls?: string[];
+ 
 
-  @IsOptional()
-  vehicleImage?: string;
+ 
 }

@@ -19,27 +19,24 @@ export class ReportService {
   ) {}
 
   
-async create(dto: CreateReportDto, userId: string): Promise<Report> {
-  const user = await this.userRepo.findOne({ where: { id: userId } });
+async create(dto: CreateReportDto, userId: string, imageUrls: string[]) {
+  const user = await this.userRepo.findOneBy({ id: userId });
   if (!user) throw new NotFoundException('User not found');
-
-  const booking = await this.bookingRepo.findOne({ where: { id: dto.bookingId } });
-  if (!booking) throw new NotFoundException('Booking not found');
 
   const report = this.reportRepo.create({
     ...dto,
+    imageUrls,
     user,
-    booking,
   });
 
-  return await this.reportRepo.save(report);
+  return this.reportRepo.save(report);
 }
 
 
   
   async getAll(): Promise<Report[]> {
     return this.reportRepo.find({
-      relations: ['user'],
+      
       order: { createdAt: 'DESC' },
     });
   }
@@ -48,7 +45,7 @@ async create(dto: CreateReportDto, userId: string): Promise<Report> {
   async getOne(id: string): Promise<Report> {
     const report = await this.reportRepo.findOne({
       where: { id },
-      relations: ['user'],
+      
     });
 
     if (!report) {
