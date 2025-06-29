@@ -139,35 +139,41 @@ export class UserService {
   // }
 
 
-  async getAllProviders() {
-    const providers = await this.userRepository
-      .createQueryBuilder('provider')
-      .leftJoin('provider.providedBookings', 'booking')
-      .leftJoin('booking.reviews', 'review')
-      .leftJoin('booking.category', 'category') // works via entity relation
-      .leftJoin('category.service', 'service')
-      .where('provider.role = :role', { role: 'provider' })
-      .andWhere('provider.isDeleted = false')
-      .select('provider.id', 'id')
-      .addSelect('provider.name', 'name')
-      .addSelect('provider.profileImage', 'profileImage')
-      .addSelect('provider.specialist', 'specialist')
-      .addSelect('AVG(review.rating)', 'avgrating')
-      .groupBy('provider.id')
-      .addGroupBy('provider.name')
-      .addGroupBy('provider.profileImage')
-      .addGroupBy('provider.specialist')
-      .orderBy('avgrating', 'ASC')
-      .getRawMany();
+  async getAllProviders(specialist?: string) {
+  const query = this.userRepository
+    .createQueryBuilder('provider')
+    .leftJoin('provider.providedBookings', 'booking')
+    .leftJoin('booking.reviews', 'review')
+    .leftJoin('booking.category', 'category') 
+    .leftJoin('category.service', 'service')
+    .where('provider.role = :role', { role: 'provider' })
+    .andWhere('provider.isDeleted = false')
+    .select('provider.id', 'id')
+    .addSelect('provider.name', 'name')
+    .addSelect('provider.profileImage', 'profileImage')
+    .addSelect('provider.specialist', 'specialist')
+    .addSelect('AVG(review.rating)', 'avgrating')
+    .groupBy('provider.id')
+    .addGroupBy('provider.name')
+    .addGroupBy('provider.profileImage')
+    .addGroupBy('provider.specialist')
+    .orderBy('avgrating', 'ASC');
 
-    return providers.map((p) => ({
-      id: p.id,
-      name: p.name,
-      profileImage: p.profileImage || null,
-      specialist: p.specialist || null,
-      averageRating: parseFloat(p.avgrating) || 0,
-    }));
+  if (specialist) {
+    query.andWhere('provider.specialist = :specialist', { specialist });
   }
+
+  const providers = await query.getRawMany();
+
+  return providers.map((p) => ({
+    id: p.id,
+    name: p.name,
+    profileImage: p.profileImage || null,
+    specialist: p.specialist || null,
+    averageRating: parseFloat(p.avgrating) || 0,
+  }));
+}
+
 
 
 

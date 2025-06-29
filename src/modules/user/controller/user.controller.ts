@@ -22,17 +22,21 @@ export class UserController {
 
 
 
-  @Get('/allProviders')
-  async getAllProviders(@Req() req, @Res() res) {
-    const result = await this.userService.getAllProviders();
-    
-    return sendResponse(res, {
-      success: true,
-      statusCode: HttpStatus.OK,
-      message: 'All providers fetched successfully!',
-      data: result,
-    });
-  }
+@Get('/allProviders')
+async getAllProviders(@Req() req, @Res() res) {
+  const specialist = req.query.specialist as string | undefined;
+
+  const result = await this.userService.getAllProviders(specialist);
+
+  return sendResponse(res, {
+    success: true,
+    statusCode: HttpStatus.OK,
+    message: 'All providers fetched successfully!',
+    data: result,
+  });
+}
+
+
 
 
   @Patch()

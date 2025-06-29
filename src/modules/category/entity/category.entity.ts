@@ -30,4 +30,5 @@ export class CategoryEntity extends AbstractionEntity {
     super();
     Object.assign(this, entity);
   }
+  
 }

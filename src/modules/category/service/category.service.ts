@@ -76,4 +76,14 @@ export class CategoryService {
     await this.categoryRepo.save(category);
     return category;
   }
+
+  async getAllCategories() {
+    return await this.categoryRepo.find({
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+  }
+
+
 }
