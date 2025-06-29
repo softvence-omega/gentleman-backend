@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpStatus, Post, Res, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { CategoryService } from '../service/category.service';
 import { CategoryDto } from '../dto/category.dto';
 import sendResponse from 'src/common/utils/sendResponse';
@@ -21,13 +21,15 @@ export class CategoryController {
         });
   }
 
-  // @Get('/:id')
-  // async getById(@Param('id') id: string) {
-  //   const data = await this.categoryService.getCategoryById(id);
-  //   return sendResponse({
-  //     message: 'Category fetched successfully',
-  //     statusCode: 200,
-  //     data,
-  //   });
-  // }
+  @Get()
+  async getAll(@Res() res: Response) {
+    const categories = await this.categoryService.getAllCategories();
+
+    return sendResponse(res, {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'All categories fetched successfully!',
+      data: categories,
+    });
+  }
 }
