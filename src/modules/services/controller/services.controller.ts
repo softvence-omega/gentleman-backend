@@ -4,6 +4,7 @@ import { ServiceService } from '../service/services.service';
 import { Response } from 'express';
 import sendResponse from 'src/common/utils/sendResponse';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Public } from 'src/common/utils/public.decorator';
 
 @Controller('services')
 export class ServiceController {
@@ -20,7 +21,7 @@ export class ServiceController {
       data: data,
     });
   }
-
+ @Public()
   @Get('/')
   async getAll(
     @Res() res: Response,
