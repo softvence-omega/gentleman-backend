@@ -4,6 +4,7 @@ import { CategoryDto } from '../dto/category.dto';
 import sendResponse from 'src/common/utils/sendResponse';
 import { Response } from 'express';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Public } from 'src/common/utils/public.decorator';
 
 @Controller('categories')
 export class CategoryController {
@@ -21,6 +22,7 @@ export class CategoryController {
         });
   }
 
+  @Public()
   @Get()
   async getAll(@Res() res: Response) {
     const categories = await this.categoryService.getAllCategories();
