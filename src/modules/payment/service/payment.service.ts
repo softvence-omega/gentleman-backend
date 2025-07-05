@@ -304,13 +304,7 @@ export class PaymentService {
     await queryRunner.startTransaction();
 
 
-     const charge = await this.stripe.charges.create({
-      amount: 2000, // $20
-      currency: 'usd',
-      source: 'tok_bypassPending', // Test token that makes funds immediately available
-      description: 'Test funding for transfer',
-    });
-    console.log('Charge successful:', charge.id);
+    
 
 
     try {
