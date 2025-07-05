@@ -302,6 +302,75 @@ export class UserService {
 
 
 
+  async getFilteredProviders({
+  status,
+  specialist,
+  country,
+  latitude,
+  longitude,
+  rangeInKm,
+  page = 1,
+  limit = 10,
+}: {
+  status?: string;
+  specialist?: string;
+  country?: string;
+  latitude?: number;
+  longitude?: number;
+  rangeInKm?: number;
+  page?: number;
+  limit?: number;
+}) {
+  const query = this.userRepository
+    .createQueryBuilder('user')
+    .where('user.role = :role', { role: 'provider' });
+
+  if (status) {
+    query.andWhere('user.status = :status', { status });
+  }
+
+  if (specialist) {
+    query.andWhere('user.specialist = :specialist', { specialist });
+  }
+
+  if (country) {
+    query.andWhere('user.country = :country', { country });
+  }
+
+  if (latitude && longitude && rangeInKm) {
+    query.andWhere(
+      `
+      (
+        6371 * acos(
+          cos(radians(:latitude)) * cos(radians(CAST(user.latitude AS DOUBLE PRECISION))) *
+          cos(radians(CAST(user.longitude AS DOUBLE PRECISION)) - radians(:longitude)) +
+          sin(radians(:latitude)) * sin(radians(CAST(user.latitude AS DOUBLE PRECISION)))
+        )
+      ) <= :rangeInKm
+    `,
+      {
+        latitude,
+        longitude,
+        rangeInKm,
+      },
+    );
+  }
+
+  const [data, total] = await query
+    .skip((page - 1) * limit)
+    .take(limit)
+    .getManyAndCount();
+
+  return {
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+    data,
+  };
+}
+
+
 
 
 }

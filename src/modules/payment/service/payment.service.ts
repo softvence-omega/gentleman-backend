@@ -216,21 +216,79 @@ export class PaymentService {
     };
   }
 
-  async getAllPayments(page: number, limit: number, order: 'ASC' | 'DESC') {
-    const [data, total] = await this.paymentRepo.findAndCount({
-      order: { createdAt: order },
-      take: limit,
-      skip: (page - 1) * limit,
-      relations: ['booking'], // optional: include related booking
-    });
+async getAllPayments(
+  page: number,
+  limit: number,
+  order: 'ASC' | 'DESC',
+  filters?: {
+    status?: mainPaymentStatus;
+    minAmount?: number;
+    maxAmount?: number;
+    updatedDate?: Date;
+    serviceTitle?: string;
+  },
+) {
+  const query = this.paymentRepo.createQueryBuilder('payment')
+    .leftJoin('payment.booking', 'booking')
+    .leftJoin('booking.category', 'category')
+    .leftJoin('category.service', 'service')
+    .addSelect('service.title', 'service_title') // select service title
+    .orderBy('payment.createdAt', order)
+    .skip((page - 1) * limit)
+    .take(limit);
 
-    return {
-      total,
-      page,
-      limit,
-      data,
-    };
+  // Filter by status
+  if (filters?.status) {
+    query.andWhere('payment.status = :status', { status: filters.status });
   }
+
+  // Filter by amount range
+  if (filters?.minAmount) {
+    query.andWhere('payment.amount >= :minAmount', { minAmount: filters.minAmount });
+  }
+
+  if (filters?.maxAmount) {
+    query.andWhere('payment.amount <= :maxAmount', { maxAmount: filters.maxAmount });
+  }
+
+  // Filter by updatedAt date
+  if (filters?.updatedDate) {
+    const startOfDay = new Date(filters.updatedDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(filters.updatedDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    query.andWhere('payment.updatedAt BETWEEN :start AND :end', {
+      start: startOfDay,
+      end: endOfDay,
+    });
+  }
+
+  // Filter by service title
+  if (filters?.serviceTitle) {
+    query.andWhere('service.title ILIKE :serviceTitle', {
+      serviceTitle: `%${filters.serviceTitle}%`,
+    });
+  }
+
+   const { entities, raw } = await query.getRawAndEntities();
+
+const data = entities.map((payment, index) => {
+  return {
+    ...payment,
+    serviceTitle: raw[index]['service_title'],
+  };
+});
+
+
+  return {
+    total: data.length,
+    page,
+    limit,
+    data,
+  };
+}
+
 
   // async withdraw(userId: string, amount: number) {
 
