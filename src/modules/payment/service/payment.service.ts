@@ -303,6 +303,16 @@ export class PaymentService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
+
+     const charge = await this.stripe.charges.create({
+      amount: 2000, // $20
+      currency: 'usd',
+      source: 'tok_bypassPending', // Test token that makes funds immediately available
+      description: 'Test funding for transfer',
+    });
+    console.log('Charge successful:', charge.id);
+
+
     try {
       // Step 1: Lock user row to prevent race conditions
       const provider = await queryRunner.manager.findOne(User, {
@@ -310,7 +320,7 @@ export class PaymentService {
         lock: { mode: 'pessimistic_write' },
       });
 
-      console.log(provider)
+      
       
       if (!provider) {
         throw new BadRequestException('User not found');
@@ -319,11 +329,11 @@ export class PaymentService {
       if (provider.role !== 'provider') {
         throw new BadRequestException('Only providers can withdraw');
       }
-      provider.balance = 100;
+      
       if (provider.balance < amount) {
         throw new BadRequestException('Insufficient internal balance to withdraw');
       }
-
+    
       // Step 2: Create Stripe account if missing
       if (!provider.stripeAccountId) {
         throw new BadRequestException('you must connect your Stripe account first');
@@ -351,6 +361,7 @@ export class PaymentService {
       await queryRunner.manager.save(withdrawal);
 
       // Step 5: Transfer funds to provider via Stripe
+     
       const transfer = await this.stripe.transfers.create({
         amount: Math.floor(amount * 100), // in cents
         currency: 'usd',
@@ -359,7 +370,10 @@ export class PaymentService {
       });
 
       // Step 6: Deduct internal balance and finalize withdrawal
+   
       provider.balance -= amount;
+      
+
       provider.lastWithdrawalId = transfer.id;
       await queryRunner.manager.save(provider);
 
@@ -374,7 +388,7 @@ export class PaymentService {
         message: 'Withdrawal successful',
         transferId: transfer.id,
         withdrawalId: withdrawal.id,
-        amount,
+        withdrawalAmount: amount,
       };
     } catch (err) {
       await queryRunner.rollbackTransaction();
@@ -386,64 +400,6 @@ export class PaymentService {
   }
 
 
- async createreciver(){
-      const account = await this.stripe.accounts.create({
-      type: 'custom',
-      country: 'US',
-      email: 'test@example.com',
-      business_type: 'individual',
-      capabilities: {
-        transfers: { requested: true },
-      },
-      tos_acceptance: {
-        date: Math.floor(Date.now() / 1000),
-        ip: '127.0.0.1',
-      },
-      individual: {
-        first_name: 'Jane',
-        last_name: 'Doe',
-        email: 'test@example.com',
-        dob: {
-          day: 1,
-          month: 1,
-          year: 1990,
-        },
-        ssn_last_4: '0000',
-        phone: '0000000000',
-        address: {
-          line1: '1234 Main Street',
-          city: 'New York',
-          state: 'NY',
-          postal_code: '10001',
-          country: 'US',
-        },
-      },
-      external_account: {
-        object: 'bank_account',
-        country: 'US',
-        currency: 'usd',
-        account_holder_name: 'Jane Doe',
-        account_holder_type: 'individual',
-        routing_number: '110000000', // Stripe test routing number
-        account_number: '000123456789', // Stripe test account number
-      },
-    });
-
-
-    // ✅ Step 3: Complete the business profile (required for transfer capability)
-    await this.stripe.accounts.update(account.id, {
-      business_profile: {
-        url: 'https://myapp.test', // Required field
-      },
-    });
-
-    console.log(account);
-
-    return{
-      id:account.id,
-      data:account
-    }
-
- }
+ 
 
 }
