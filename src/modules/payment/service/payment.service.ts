@@ -21,6 +21,7 @@ import Booking, {
 } from 'src/modules/booking/entity/booking.entity';
 import { EmailService } from 'src/common/nodemailer/email.service';
 import { User } from 'src/modules/user/entities/user.entity';
+import { blob } from 'stream/consumers';
 
 @Injectable()
 export class PaymentService {
@@ -302,6 +303,16 @@ export class PaymentService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
+
+     const charge = await this.stripe.charges.create({
+      amount: 2000, // $20
+      currency: 'usd',
+      source: 'tok_bypassPending', // Test token that makes funds immediately available
+      description: 'Test funding for transfer',
+    });
+    console.log('Charge successful:', charge.id);
+
+
     try {
       // Step 1: Lock user row to prevent race conditions
       const provider = await queryRunner.manager.findOne(User, {
@@ -309,6 +320,8 @@ export class PaymentService {
         lock: { mode: 'pessimistic_write' },
       });
 
+      
+      
       if (!provider) {
         throw new BadRequestException('User not found');
       }
@@ -316,25 +329,14 @@ export class PaymentService {
       if (provider.role !== 'provider') {
         throw new BadRequestException('Only providers can withdraw');
       }
-
+      
       if (provider.balance < amount) {
         throw new BadRequestException('Insufficient internal balance to withdraw');
       }
-
+    
       // Step 2: Create Stripe account if missing
       if (!provider.stripeAccountId) {
-        const account = await this.stripe.accounts.create({
-          type: 'express',
-          country: 'US',
-          email: provider.email,
-          capabilities: {
-            card_payments: { requested: true },
-            transfers: { requested: true },
-          },
-        });
-
-        provider.stripeAccountId = account.id;
-        await queryRunner.manager.save(provider);
+        throw new BadRequestException('you must connect your Stripe account first');
       }
 
       // Step 3: Check platform Stripe balance
@@ -342,6 +344,12 @@ export class PaymentService {
       const available = balance.available.find(b => b.currency === 'usd');
       if (!available || available.amount < Math.floor(amount * 100)) {
         throw new BadRequestException('Platform balance is insufficient');
+      }
+      
+
+      const acc = await this.stripe.accounts.retrieve(provider.stripeAccountId);
+      if(  acc.capabilities?.transfers === 'inactive') {
+        throw new BadRequestException('Invalid Stripe account. Please connect your Stripe account first.');
       }
 
       // Step 4: Create initial withdrawal record (status: pending)
@@ -353,6 +361,7 @@ export class PaymentService {
       await queryRunner.manager.save(withdrawal);
 
       // Step 5: Transfer funds to provider via Stripe
+     
       const transfer = await this.stripe.transfers.create({
         amount: Math.floor(amount * 100), // in cents
         currency: 'usd',
@@ -361,7 +370,10 @@ export class PaymentService {
       });
 
       // Step 6: Deduct internal balance and finalize withdrawal
+   
       provider.balance -= amount;
+      
+
       provider.lastWithdrawalId = transfer.id;
       await queryRunner.manager.save(provider);
 
@@ -376,7 +388,7 @@ export class PaymentService {
         message: 'Withdrawal successful',
         transferId: transfer.id,
         withdrawalId: withdrawal.id,
-        amount,
+        withdrawalAmount: amount,
       };
     } catch (err) {
       await queryRunner.rollbackTransaction();
@@ -386,4 +398,8 @@ export class PaymentService {
       await queryRunner.release();
     }
   }
+
+
+ 
+
 }
