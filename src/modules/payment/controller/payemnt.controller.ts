@@ -12,6 +12,8 @@ import {
   Res,
   HttpStatus,
   Query,
+  DefaultValuePipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { CreatePaymentDto, WithdrawDto } from '../dto/payment.dto';
@@ -20,6 +22,8 @@ import Stripe from 'stripe';
 import sendResponse from 'src/common/utils/sendResponse';
 import { Response } from 'express';
 import { Public } from 'src/common/utils/public.decorator';
+import { ApiQuery } from '@nestjs/swagger';
+import { PaymentStatus } from '../entity/payment.enum';
 
 
 @Controller('payments')
@@ -57,20 +61,26 @@ export class PaymentController {
     })
   }
 
-  @Get('all')
+@Get('all')
   async getAllPayments(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @Query('order') order: 'ASC' | 'DESC' = 'DESC',
-    @Res() res: Response,
+    @Query('status') status?: PaymentStatus,
+    @Query('minAmount') minAmount?: number,
+    @Query('maxAmount') maxAmount?: number,
+    @Query('updatedDate') updatedDate?: string,
+    @Query('serviceTitle') serviceTitle?: string,
   ) {
-    const data = await this.paymentService.getAllPayments(+page, +limit, order);
-    return sendResponse(res, {
-      statusCode: HttpStatus.OK,
-      success: true,
-      message: 'All payments fetched successfully',
-      data,
-    });
+    const filters = {
+      status,
+      minAmount: minAmount ? Number(minAmount) : undefined,
+      maxAmount: maxAmount ? Number(maxAmount) : undefined,
+      updatedDate: updatedDate ? new Date(updatedDate) : undefined,
+      serviceTitle,
+    };
+
+    return await this.paymentService.getAllPayments(page, limit, order, filters);
   }
 
 

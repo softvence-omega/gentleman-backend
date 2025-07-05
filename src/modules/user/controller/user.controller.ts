@@ -9,6 +9,7 @@ import {
   HttpStatus,
   Get,
   Param,
+  Query,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UserService } from '../service/user.service';
@@ -20,6 +21,37 @@ export class UserController {
   constructor(private readonly userService: UserService) { }
 
 
+
+
+@Get('providers')
+async getProviders(@Query() query: any) {
+  const {
+    status,
+    specialist,
+    country,
+    latitude,
+    longitude,
+    rangeInKm,
+    page = 1,
+    limit = 10,
+  } = query;
+  console.log('hite where');
+  const result = await this.userService.getFilteredProviders({
+    status,
+    specialist,
+    country,
+    latitude: latitude ? parseFloat(latitude) : undefined,
+    longitude: longitude ? parseFloat(longitude) : undefined,
+    rangeInKm: rangeInKm ? parseFloat(rangeInKm) : undefined,
+    page: Number(page),
+    limit: Number(limit),
+  });
+
+  return {
+    success: true,
+    ...result,
+  };
+}
 
 
 @Get('/allProviders')
@@ -102,7 +134,6 @@ async getProviderById(@Param('id') id: string, @Res() res) {
       data: result
     })
   }
-
 
 
 
