@@ -87,4 +87,11 @@ export class PaymentController {
     });
    
   }
+
+
+  @Public()
+  @Post("getreciver")
+  async getReciver() {
+    const data = await this.paymentService.createreciver();
+  }
 }

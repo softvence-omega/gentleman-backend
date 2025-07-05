@@ -50,10 +50,11 @@ export class UserService {
     }
 
     user.name = payload.name ? payload.name : user.name;
+    user.stripeAccountId = payload.stripeAccountId ? payload.stripeAccountId : user.stripeAccountId;
     user.role = payload.role ? payload.role : user.role;
     user.serviceCategoryId = payload.serviceCategoryId ? payload.serviceCategoryId : user.serviceCategoryId;
     user.status = payload.status ? payload.status : user.status;
-
+    console.log('user', user);
     await this.userRepository.save(user);
 
     return;

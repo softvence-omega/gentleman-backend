@@ -40,4 +40,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   readonly bio: string;
+
+  @IsOptional()
+  @IsString()
+  readonly  stripeAccountId?: string;
 }

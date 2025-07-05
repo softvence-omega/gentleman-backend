@@ -21,6 +21,7 @@ import Booking, {
 } from 'src/modules/booking/entity/booking.entity';
 import { EmailService } from 'src/common/nodemailer/email.service';
 import { User } from 'src/modules/user/entities/user.entity';
+import { blob } from 'stream/consumers';
 
 @Injectable()
 export class PaymentService {
@@ -309,6 +310,8 @@ export class PaymentService {
         lock: { mode: 'pessimistic_write' },
       });
 
+      console.log(provider)
+      
       if (!provider) {
         throw new BadRequestException('User not found');
       }
@@ -316,25 +319,14 @@ export class PaymentService {
       if (provider.role !== 'provider') {
         throw new BadRequestException('Only providers can withdraw');
       }
-
+      provider.balance = 100;
       if (provider.balance < amount) {
         throw new BadRequestException('Insufficient internal balance to withdraw');
       }
 
       // Step 2: Create Stripe account if missing
       if (!provider.stripeAccountId) {
-        const account = await this.stripe.accounts.create({
-          type: 'express',
-          country: 'US',
-          email: provider.email,
-          capabilities: {
-            card_payments: { requested: true },
-            transfers: { requested: true },
-          },
-        });
-
-        provider.stripeAccountId = account.id;
-        await queryRunner.manager.save(provider);
+        throw new BadRequestException('you must connect your Stripe account first');
       }
 
       // Step 3: Check platform Stripe balance
@@ -342,6 +334,12 @@ export class PaymentService {
       const available = balance.available.find(b => b.currency === 'usd');
       if (!available || available.amount < Math.floor(amount * 100)) {
         throw new BadRequestException('Platform balance is insufficient');
+      }
+      
+
+      const acc = await this.stripe.accounts.retrieve(provider.stripeAccountId);
+      if(  acc.capabilities?.transfers === 'inactive') {
+        throw new BadRequestException('Invalid Stripe account. Please connect your Stripe account first.');
       }
 
       // Step 4: Create initial withdrawal record (status: pending)
@@ -386,4 +384,66 @@ export class PaymentService {
       await queryRunner.release();
     }
   }
+
+
+ async createreciver(){
+      const account = await this.stripe.accounts.create({
+      type: 'custom',
+      country: 'US',
+      email: 'test@example.com',
+      business_type: 'individual',
+      capabilities: {
+        transfers: { requested: true },
+      },
+      tos_acceptance: {
+        date: Math.floor(Date.now() / 1000),
+        ip: '127.0.0.1',
+      },
+      individual: {
+        first_name: 'Jane',
+        last_name: 'Doe',
+        email: 'test@example.com',
+        dob: {
+          day: 1,
+          month: 1,
+          year: 1990,
+        },
+        ssn_last_4: '0000',
+        phone: '0000000000',
+        address: {
+          line1: '1234 Main Street',
+          city: 'New York',
+          state: 'NY',
+          postal_code: '10001',
+          country: 'US',
+        },
+      },
+      external_account: {
+        object: 'bank_account',
+        country: 'US',
+        currency: 'usd',
+        account_holder_name: 'Jane Doe',
+        account_holder_type: 'individual',
+        routing_number: '110000000', // Stripe test routing number
+        account_number: '000123456789', // Stripe test account number
+      },
+    });
+
+
+    // ✅ Step 3: Complete the business profile (required for transfer capability)
+    await this.stripe.accounts.update(account.id, {
+      business_profile: {
+        url: 'https://myapp.test', // Required field
+      },
+    });
+
+    console.log(account);
+
+    return{
+      id:account.id,
+      data:account
+    }
+
+ }
+
 }
