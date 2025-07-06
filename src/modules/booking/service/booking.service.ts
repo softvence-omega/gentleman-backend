@@ -416,13 +416,14 @@ export class BookingService {
   }
 
   async getBookingsByProvider(
-    providerId: string,
+
     page: number,
     limit: number,
     order: 'ASC' | 'DESC' = 'DESC',
   ) {
     const [bookings, total] = await this.bookingRepo.findAndCount({
-      where: { provider: { id: providerId } },
+      skip: (page - 1) * limit,
+      take: limit,
       relations: [
         'user',
         'provider',

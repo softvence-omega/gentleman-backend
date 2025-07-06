@@ -78,7 +78,7 @@ async getProviderBookings(
 ) {
   
     const providerId = req.user.userId;
-  const result = await this.bookingService.getBookingsByProvider(providerId, +page, +limit, order);
+  const result = await this.bookingService.getBookingsByProvider( +page, +limit, order);
   return sendResponse(res, {
     success: true,
     statusCode: HttpStatus.OK,
