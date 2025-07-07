@@ -86,6 +86,22 @@ async getProviderBookings(
     data: result,
   });
 }
+@Get('customerAllBookings')
+async getCustomerBookings(
+
+  @Res() res,
+  @Req() req,
+) {
+  
+    const customerId = req.user.userId;
+  const result = await this.bookingService.getCustomerAllBookings( customerId);
+  return sendResponse(res, {
+    success: true,
+    statusCode: HttpStatus.OK,
+    message: 'Bookings fetched successfully!',
+    data: result,
+  });
+}
 
 
   @Patch(':id')

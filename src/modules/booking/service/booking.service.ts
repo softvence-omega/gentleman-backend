@@ -415,6 +415,26 @@ export class BookingService {
     };
   }
 
+  async getCustomerAllBookings(customerId: string) {
+  const [data] = await this.bookingRepo.findAndCount({
+    where: {
+      user: { id: customerId },
+    },
+    relations: [
+      'user',
+      'payment',
+      'provider',
+      'vehicleType',
+    ],
+    order: {
+      createdAt: 'DESC',
+    },
+  });
+
+  return data;
+}
+
+
   async getBookingsByProvider(
 
     page: number,
