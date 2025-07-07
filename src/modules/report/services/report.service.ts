@@ -49,8 +49,7 @@ async getAll({
   const skip = (page - 1) * limit;
 
   const query = this.reportRepo.createQueryBuilder('report')
-    .leftJoinAndSelect('report.user', 'user')
-    .leftJoinAndSelect('report.booking', 'booking')
+ 
     .orderBy('report.createdAt', sortOrder)
     .skip(skip)
     .take(limit);
