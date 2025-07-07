@@ -11,7 +11,10 @@ async function bootstrap(): Promise<void> {
     rawBody: true,
     bodyParser: true,
   });
-  app.enableCors();
+  app.enableCors({
+  origin: '*',
+});
+
   app.useGlobalFilters(new AllExceptionsFilter());
 
   app.useGlobalPipes(
