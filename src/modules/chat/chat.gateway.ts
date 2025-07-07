@@ -13,8 +13,11 @@ export class ChatGateway {
   constructor(private redisService: RedisService, private jwtService: JwtService) { }
 
   async handleConnection(client: Socket) {
+  
     const redis = this.redisService.getClient();
     const userId = this.extractUserId(client);
+    console.log(userId)
+    
     if (!userId) {
       client.emit(Events.FORBIDDEN, "Authorization token not found!");
       client.disconnect();
@@ -37,11 +40,14 @@ export class ChatGateway {
 
   @SubscribeMessage('send_message')
   async sendMessageToUser(client: Socket, payload: any) {
+   
     try {
       payload = JSON.parse(payload);
       const redis = this.redisService.getClient();
+  
+      console.log("hite here");
       const socketId = await redis.get(`user_socket:${payload.receiverId}`);
-      console.log(payload.receiverId);
+      console.log(socketId,"this is the socket id");
       if (socketId) {
         console.log(socketId);
         this.server.to(socketId).emit('receive_message', payload.message);
@@ -54,15 +60,17 @@ export class ChatGateway {
 
   private extractUserId(client: Socket): string | null {
     try {
-      const token =
+      let token =
         client.handshake.auth?.token ||
         client.handshake.headers?.authorization;
+        
       if (!token) return null;
       const decoded: any = this.jwtService.verify(token);
       return decoded.userId;
+      console.log(decoded);
     } catch (err) {
       console.error('Invalid or missing token:', err.message);
-      return null;
+      return null;     
     }
   }
 }
