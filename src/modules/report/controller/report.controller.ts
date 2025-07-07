@@ -10,6 +10,7 @@ import {
   Req,
   Res,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
@@ -99,15 +100,29 @@ export class ReportController {
       data:null,
     });
   }
-   @Get()
-  async getAll(@Res() res: Response) {
-    const data = await this.reportService.getAll();
-    return sendResponse(res, {
-      statusCode: HttpStatus.OK,
-      success: true,
-      message: 'All reports fetched',
-      data,
-    });
-  }
+
+  @Get()
+async getAll(
+  @Query('page') page: string,
+  @Query('limit') limit: string,
+  @Query('status') status: 'FULL' | 'PARTIAL' | 'EXPERIENCE_ONLY',
+  @Query('sortOrder') sortOrder: 'ASC' | 'DESC',
+  @Res() res: Response,
+) {
+  const data = await this.reportService.getAll({
+    page: parseInt(page) || 1,
+    limit: parseInt(limit) || 10,
+    status,
+    sortOrder: sortOrder || 'DESC',
+  });
+
+  return sendResponse(res, {
+    statusCode: HttpStatus.OK,
+    success: true,
+    message: 'Reports fetched successfully',
+    data,
+  });
+}
+  
 
 }
