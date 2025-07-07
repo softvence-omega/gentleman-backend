@@ -34,12 +34,40 @@ async create(dto: CreateReportDto, userId: string, imageUrls: string[]) {
 
 
   
-  async getAll(): Promise<Report[]> {
-    return this.reportRepo.find({
-      
-      order: { createdAt: 'DESC' },
-    });
+// report.service.ts
+async getAll({
+  page = 1,
+  limit = 10,
+  status,
+  sortOrder = 'DESC',
+}: {
+  page?: number;
+  limit?: number;
+  status?: 'FULL' | 'PARTIAL' | 'EXPERIENCE_ONLY';
+  sortOrder?: 'ASC' | 'DESC';
+}): Promise<{ data: Report[]; total: number; page: number; limit: number }> {
+  const skip = (page - 1) * limit;
+
+  const query = this.reportRepo.createQueryBuilder('report')
+    .leftJoinAndSelect('report.user', 'user')
+    .leftJoinAndSelect('report.booking', 'booking')
+    .orderBy('report.createdAt', sortOrder)
+    .skip(skip)
+    .take(limit);
+
+  if (status) {
+    query.andWhere('report.refundType = :status', { status });
   }
+
+  const [data, total] = await query.getManyAndCount();
+
+  return {
+    data,
+    total,
+    page,
+    limit,
+  };
+}
 
   
   async getOne(id: string): Promise<Report> {
