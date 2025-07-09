@@ -1,5 +1,8 @@
 import { AbstractionEntity } from 'src/database/abstraction.entity';
 import Booking from 'src/modules/booking/entity/booking.entity';
+import { Conversation } from 'src/modules/messaging/entity/conversation.entity';
+import { Message } from 'src/modules/messaging/entity/message.entity';
+import { Offer } from 'src/modules/messaging/entity/offer.entity';
 import { WithdrawalEntity } from 'src/modules/payment/entity/payment.entity';
 import { Report } from 'src/modules/report/entity/report.entity';
 import { VehicleEntity } from 'src/modules/vehicle/entity/vehicle.entity';
@@ -46,8 +49,6 @@ export class User extends AbstractionEntity {
   @Column({ nullable: true })
   specialist?: string;
 
-  
-
   @Column({ enum: ['blocked', 'active', 'inactive'], default: 'inactive' })
   status: string;
 
@@ -63,14 +64,20 @@ export class User extends AbstractionEntity {
   @Column({ nullable: true })
   country: string;
 
- @Column({ type: 'decimal', precision: 10, scale: 2, default: 0, nullable: true })
- balance: number;
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
+    default: 0,
+    nullable: true,
+  })
+  balance: number;
 
   @Column({ nullable: true })
-  lastWithdrawalId: string
+  lastWithdrawalId: string;
 
   @OneToMany(() => VehicleEntity, (vehicle) => vehicle.user)
-vehicles: VehicleEntity[];
+  vehicles: VehicleEntity[];
 
   @OneToMany(() => Booking, (booking) => booking.user)
   bookings: Booking[];
@@ -78,16 +85,29 @@ vehicles: VehicleEntity[];
   @OneToMany(() => Booking, (booking) => booking.provider)
   providedBookings: Booking[];
 
-
   @OneToMany(() => WithdrawalEntity, (withdrawal) => withdrawal.user)
   withdrawals: WithdrawalEntity[];
 
-   @OneToMany(() => Report, (report) => report.user)
+  @OneToMany(() => Report, (report) => report.user)
   reports: Report[];
 
-  
+  @OneToMany(() => Offer, (o) => o.sender)
+  sentOffers: Offer[];
 
+  @OneToMany(() => Offer, (o) => o.receiver)
+  receivedOffers: Offer[];
 
+  @OneToMany(() => Conversation, (conv) => conv.user1)
+  conversations1: Conversation[];
+
+  @OneToMany(() => Conversation, (conv) => conv.user2)
+  conversations2: Conversation[];
+
+  @OneToMany(() => Message, (m) => m.sender)
+  sentMessages: Message[];
+
+  @OneToMany(() => Message, (m) => m.receiver)
+  receivedMessages: Message[];
 
   constructor(entity?: Partial<User>) {
     super();

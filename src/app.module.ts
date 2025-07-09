@@ -23,6 +23,7 @@ import { MetadataController } from './modules/metadata/controller/metadata.contr
 import { MetadataModule } from './modules/metadata/metadata.module';
 import { VehicleModule } from './modules/vehicle/vehicle.module';
 import { ReportModule } from './modules/report/report.module';
+import { MessagingModule } from './modules/messaging/messaging.module';
 // Import other modules here...
 
 @Module({
@@ -48,11 +49,12 @@ import { ReportModule } from './modules/report/report.module';
     UserModule,
     VehicleTypeModule,
     BookingModule,
-    ChatModule,
+
     RedisModule,
     MetadataModule,
     VehicleModule,
     ReportModule,
+    MessagingModule,
   ],
 })
 export class AppModule { }
