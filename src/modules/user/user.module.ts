@@ -10,9 +10,12 @@ import Review from '../review/enitity/review.entity';
 import { VehicleEntity } from '../vehicle/entity/vehicle.entity';
 import { WithdrawalEntity } from '../payment/entity/payment.entity';
 import { Report } from '../report/entity/report.entity';
+import { Conversation } from '../messaging/entity/conversation.entity';
+import { Offer } from '../messaging/entity/offer.entity';
+import { Message } from '../messaging/entity/message.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Booking,Review,VehicleEntity,WithdrawalEntity,Report]), CloudinaryModule,ReviewModule],
+  imports: [TypeOrmModule.forFeature([User, Booking,Review,VehicleEntity,WithdrawalEntity,Report,Conversation,Offer,Message]), CloudinaryModule,ReviewModule],
   controllers: [UserController],
   providers: [UserService],
   exports: [TypeOrmModule]
