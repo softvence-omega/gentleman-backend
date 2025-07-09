@@ -38,7 +38,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
   }
 
   async handleDisconnect(client: Socket) {
-    console.log(`hite here`);
+    
     const userSocketMap = await this.redisService.hGetAll('userSocketMap');
     const userId = Object.keys(userSocketMap).find(
       (key) => userSocketMap[key] === client.id,
@@ -56,7 +56,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @MessageBody() data: { userId: string },
     @ConnectedSocket() client: Socket,
   ) {
-    console.log("hit here")
+
     await this.redisService.hSet('userSocketMap', data.userId, client.id);
     console.log(`User ${data.userId} registered with socket ${client.id}`);
   }
@@ -345,6 +345,21 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     if (senderSocketId) this.server.to(senderSocketId).emit('newChatItem', payload);
     if (receiverSocketId) this.server.to(receiverSocketId).emit('newChatItem', payload);
   }
+
+  @SubscribeMessage('getAllCustomers')
+async handleGetAllCustomers(
+  @ConnectedSocket() client: Socket,
+) {
+  const customers = await this.userRepo.find({
+    where: { role: 'customer', isDeleted: false },
+    select: ['id', 'name', 'email', 'status', 'role', 'profileImage'],
+    order: { createdAt: 'DESC' },
+  });
+
+  client.emit('allCustomers', customers);
+}
+
+
 }
 
 // Entity files (user.entity.ts, conversation.entity.ts, message.entity.ts, offer.entity.ts)
