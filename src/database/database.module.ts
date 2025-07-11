@@ -16,6 +16,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           url: dbConfig.url,
           synchronize: true,
           autoLoadEntities: true,
+          dropSchema:true,
           
         };
       },

@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <head>
+    <title>FCM Token Generator</title>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-messaging-compat.js"></script>
+  </head>
+  <body>
+    <h1>Firebase FCM Token</h1>
+    <pre id="token">Waiting for permission...</pre>
+
+    <script>
+      const firebaseConfig = {
+        apiKey: 'AIzaSyAIscbIXS5LaxCovtPhc82_Kx1swoljV0o',
+        authDomain: 'test-73504.firebaseapp.com',
+        projectId: 'test-73504',
+        storageBucket: 'test-73504.firebasestorage.app',
+        messagingSenderId: '1072812350910',
+        appId: '1:1072812350910:web:7791995753797f26bf2def',
+      };
+
+      const vapidKey =
+        'BItSCCGcPtz9U2LhpWfJpL3yX9mEPxqs-oNM8Xr5F0Ag6cHKjtFdTLuJMMVUz3oOAProsz586FhTJJm8-79-em4';
+
+      firebase.initializeApp(firebaseConfig);
+
+      const messaging = firebase.messaging();
+
+      Notification.requestPermission().then((permission) => {
+        if (permission === 'granted') {
+          messaging
+            .getToken({ vapidKey })
+            .then((token) => {
+              document.getElementById('token').textContent = token;
+            })
+            .catch((err) => {
+              console.error('Error getting token:', err);
+            });
+        } else {
+          document.getElementById('token').textContent = 'Permission denied';
+        }
+      });
+    </script>
+  </body>
+</html>

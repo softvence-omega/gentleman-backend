@@ -13,9 +13,10 @@ import { Report } from '../report/entity/report.entity';
 import { Conversation } from '../messaging/entity/conversation.entity';
 import { Offer } from '../messaging/entity/offer.entity';
 import { Message } from '../messaging/entity/message.entity';
+import { Notification } from '../notifications/entity/notificationcs.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Booking,Review,VehicleEntity,WithdrawalEntity,Report,Conversation,Offer,Message]), CloudinaryModule,ReviewModule],
+  imports: [TypeOrmModule.forFeature([User, Booking,Review,VehicleEntity,WithdrawalEntity,Report,Conversation,Offer,Message,Notification]), CloudinaryModule,ReviewModule,],
   controllers: [UserController],
   providers: [UserService],
   exports: [TypeOrmModule]
