@@ -14,19 +14,12 @@ import { EventTypeService } from './event/event.service';
 export class NotificationController {
   constructor(
     private readonly notificationService: NotificationService,
-     private readonly eventEmitter: EventTypeService
+    
 ) {}
   @Public()
   @Post('send')
   async sendNotification(@Body() data: SendNotificationDto) {
-   await this.eventEmitter.emit('NOTIFICATION_SEND', {
-     fcmToken: data.token,
-     title: data.title,
-     body: data.body,
-     data: data.data,
-     userId: data.id
-   });
-  const test= await this.notificationService.sendPushNotification(data);
+  await this.notificationService.sendPushNotification(data);
   
    return { success: true, message: 'Notification sent successfully' };
   }
