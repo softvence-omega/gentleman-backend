@@ -1,4 +1,5 @@
-import { IsDateString, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsDateString, IsISO8601, IsOptional, IsString, IsUUID, Validate } from "class-validator";
+import { IsFutureUtcDateConstraint } from "./validateDateite";
 
 export class CreateBookingDto {
   @IsString()
@@ -14,6 +15,7 @@ export class CreateBookingDto {
   @IsString()
   DetailsDescription?: string;
 
+  
  
 
    @IsOptional()
@@ -26,6 +28,8 @@ export class CreateBookingDto {
   vehicleImage?: string;
 
   @IsString()
+  @IsISO8601({ strict: true }, { message: 'desireDate must be a valid ISO 8601 string' })
+  @Validate(IsFutureUtcDateConstraint)
   desireDate: string;
 
 

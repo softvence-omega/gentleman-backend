@@ -35,7 +35,7 @@ async getProviders(@Query() query: any) {
     page = 1,
     limit = 10,
   } = query;
-  console.log('hite where');
+  
   const result = await this.userService.getFilteredProviders({
     status,
     specialist,
