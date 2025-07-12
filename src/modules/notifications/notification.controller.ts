@@ -26,23 +26,24 @@ export class NotificationController {
      data: data.data,
      userId: data.id
    });
-
+  const test= await this.notificationService.sendPushNotification(data);
+  
    return { success: true, message: 'Notification sent successfully' };
   }
 
-  @Public()
   @Post('get')
-  @ApiBearerAuth()
-  async getNotification(
-    @Req() req: AuthenticatedRequest,
-    @Query() rawDate: CursorDto,
-  ) {
-    if (!req.user) {
-      throw new BadRequestException('user  not Created');
-    }
-    return this.notificationService.getNotification(
-      { id: req.user.sub },
-      rawDate,
-    );
+@Public()
+@ApiBearerAuth()
+async getNotification(
+  @Req() req: AuthenticatedRequest,
+  @Body() body:{id:string},
+) {
+  const { id } = body;
+
+  if (!id) {
+    throw new BadRequestException('User ID not provided in body.');
   }
+
+  return this.notificationService.getNotification({ id });
+}
 }

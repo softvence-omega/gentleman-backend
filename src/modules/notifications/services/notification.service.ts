@@ -23,58 +23,53 @@ export class NotificationService {
   body,
   data,
   bookingId,
+  id,
 }: SendNotificationDto) {
-  try {
-    const message = {
-      token,
-      notification: {
-        title,
-        body,
-      },
-      data: {
-        ...(data || {}),
-        ...(bookingId ? { bookingId } : {}),
-      },
-    };
+ try {
+  const message = {
+    token,
+    notification: {
+      title,
+      body,
+    },
+    data: {
+      ...(data || {}),
+      ...(bookingId ? { bookingId } : {}),
+    },
+  };
 
-    const response = await this.firebaseService.getMessaging().send(message);
-    this.logger.debug(`Push notification sent: ${response}`);
-  } catch (error) {
-    this.logger.error(`Error sending push notification: ${error}`);
-  }
+  const response = await this.firebaseService.getMessaging().send(message);
+  this.logger.debug(`Push notification sent: ${response}`);
+
+  const saved = await this.notificationRepository.save({
+    user:{id},
+    title,
+    body,
+    bookingId,
+    data,
+  });
+
+  this.logger.debug('Saved notification:', saved);
+} catch (error) {
+  this.logger.error('Error sending push notification or saving it:', error);
+}
+
 }
 
 
-  public async getNotification(
-    { id }: { id: string },
-    { cursor, take }: CursorDto,
-  ): Promise<ApiResponse<Notification[]>> {
-    const query = this.notificationRepository
-      .createQueryBuilder('notification')
-      .where('notification.userId = :id', { id })
-      .orderBy('notification.createdAt', 'DESC')
-      .take(take);
+public async getNotification(
+  { id }: { id: string }
+): Promise<ApiResponse<Notification[]>> {
+  const data = await this.notificationRepository.find({
+    where: { userId: id },
+    order: { createdAt: 'DESC' },
+  });
 
-    if (cursor) {
-      // For cursor pagination, we assume cursor is notification id and paginate by createdAt + id
-      const cursorNotification = await this.notificationRepository.findOneBy({ id: cursor });
-      if (cursorNotification) {
-        query.andWhere(
-          '(notification.createdAt < :createdAt OR (notification.createdAt = :createdAt AND notification.id < :id))',
-          {
-            createdAt: cursorNotification.createdAt,
-            id: cursorNotification.id,
-          },
-        );
-      }
-    }
+  return {
+    data,
+    message: 'Notifications fetched successfully',
+    success: true,
+  };
+}
 
-    const data = await query.getMany();
-
-    return {
-      data,
-      message: 'Notifications fetched successfully',
-      success: true,
-    };
-  }
 }
