@@ -8,6 +8,12 @@ import {
 import { Conversation } from './conversation.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 
+export enum MessageType {
+  IMAGE = 'image',
+  PDF = 'pdf',
+  TEXT = 'text',
+}
+
 
 @Entity()
 export class Message {
@@ -16,6 +22,13 @@ export class Message {
 
   @Column()
   text: string;
+
+    @Column({
+    type: 'enum',
+    enum: MessageType,
+    default: MessageType.TEXT,
+  })
+  document: MessageType;
 
   @Column()
   senderId: string;
