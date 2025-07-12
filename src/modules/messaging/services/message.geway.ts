@@ -14,7 +14,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Offer, OfferStatus } from '../entity/offer.entity';
 import { RedisService } from './redis.services';
-import { Message } from '../entity/message.entity';
+import { Message, MessageType } from '../entity/message.entity';
 import { Conversation } from '../entity/conversation.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 
@@ -63,10 +63,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
-    @MessageBody() data: { text: string; sender: string; receiver: string },
+    @MessageBody() data: { text: string; sender: string; receiver: string, document:MessageType },
     @ConnectedSocket() client: Socket,
   ) {
-    const { sender, receiver, text } = data;
+    const { sender, receiver, text,document} = data;
     const [user1Id, user2Id] = [sender, receiver].sort();
 
     console.log("hit here")
@@ -119,8 +119,11 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       receiver,
     );
 
+    
+
     const savedMessage = await this.messageRepo.save(this.messageRepo.create({
       text,
+      document,
       senderId: sender,
       receiverId: receiver,
       conversationId: conversation.id,
