@@ -54,7 +54,7 @@ export class UserService {
     user.role = payload.role ? payload.role : user.role;
     user.serviceCategoryId = payload.serviceCategoryId ? payload.serviceCategoryId : user.serviceCategoryId;
     user.status = payload.status ? payload.status : user.status;
-    console.log('user', user);
+    
     await this.userRepository.save(user);
 
     return;
