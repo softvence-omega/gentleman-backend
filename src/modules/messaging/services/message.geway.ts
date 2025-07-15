@@ -17,6 +17,7 @@ import { RedisService } from './redis.services';
 import { Message, MessageType } from '../entity/message.entity';
 import { Conversation } from '../entity/conversation.entity';
 import { User } from 'src/modules/user/entities/user.entity';
+import Booking from 'src/modules/booking/entity/booking.entity';
 
 
 @WebSocketGateway({ cors: { origin: '*' } })
@@ -31,6 +32,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @InjectRepository(Message) private messageRepo: Repository<Message>,
     @InjectRepository(Offer) private offerRepo: Repository<Offer>,
     private redisService: RedisService,
+    @InjectRepository(Booking) private bookingRepo : Repository<Booking>
   ) {}
 
   async handleConnection(client: Socket) {
@@ -361,6 +363,54 @@ async handleGetAllCustomers(
 
   client.emit('allCustomers', customers);
 }
+
+@SubscribeMessage('updateBookingLocation')
+async handleUpdateBookingLocation(
+  @MessageBody() data: { bookingId: string; latitude: string; longitude: string },
+  @ConnectedSocket() client: Socket,
+) {
+  const { bookingId, latitude, longitude } = data;
+
+  const booking = await this.bookingRepo.findOne({
+    where: { id: bookingId },
+    relations: ['provider'],
+  });
+
+  if (!booking) {
+    return client.emit('bookingLocationUpdateError', {
+      message: 'Booking not found',
+    });
+  }
+
+  booking.latitude = latitude;
+  booking.longitude = longitude;
+
+  await this.bookingRepo.save(booking);
+
+  const responsePayload = {
+    bookingId,
+    latitude,
+    longitude,
+    message: 'Booking location updated successfully',
+  };
+
+  // Emit to sender
+  client.emit('bookingLocationUpdated', responsePayload);
+
+  // Emit to provider
+  const providerId = booking.provider?.id;
+  if (providerId) {
+    const providerSocketId = await this.redisService.hGet('userSocketMap', providerId);
+    if (providerSocketId) {
+      this.server.to(providerSocketId).emit('bookingLocationUpdated', responsePayload);
+    }
+  }
+}
+
+
+
+
+
 
 
 }
