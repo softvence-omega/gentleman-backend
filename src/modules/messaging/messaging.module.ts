@@ -8,9 +8,10 @@ import { Message } from './entity/message.entity';
 import { User } from '../user/entities/user.entity';
 import { RedisService } from './services/redis.services';
 import { MessageGateway } from './services/message.geway';
+import Booking from '../booking/entity/booking.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Conversation, Message, Offer])],
+  imports: [TypeOrmModule.forFeature([User, Conversation, Message, Offer,Booking])],
   providers: [MessageGateway, RedisService],
   exports: [MessageGateway],
 })
