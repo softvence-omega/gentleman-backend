@@ -14,10 +14,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         return {
           type: 'postgres',
           url: dbConfig.url,
-          synchronize: true,
+          synchronize: false,
           autoLoadEntities: true,
-          
-          
         };
       },
     }),

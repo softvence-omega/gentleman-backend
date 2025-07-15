@@ -1,0 +1,38 @@
+services:
+  server:
+    build:
+      context: .
+    environment:
+      NODE_ENV: production
+    env_file:
+      - .env
+    ports:
+      - 5012:5012
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres
+    restart: always
+    user: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: gentleman_db
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    expose:
+      - 5432
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+
+volumes:
+  db-data:
+  redis-data:
