@@ -55,7 +55,6 @@ import { NotificationModule } from './modules/notifications/notification.module'
     VehicleModule,
     ReportModule,
     MessagingModule,
-   NotificationModule,
 
     BullModule.forRootAsync({
   imports: [ConfigModule],
