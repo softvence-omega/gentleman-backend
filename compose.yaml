@@ -2,8 +2,10 @@ services:
   server:
     build:
       context: .
+    image: arafat2025/gentleman-server:latest
+    platform: linux/amd64
     environment:
-      NODE_ENV: production
+      NODE_ENV: development
     env_file:
       - .env
     ports:

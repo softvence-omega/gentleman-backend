@@ -20,7 +20,7 @@ import { User } from 'src/modules/user/entities/user.entity';
 import Booking from 'src/modules/booking/entity/booking.entity';
 
 
-@WebSocketGateway({ cors: { origin: '*' } })
+@WebSocketGateway({ cors: { origin: '*' } , })
 @Injectable()
 export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()

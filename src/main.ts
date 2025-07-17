@@ -25,10 +25,10 @@ async function bootstrap(): Promise<void> {
       transform: true,
     }),
   );
-  app.setGlobalPrefix('/api/v1/')
+  app.setGlobalPrefix('/gntl/v1/')
 
   const config = app.get(ConfigService);
-  const port = config.get('port') || 3000;
+  const port = process.env.PORT || 5012;
   const node_env = config.get('node_env') || 'development';
   if (node_env !== 'production') {
     setupSwagger(app);

@@ -4,5 +4,5 @@ import { swaggerConfig } from './swagger.config';
 
 export function setupSwagger(app: INestApplication) {
   const document = SwaggerModule.createDocument(app, swaggerConfig);
-  SwaggerModule.setup('api-docs', app, document);
+  SwaggerModule.setup('/gntl/v1/api-docs', app, document);
 }
