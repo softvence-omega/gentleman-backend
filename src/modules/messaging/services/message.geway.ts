@@ -224,49 +224,59 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     });
   }
 
+  
+
   @SubscribeMessage('getConversations')
-  async handleGetConversations(
-    @MessageBody() data: { userId: string },
-    @ConnectedSocket() client: Socket,
-  ) {
-    const { userId } = data;
+async handleGetConversations(
+  @MessageBody() data: { userId: string },
+  @ConnectedSocket() client: Socket,
+) {
+  const { userId } = data;
 
-    const conversations = await this.convoRepo.find({
-      where: [{ user1Id: userId }, { user2Id: userId }],
-      order: { lastMessageAt: 'DESC' },
-    });
+  const conversations = await this.convoRepo.find({
+    where: [{ user1Id: userId }, { user2Id: userId }],
+    order: { lastMessageAt: 'DESC' },
+  });
 
-    if (!conversations.length) {
-      client.emit('conversationsLoaded', []);
-      return;
-    }
-
-    const userIds = conversations.map((c) =>
-      c.user1Id === userId ? c.user2Id : c.user1Id
-    );
-
-    const users = await this.userRepo.findByIds(userIds);
-
-    const unreadCounts = await this.messageRepo
-      .createQueryBuilder('m')
-      .select('m.senderId', 'senderId')
-      .addSelect('COUNT(*)', 'count')
-      .where('m.receiverId = :userId AND m.isRead = false', { userId })
-      .groupBy('m.senderId')
-      .getRawMany();
-
-    const chatUsers = users.map((u) => {
-      const countObj = unreadCounts.find((x) => x.senderId === u.id);
-      return {
-        id: u.id,
-        name: u.name,
-        hasGoogleAccount: true,
-        unreadCount: Number(countObj?.count || 0),
-      };
-    });
-
-    client.emit('conversationsLoaded', chatUsers);
+  if (!conversations.length) {
+    client.emit('conversationsLoaded', []);
+    return;
   }
+
+  // Extract the other user IDs from each conversation
+  const userIds = conversations.map((c) =>
+    c.user1Id === userId ? c.user2Id : c.user1Id,
+  );
+
+  const users = await this.userRepo.findByIds(userIds);
+
+  // Get unread message counts grouped by sender
+  const unreadCounts = await this.messageRepo
+    .createQueryBuilder('m')
+    .select('m.senderId', 'senderId')
+    .addSelect('COUNT(*)', 'count')
+    .where('m.receiverId = :userId AND m.isRead = false', { userId })
+    .groupBy('m.senderId')
+    .getRawMany();
+
+  // Build conversation list enriched with name, profile, unread count, and last message time
+  const chatUsers = conversations.map((convo) => {
+    const otherUserId = convo.user1Id === userId ? convo.user2Id : convo.user1Id;
+    const user = users.find((u) => u.id === otherUserId);
+    const countObj = unreadCounts.find((x) => x.senderId === otherUserId);
+
+    return {
+      id: user?.id,
+      name: user?.name,
+      profile: user?.profileImage,
+      unreadCount: Number(countObj?.count || 0),
+      lastMessageAt: convo.lastMessageAt,
+    };
+  });
+
+  client.emit('conversationsLoaded', chatUsers);
+}
+
 
   @SubscribeMessage('createOffer')
   async handleCreateOffer(
@@ -417,3 +427,47 @@ async handleUpdateBookingLocation(
 
 // Entity files (user.entity.ts, conversation.entity.ts, message.entity.ts, offer.entity.ts)
 // will be provided next.
+
+// @SubscribeMessage('getConversations')
+//   async handleGetConversations(
+//     @MessageBody() data: { userId: string },
+//     @ConnectedSocket() client: Socket,
+//   ) {
+//     const { userId } = data;
+
+//     const conversations = await this.convoRepo.find({
+//       where: [{ user1Id: userId }, { user2Id: userId }],
+//       order: { lastMessageAt: 'DESC' },
+//     });
+
+//     if (!conversations.length) {
+//       client.emit('conversationsLoaded', []);
+//       return;
+//     }
+
+//     const userIds = conversations.map((c) =>
+//       c.user1Id === userId ? c.user2Id : c.user1Id
+//     );
+
+//     const users = await this.userRepo.findByIds(userIds);
+
+//     const unreadCounts = await this.messageRepo
+//       .createQueryBuilder('m')
+//       .select('m.senderId', 'senderId')
+//       .addSelect('COUNT(*)', 'count')
+//       .where('m.receiverId = :userId AND m.isRead = false', { userId })
+//       .groupBy('m.senderId')
+//       .getRawMany();
+
+//     const chatUsers = users.map((u) => {
+//       const countObj = unreadCounts.find((x) => x.senderId === u.id);
+//       return {
+//         id: u.id,
+//         name: u.name,
+//         profile: u?.profileImage,
+//         unreadCount: Number(countObj?.count || 0),
+//       };
+//     });
+
+//     client.emit('conversationsLoaded', chatUsers);
+//   }
