@@ -7,8 +7,9 @@
   "license": "UNLICENSED",
   "scripts": {
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "NODE_OPTIONS=--max-old-space-size=384 nest start",
-    "build": "nest build",
+    "start": "NODE_OPTIONS=--max-old-space-size=4096 nest start",
+    "build": "NODE_OPTIONS=--max-old-space-size=4096 nest build",
+
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
