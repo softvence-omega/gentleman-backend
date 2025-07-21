@@ -30,6 +30,9 @@ export class User extends AbstractionEntity {
   otp?: string;
 
   @Column({ nullable: true })
+  fcmToken?:string; 
+
+  @Column({ nullable: true })
   serviceCategoryId?: string;
 
   @Column({ nullable: true })

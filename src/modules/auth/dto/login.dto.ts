@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsNotEmpty, IsString } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsNotEmpty, IsOptional, IsString } from "class-validator";
 
 export class LoginDto {
   @ApiProperty({
@@ -17,4 +17,14 @@ export class LoginDto {
   @IsNotEmpty()
   @IsString()
   password: string;
+
+
+  @ApiPropertyOptional({
+    example: 'fcmToken1234567890abcdef',
+    description: 'Optional Firebase Cloud Messaging token',
+  })
+  @IsOptional()
+  @IsString()
+  fcmToken?: string;
+
 }
