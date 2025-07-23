@@ -93,6 +93,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         name: senderUser?.name,
         hasGoogleAccount: true,
         unreadCount: 1,
+        profile: senderUser?.profileImage,
+        lastMessageAt: conversation.createdAt,
       };
 
       const newChatUserForSender = {
@@ -100,6 +102,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         name: receiverUser?.name,
         hasGoogleAccount: true,
         unreadCount: 0,
+       profile: senderUser?.profileImage,
+        lastMessageAt: conversation.createdAt,
       };
 
       const [receiverSocketId, senderSocketId] = await Promise.all([
