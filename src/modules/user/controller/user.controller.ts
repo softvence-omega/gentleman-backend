@@ -91,6 +91,10 @@ async getAllProviders(@Req() req, @Res() res) {
     const image = files.image?.[0];
     const certificate = files.certificate?.[0];
 
+    console.log('Image:', image);
+    console.log('Certificate:', certificate);
+    console.log('Payload:', payload);
+    console.log('User:', req.user);
     const result = await this.userService.updateUser(req.user, payload, image, certificate);
     sendResponse(res, {
       success: true,
