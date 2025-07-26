@@ -133,7 +133,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       senderId: sender,
       receiverId: receiver,
       conversationId: conversation.id,
-      isRead: receiverActiveWith === sender,
+      isRead:false,
     }));
 
     await this.convoRepo.update(conversation.id, {
@@ -420,6 +420,36 @@ async handleUpdateBookingLocation(
     }
   }
 }
+
+
+@SubscribeMessage('markConversationRead')
+async handleMarkConversationRead(
+  @MessageBody() data: { userId: string; conversationId: string },
+  @ConnectedSocket() client: Socket,
+) {
+  const { userId, conversationId } = data;
+
+  // Step 1: Mark all unread messages as read
+  await this.messageRepo.update(
+    {
+      conversationId,
+      receiverId: userId,
+      isRead: false,
+    },
+    { isRead: true },
+  );
+
+  // Step 2: Clear active chat (optional)
+  await this.redisService.hDel('userActiveChatMap', userId);
+
+  // Step 3: Emit updated unread count (0)
+  client.emit('unreadCountUpdate', {
+    conversationId,
+    count: 0,
+    from: null, // or keep `from: previousSenderId` if known
+  });
+}
+
 
 
 
