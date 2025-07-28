@@ -11,6 +11,7 @@ import {
   Res,
   HttpStatus,
   Query,
+  Patch,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
@@ -21,6 +22,7 @@ import sendResponse from 'src/common/utils/sendResponse';
 import { ReportService } from '../services/report.service';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import { CreateReportDto } from '../dto/report.dto';
+import { UpdateReportDto } from '../dto/update-report.dto';
 
 
 @ApiTags('Reports')
@@ -89,6 +91,32 @@ export class ReportController {
       data,
     });
   }
+
+  @Patch(':id')
+async updateReport(
+  @Param('id') id: string,
+  @Body() dto: UpdateReportDto,
+  @Res() res: Response,
+) {
+  try {
+    const updated = await this.reportService.update(id, dto);
+
+    return sendResponse(res, {
+      statusCode: HttpStatus.OK,
+      success: true,
+      message: 'Report updated successfully',
+      data: updated,
+    });
+  } catch (error) {
+    return sendResponse(res, {
+      statusCode: error?.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: error?.message || 'Failed to update report',
+      data: null,
+    });
+  }
+}
+
 
   @Delete(':id')
   async delete(@Param('id') id: string, @Res() res: Response) {

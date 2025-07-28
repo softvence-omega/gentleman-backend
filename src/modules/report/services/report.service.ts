@@ -1,10 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from 'src/modules/user/entities/user.entity';
 import { CreateReportDto } from '../dto/report.dto';
 import { Report } from '../entity/report.entity';
 import Booking from 'src/modules/booking/entity/booking.entity';
+import { UpdateReportDto } from '../dto/update-report.dto';
 
 @Injectable()
 export class ReportService {
@@ -18,19 +19,49 @@ export class ReportService {
     private bookingRepo: Repository<Booking>,
   ) {}
 
-  
 async create(dto: CreateReportDto, userId: string, imageUrls: string[]) {
   const user = await this.userRepo.findOneBy({ id: userId });
   if (!user) throw new NotFoundException('User not found');
+
+  const booking = await this.bookingRepo.findOne({
+    where: { id: dto.bookingId },
+    relations: {
+      user: true,
+      provider: true,
+    },
+  });
+  if (!booking) throw new NotFoundException('Booking not found');
+
+  
+  const existingReport = await this.reportRepo.findOne({
+    where: { booking: { id: dto.bookingId } },
+  });
+
+  if (existingReport) {
+    throw new BadRequestException('A report for this booking already exists');
+  }
 
   const report = this.reportRepo.create({
     ...dto,
     imageUrls,
     user,
+    booking,
   });
 
-  return this.reportRepo.save(report);
+  const saved = await this.reportRepo.save(report);
+
+  return this.reportRepo.findOne({
+    where: { id: saved.id },
+    relations: {
+      user: true,
+      booking: {
+        user: true,
+        provider: true,
+      },
+    },
+  });
 }
+
 
 
   
@@ -68,19 +99,44 @@ async getAll({
   };
 }
 
-  
-  async getOne(id: string): Promise<Report> {
-    const report = await this.reportRepo.findOne({
-      where: { id },
-      
-    });
+async getOne(id: string): Promise<Report> {
+  const report = await this.reportRepo.findOne({
+    where: { id },
+    relations: {
+      booking: {
+        user: true,
+        provider: true,
+      },
+    },
+  });
 
-    if (!report) {
-      throw new NotFoundException('Report not found');
-    }
-
-    return report;
+  if (!report) {
+    throw new NotFoundException('Report not found');
   }
+
+  
+
+  return report;
+}
+
+
+
+async update(id: string, dto: UpdateReportDto): Promise<Report> {
+  const report = await this.reportRepo.findOne({
+    where: { id },
+  });
+
+  if (!report) {
+    throw new NotFoundException('Report not found');
+  }
+
+  Object.assign(report, dto);
+  const newrepost = await this.reportRepo.save(report);
+
+  
+  return newrepost;
+}
+
 
 
   async delete(id: string): Promise<void> {
