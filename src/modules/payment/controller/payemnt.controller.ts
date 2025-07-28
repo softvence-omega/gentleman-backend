@@ -14,6 +14,7 @@ import {
   Query,
   DefaultValuePipe,
   ParseIntPipe,
+  Patch,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { CreatePaymentDto, WithdrawDto } from '../dto/payment.dto';
@@ -24,6 +25,7 @@ import { Response } from 'express';
 import { Public } from 'src/common/utils/public.decorator';
 import { ApiQuery } from '@nestjs/swagger';
 import { PaymentStatus } from '../entity/payment.enum';
+import { RefundDto } from '../dto/refund.dto';
 
 
 @Controller('payments')
@@ -51,15 +53,31 @@ export class PaymentController {
 
 
 
-  @Post('/refund/:paymentIntentId')
-  async refund(@Param('paymentIntentId') id: string, @Res() res: Response) {
+
+  @Patch('refund')
+async handleRefund(
+  @Body() dto: RefundDto,
+  @Res() res: Response,
+) {
+  try {
+    const data = await this.paymentService.refund(dto);
+
     return sendResponse(res, {
       statusCode: HttpStatus.OK,
       success: true,
-      message: "refund money succfully",
-      data: this.paymentService.refund(id),
-    })
+      message: 'Refund processed successfully',
+      data,
+    });
+  } catch (error) {
+    return sendResponse(res, {
+      statusCode: error.status || HttpStatus.INTERNAL_SERVER_ERROR,
+      success: false,
+      message: error.message || 'Refund failed',
+      data: null,
+    });
   }
+}
+
 
 @Get('all')
   async getAllPayments(

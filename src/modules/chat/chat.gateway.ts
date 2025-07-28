@@ -6,7 +6,7 @@ import { Server, Socket } from 'socket.io';
 import { Events } from './constants';
 
 @Injectable()
-@WebSocketGateway({ cors: { origin: '*' } })
+@WebSocketGateway({ cors: { origin: '*' }})
 export class ChatGateway {
   @WebSocketServer()
   private server: Server;

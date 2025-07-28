@@ -1,0 +1,40 @@
+services:
+  server:
+    build:
+      context: .
+    image: arafat2025/gentleman-server:latest
+    platform: linux/amd64
+    environment:
+      NODE_ENV: development
+    env_file:
+      - .env
+    ports:
+      - 5012:5012
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres
+    restart: always
+    user: postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: gentleman_db
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    expose:
+      - 5432
+
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - redis-data:/data
+
+volumes:
+  db-data:
+  redis-data:

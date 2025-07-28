@@ -3,6 +3,7 @@ import Booking from 'src/modules/booking/entity/booking.entity';
 import { Conversation } from 'src/modules/messaging/entity/conversation.entity';
 import { Message } from 'src/modules/messaging/entity/message.entity';
 import { Offer } from 'src/modules/messaging/entity/offer.entity';
+import { Notification } from 'src/modules/notifications/entity/notificationcs.entity';
 import { WithdrawalEntity } from 'src/modules/payment/entity/payment.entity';
 import { Report } from 'src/modules/report/entity/report.entity';
 import { VehicleEntity } from 'src/modules/vehicle/entity/vehicle.entity';
@@ -27,6 +28,9 @@ export class User extends AbstractionEntity {
 
   @Column({ nullable: true })
   otp?: string;
+
+  @Column({ nullable: true })
+  fcmToken?:string; 
 
   @Column({ nullable: true })
   serviceCategoryId?: string;
@@ -75,6 +79,10 @@ export class User extends AbstractionEntity {
 
   @Column({ nullable: true })
   lastWithdrawalId: string;
+
+
+    @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
 
   @OneToMany(() => VehicleEntity, (vehicle) => vehicle.user)
   vehicles: VehicleEntity[];

@@ -26,7 +26,7 @@ export class AuthService {
     ) { }
 
     async login(payload: LoginDto): Promise<any> {
-        const { email, password } = payload
+        const { email, password,fcmToken } = payload
         const user = await this.userRepository.findOneBy({ email });
         if (!user) {
             throw new ApiError(HttpStatus.NOT_FOUND, "User not found!");
@@ -45,6 +45,11 @@ export class AuthService {
         if (!passwordVerify) {
             throw new ApiError(HttpStatus.FORBIDDEN, "Email or Password not matched!");
         }
+
+         if (fcmToken && fcmToken !== user.fcmToken) {
+        user.fcmToken = fcmToken;
+        await this.userRepository.save(user);
+    }
 
         const jwtPayload = {
             userId: user.id,
@@ -111,10 +116,14 @@ export class AuthService {
             throw new ApiError(HttpStatus.FORBIDDEN, "This user is blocked ! !");
         }
 
+        
+
         const jwtPayload = {
             userId: user.id,
             role: user.role,
         };
+
+        
 
         const resetToken = await this.jwtService.signAsync(jwtPayload, {
             expiresIn: '5m'

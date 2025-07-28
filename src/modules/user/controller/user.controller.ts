@@ -35,7 +35,7 @@ async getProviders(@Query() query: any) {
     page = 1,
     limit = 10,
   } = query;
-  console.log('hite where');
+  
   const result = await this.userService.getFilteredProviders({
     status,
     specialist,
@@ -91,6 +91,7 @@ async getAllProviders(@Req() req, @Res() res) {
     const image = files.image?.[0];
     const certificate = files.certificate?.[0];
 
+  
     const result = await this.userService.updateUser(req.user, payload, image, certificate);
     sendResponse(res, {
       success: true,

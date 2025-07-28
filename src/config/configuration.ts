@@ -14,6 +14,11 @@ export default () => ({
   client_url: process.env.ClIENT_URL,
   stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
   redis_connection_url: process.env.REDIS_CONNECTION_URL,
+   firebase: {
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY,
+  },
   database: {
     url: process.env.DATABASE_URL
   }

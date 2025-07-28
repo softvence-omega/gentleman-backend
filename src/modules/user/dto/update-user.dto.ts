@@ -44,4 +44,8 @@ export class UpdateUserDto {
   @IsOptional()
   @IsString()
   readonly  stripeAccountId?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly  fcmToken?: string;
 }

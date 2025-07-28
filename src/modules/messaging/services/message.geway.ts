@@ -14,12 +14,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Offer, OfferStatus } from '../entity/offer.entity';
 import { RedisService } from './redis.services';
-import { Message } from '../entity/message.entity';
+import { Message, MessageType } from '../entity/message.entity';
 import { Conversation } from '../entity/conversation.entity';
 import { User } from 'src/modules/user/entities/user.entity';
+import Booking from 'src/modules/booking/entity/booking.entity';
 
 
-@WebSocketGateway({ cors: { origin: '*' } })
+@WebSocketGateway({ cors: { origin: '*' } , })
 @Injectable()
 export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
@@ -31,6 +32,7 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     @InjectRepository(Message) private messageRepo: Repository<Message>,
     @InjectRepository(Offer) private offerRepo: Repository<Offer>,
     private redisService: RedisService,
+    @InjectRepository(Booking) private bookingRepo : Repository<Booking>
   ) {}
 
   async handleConnection(client: Socket) {
@@ -63,10 +65,10 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
 
   @SubscribeMessage('sendMessage')
   async handleSendMessage(
-    @MessageBody() data: { text: string; sender: string; receiver: string },
+    @MessageBody() data: { text: string; sender: string; receiver: string, document:MessageType },
     @ConnectedSocket() client: Socket,
   ) {
-    const { sender, receiver, text } = data;
+    const { sender, receiver, text,document} = data;
     const [user1Id, user2Id] = [sender, receiver].sort();
 
     console.log("hit here")
@@ -91,6 +93,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         name: senderUser?.name,
         hasGoogleAccount: true,
         unreadCount: 1,
+        profile: senderUser?.profileImage,
+        lastMessageAt: conversation.createdAt,
       };
 
       const newChatUserForSender = {
@@ -98,6 +102,8 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
         name: receiverUser?.name,
         hasGoogleAccount: true,
         unreadCount: 0,
+       profile: senderUser?.profileImage,
+        lastMessageAt: conversation.createdAt,
       };
 
       const [receiverSocketId, senderSocketId] = await Promise.all([
@@ -119,12 +125,15 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
       receiver,
     );
 
+    
+
     const savedMessage = await this.messageRepo.save(this.messageRepo.create({
       text,
+      document,
       senderId: sender,
       receiverId: receiver,
       conversationId: conversation.id,
-      isRead: receiverActiveWith === sender,
+      isRead:false,
     }));
 
     await this.convoRepo.update(conversation.id, {
@@ -219,49 +228,59 @@ export class MessageGateway implements OnGatewayConnection, OnGatewayDisconnect 
     });
   }
 
+  
+
   @SubscribeMessage('getConversations')
-  async handleGetConversations(
-    @MessageBody() data: { userId: string },
-    @ConnectedSocket() client: Socket,
-  ) {
-    const { userId } = data;
+async handleGetConversations(
+  @MessageBody() data: { userId: string },
+  @ConnectedSocket() client: Socket,
+) {
+  const { userId } = data;
 
-    const conversations = await this.convoRepo.find({
-      where: [{ user1Id: userId }, { user2Id: userId }],
-      order: { lastMessageAt: 'DESC' },
-    });
+  const conversations = await this.convoRepo.find({
+    where: [{ user1Id: userId }, { user2Id: userId }],
+    order: { lastMessageAt: 'DESC' },
+  });
 
-    if (!conversations.length) {
-      client.emit('conversationsLoaded', []);
-      return;
-    }
-
-    const userIds = conversations.map((c) =>
-      c.user1Id === userId ? c.user2Id : c.user1Id
-    );
-
-    const users = await this.userRepo.findByIds(userIds);
-
-    const unreadCounts = await this.messageRepo
-      .createQueryBuilder('m')
-      .select('m.senderId', 'senderId')
-      .addSelect('COUNT(*)', 'count')
-      .where('m.receiverId = :userId AND m.isRead = false', { userId })
-      .groupBy('m.senderId')
-      .getRawMany();
-
-    const chatUsers = users.map((u) => {
-      const countObj = unreadCounts.find((x) => x.senderId === u.id);
-      return {
-        id: u.id,
-        name: u.name,
-        hasGoogleAccount: true,
-        unreadCount: Number(countObj?.count || 0),
-      };
-    });
-
-    client.emit('conversationsLoaded', chatUsers);
+  if (!conversations.length) {
+    client.emit('conversationsLoaded', []);
+    return;
   }
+
+  // Extract the other user IDs from each conversation
+  const userIds = conversations.map((c) =>
+    c.user1Id === userId ? c.user2Id : c.user1Id,
+  );
+
+  const users = await this.userRepo.findByIds(userIds);
+
+  // Get unread message counts grouped by sender
+  const unreadCounts = await this.messageRepo
+    .createQueryBuilder('m')
+    .select('m.senderId', 'senderId')
+    .addSelect('COUNT(*)', 'count')
+    .where('m.receiverId = :userId AND m.isRead = false', { userId })
+    .groupBy('m.senderId')
+    .getRawMany();
+
+  // Build conversation list enriched with name, profile, unread count, and last message time
+  const chatUsers = conversations.map((convo) => {
+    const otherUserId = convo.user1Id === userId ? convo.user2Id : convo.user1Id;
+    const user = users.find((u) => u.id === otherUserId);
+    const countObj = unreadCounts.find((x) => x.senderId === otherUserId);
+
+    return {
+      id: user?.id,
+      name: user?.name,
+      profile: user?.profileImage,
+      unreadCount: Number(countObj?.count || 0),
+      lastMessageAt: convo.lastMessageAt,
+    };
+  });
+
+  client.emit('conversationsLoaded', chatUsers);
+}
+
 
   @SubscribeMessage('createOffer')
   async handleCreateOffer(
@@ -359,8 +378,130 @@ async handleGetAllCustomers(
   client.emit('allCustomers', customers);
 }
 
+@SubscribeMessage('updateBookingLocation')
+async handleUpdateBookingLocation(
+  @MessageBody() data: { bookingId: string; latitude: string; longitude: string },
+  @ConnectedSocket() client: Socket,
+) {
+  const { bookingId, latitude, longitude } = data;
+
+  const booking = await this.bookingRepo.findOne({
+    where: { id: bookingId },
+    relations: ['provider'],
+  });
+
+  if (!booking) {
+    return client.emit('bookingLocationUpdateError', {
+      message: 'Booking not found',
+    });
+  }
+
+  booking.latitude = latitude;
+  booking.longitude = longitude;
+
+  await this.bookingRepo.save(booking);
+
+  const responsePayload = {
+    bookingId,
+    latitude,
+    longitude,
+    message: 'Booking location updated successfully',
+  };
+
+  // Emit to sender
+  client.emit('bookingLocationUpdated', responsePayload);
+
+  // Emit to provider
+  const providerId = booking.provider?.id;
+  if (providerId) {
+    const providerSocketId = await this.redisService.hGet('userSocketMap', providerId);
+    if (providerSocketId) {
+      this.server.to(providerSocketId).emit('bookingLocationUpdated', responsePayload);
+    }
+  }
+}
+
+
+@SubscribeMessage('markConversationRead')
+async handleMarkConversationRead(
+  @MessageBody() data: { userId: string; conversationId: string },
+  @ConnectedSocket() client: Socket,
+) {
+  const { userId, conversationId } = data;
+
+  // Step 1: Mark all unread messages as read
+  await this.messageRepo.update(
+    {
+      conversationId,
+      receiverId: userId,
+      isRead: false,
+    },
+    { isRead: true },
+  );
+
+  // Step 2: Clear active chat (optional)
+  await this.redisService.hDel('userActiveChatMap', userId);
+
+  // Step 3: Emit updated unread count (0)
+  client.emit('unreadCountUpdate', {
+    conversationId,
+    count: 0,
+    from: null, // or keep `from: previousSenderId` if known
+  });
+}
+
+
+
+
+
+
+
 
 }
 
 // Entity files (user.entity.ts, conversation.entity.ts, message.entity.ts, offer.entity.ts)
 // will be provided next.
+
+// @SubscribeMessage('getConversations')
+//   async handleGetConversations(
+//     @MessageBody() data: { userId: string },
+//     @ConnectedSocket() client: Socket,
+//   ) {
+//     const { userId } = data;
+
+//     const conversations = await this.convoRepo.find({
+//       where: [{ user1Id: userId }, { user2Id: userId }],
+//       order: { lastMessageAt: 'DESC' },
+//     });
+
+//     if (!conversations.length) {
+//       client.emit('conversationsLoaded', []);
+//       return;
+//     }
+
+//     const userIds = conversations.map((c) =>
+//       c.user1Id === userId ? c.user2Id : c.user1Id
+//     );
+
+//     const users = await this.userRepo.findByIds(userIds);
+
+//     const unreadCounts = await this.messageRepo
+//       .createQueryBuilder('m')
+//       .select('m.senderId', 'senderId')
+//       .addSelect('COUNT(*)', 'count')
+//       .where('m.receiverId = :userId AND m.isRead = false', { userId })
+//       .groupBy('m.senderId')
+//       .getRawMany();
+
+//     const chatUsers = users.map((u) => {
+//       const countObj = unreadCounts.find((x) => x.senderId === u.id);
+//       return {
+//         id: u.id,
+//         name: u.name,
+//         profile: u?.profileImage,
+//         unreadCount: Number(countObj?.count || 0),
+//       };
+//     });
+
+//     client.emit('conversationsLoaded', chatUsers);
+//   }

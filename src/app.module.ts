@@ -3,7 +3,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ReviewModule } from './modules/review/review.module';
 import { PaymentModule } from './modules/payment/payment.module';
-import { NotificationModule } from './modules/notification/notification.module';
 import { CategoryModule } from './modules/category/category.module';
 import { BookingModule } from './modules/booking/booking.module';
 import { MessageModule } from './modules/message/message.module';
@@ -24,6 +23,9 @@ import { MetadataModule } from './modules/metadata/metadata.module';
 import { VehicleModule } from './modules/vehicle/vehicle.module';
 import { ReportModule } from './modules/report/report.module';
 import { MessagingModule } from './modules/messaging/messaging.module';
+import { BullModule } from '@nestjs/bullmq';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { NotificationModule } from './modules/notifications/notification.module';
 // Import other modules here...
 
 @Module({
@@ -40,7 +42,6 @@ import { MessagingModule } from './modules/messaging/messaging.module';
     ReviewModule,
     ServiceModule,
     PaymentModule,
-    NotificationModule,
     CategoryModule,
     BookingModule,
     MessageModule,
@@ -49,12 +50,23 @@ import { MessagingModule } from './modules/messaging/messaging.module';
     UserModule,
     VehicleTypeModule,
     BookingModule,
-
     RedisModule,
     MetadataModule,
     VehicleModule,
     ReportModule,
     MessagingModule,
+   NotificationModule,
+
+    BullModule.forRootAsync({
+  imports: [ConfigModule],
+  inject: [ConfigService],
+  useFactory: async (configService: ConfigService) => ({
+    connection: {
+      url: configService.getOrThrow<string>('redis_connection_url'),
+    },
+  }),
+}),
+    
   ],
 })
 export class AppModule { }

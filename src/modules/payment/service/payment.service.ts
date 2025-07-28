@@ -22,6 +22,7 @@ import Booking, {
 import { EmailService } from 'src/common/nodemailer/email.service';
 import { User } from 'src/modules/user/entities/user.entity';
 import { blob } from 'stream/consumers';
+import { RefundDto } from '../dto/refund.dto';
 
 @Injectable()
 export class PaymentService {
@@ -187,34 +188,58 @@ export class PaymentService {
     return { received: true, type: event.type };
   }
 
-  async refund(paymentIntentId: string) {
-    const paymentIntent =
-      await this.stripe.paymentIntents.retrieve(paymentIntentId);
-    const refundAmount = Math.round(paymentIntent.amount * 0.95);
+  async refund(dto: RefundDto) {
+  const { amount, userId, providerId } = dto;
 
-    const refund = await this.stripe.refunds.create({
-      payment_intent: paymentIntentId,
-      amount: refundAmount,
-    });
+  const user = await this.userRepo.findOne({
+    where: { id: userId },
+    relations: ['payments'],
+  });
+  if (!user) throw new NotFoundException('User not found');
 
-    if (!refund) throw new BadRequestException('Refund failed');
+  const provider = await this.userRepo.findOneBy({ id: providerId });
+  if (!provider) throw new NotFoundException('Provider not found');
 
-    return this.paymentRepo.update(
-      { senderPaymentTransaction: paymentIntentId },
-      { status: mainPaymentStatus.REFUNDED },
-    );
+  if (Number(provider.balance) < amount) {
+    throw new BadRequestException('Provider does not have enough balance for this refund');
   }
 
-  async refundPayment(apiId: string, userId: string) {
-    const refund = await this.stripe.refunds.create({
-      payment_intent: apiId,
-    });
 
-    return {
-      message: 'Payment refunded successfully',
-      refund,
-    };
+  const payment = await this.paymentRepo.findOne({
+    where: { status: mainPaymentStatus.COMPLETED,  booking: { user: { id: userId } } },
+    order: { createdAt: 'DESC' },
+    relations: ['booking', 'booking.user'],
+  });
+  if (!payment || !payment.senderPaymentTransaction) {
+    throw new BadRequestException('Valid payment not found for refund');
   }
+
+  const refund = await this.stripe.refunds.create({
+    payment_intent: payment.senderPaymentTransaction,
+    amount: amount * 100, 
+  });
+
+  if (!refund || refund.status !== 'succeeded') {
+    throw new BadRequestException('Refund failed');
+  }
+
+
+  await this.paymentRepo.update(payment.id, {
+    status: mainPaymentStatus.REFUNDED,
+  });
+
+
+  provider.balance = parseFloat((+provider.balance - amount).toFixed(2));
+  await this.userRepo.save(provider);
+
+  return {
+    message: 'Refund successful',
+    refundId: refund.id,
+    providerBalance: provider.balance,
+  };
+}
+
+
 
 async getAllPayments(
   page: number,
@@ -455,3 +480,33 @@ const data = entities.map((payment, index) => {
  
 
 }
+
+
+
+
+  // async refund(paymentIntentId: string) {
+
+
+  //   const refund = await this.stripe.refunds.create({
+  //     payment_intent: paymentIntentId,
+  //     amount: refundAmount,
+  //   });
+
+  //   if (!refund) throw new BadRequestException('Refund failed');
+
+  //   return this.paymentRepo.update(
+  //     { senderPaymentTransaction: paymentIntentId },
+  //     { status: mainPaymentStatus.REFUNDED },
+  //   );
+  // }
+
+  // async refundPayment(apiId: string, userId: string) {
+  //   const refund = await this.stripe.refunds.create({
+  //     payment_intent: apiId,
+  //   });
+
+  //   return {
+  //     message: 'Payment refunded successfully',
+  //     refund,
+  //   };
+  // }

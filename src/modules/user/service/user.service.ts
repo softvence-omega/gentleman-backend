@@ -18,7 +18,9 @@ export class UserService {
   ) { }
 
   async updateUser(userData: any, payload: UpdateUserDto, image?: Express.Multer.File, certificate?: Express.Multer.File) {
-    const user = await this.userRepository.findOneBy({ id: userData.userId });
+
+    try{
+      const user = await this.userRepository.findOneBy({ id: userData.userId });
 
     if (!user) {
       throw new ApiError(HttpStatus.NOT_FOUND, 'User not exist!');
@@ -54,10 +56,15 @@ export class UserService {
     user.role = payload.role ? payload.role : user.role;
     user.serviceCategoryId = payload.serviceCategoryId ? payload.serviceCategoryId : user.serviceCategoryId;
     user.status = payload.status ? payload.status : user.status;
-    console.log('user', user);
+    
     await this.userRepository.save(user);
 
     return;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, error.message);
+
+    }
 
   }
 
