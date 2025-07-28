@@ -27,10 +27,10 @@ export class Conversation {
   @Column({ nullable: true })
   lastMessageAt: Date;
 
-  @ManyToOne(() => User, (user) => user.conversations1)
+  @ManyToOne(() => User, (user) => user.conversations1, { cascade: true })
   user1: User;
 
-  @ManyToOne(() => User, (user) => user.conversations2)
+  @ManyToOne(() => User, (user) => user.conversations2, { cascade: true })
   user2: User;
 
   @OneToMany(() => Message, (message) => message.conversation)

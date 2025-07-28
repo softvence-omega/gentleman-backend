@@ -54,12 +54,12 @@ export class Offer {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne(() => User, (user) => user.sentOffers)
+  @ManyToOne(() => User, (user) => user.sentOffers, { cascade: true })
   sender: User;
 
-  @ManyToOne(() => User, (user) => user.receivedOffers)
+  @ManyToOne(() => User, (user) => user.receivedOffers, { cascade: true })
   receiver: User;
 
-  @ManyToOne(() => Conversation, (conversation) => conversation.offers)
+  @ManyToOne(() => Conversation, (conversation) => conversation.offers, { cascade: true })
   conversation: Conversation;
 }

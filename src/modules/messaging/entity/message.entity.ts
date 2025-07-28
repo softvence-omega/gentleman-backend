@@ -23,7 +23,7 @@ export class Message {
   @Column()
   text: string;
 
-    @Column({
+  @Column({
     type: 'enum',
     enum: MessageType,
     default: MessageType.TEXT,
@@ -45,12 +45,12 @@ export class Message {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne(() => User, (user) => user.sentMessages)
+  @ManyToOne(() => User, (user) => user.sentMessages, { cascade: true })
   sender: User;
 
-  @ManyToOne(() => User, (user) => user.receivedMessages)
+  @ManyToOne(() => User, (user) => user.receivedMessages, { cascade: true })
   receiver: User;
 
-  @ManyToOne(() => Conversation, (conversation) => conversation.messages)
+  @ManyToOne(() => Conversation, (conversation) => conversation.messages, { cascade: true })
   conversation: Conversation;
 }

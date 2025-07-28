@@ -10,6 +10,7 @@ import {
   Get,
   Param,
   Query,
+  Delete,
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UserService } from '../service/user.service';
@@ -23,50 +24,50 @@ export class UserController {
 
 
 
-@Get('providers')
-async getProviders(@Query() query: any) {
-  const {
-    status,
-    specialist,
-    country,
-    latitude,
-    longitude,
-    rangeInKm,
-    page = 1,
-    limit = 10,
-  } = query;
-  
-  const result = await this.userService.getFilteredProviders({
-    status,
-    specialist,
-    country,
-    latitude: latitude ? parseFloat(latitude) : undefined,
-    longitude: longitude ? parseFloat(longitude) : undefined,
-    rangeInKm: rangeInKm ? parseFloat(rangeInKm) : undefined,
-    page: Number(page),
-    limit: Number(limit),
-  });
+  @Get('providers')
+  async getProviders(@Query() query: any) {
+    const {
+      status,
+      specialist,
+      country,
+      latitude,
+      longitude,
+      rangeInKm,
+      page = 1,
+      limit = 10,
+    } = query;
 
-  return {
-    success: true,
-    ...result,
-  };
-}
+    const result = await this.userService.getFilteredProviders({
+      status,
+      specialist,
+      country,
+      latitude: latitude ? parseFloat(latitude) : undefined,
+      longitude: longitude ? parseFloat(longitude) : undefined,
+      rangeInKm: rangeInKm ? parseFloat(rangeInKm) : undefined,
+      page: Number(page),
+      limit: Number(limit),
+    });
+
+    return {
+      success: true,
+      ...result,
+    };
+  }
 
 
-@Get('/allProviders')
-async getAllProviders(@Req() req, @Res() res) {
-  const specialist = req.query.specialist as string | undefined;
+  @Get('/allProviders')
+  async getAllProviders(@Req() req, @Res() res) {
+    const specialist = req.query.specialist as string | undefined;
 
-  const result = await this.userService.getAllProviders(specialist);
+    const result = await this.userService.getAllProviders(specialist);
 
-  return sendResponse(res, {
-    success: true,
-    statusCode: HttpStatus.OK,
-    message: 'All providers fetched successfully!',
-    data: result,
-  });
-}
+    return sendResponse(res, {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'All providers fetched successfully!',
+      data: result,
+    });
+  }
 
 
 
@@ -91,7 +92,7 @@ async getAllProviders(@Req() req, @Res() res) {
     const image = files.image?.[0];
     const certificate = files.certificate?.[0];
 
-  
+
     const result = await this.userService.updateUser(req.user, payload, image, certificate);
     sendResponse(res, {
       success: true,
@@ -112,16 +113,16 @@ async getAllProviders(@Req() req, @Res() res) {
 
 
   @Get('singleProvider/:id')
-async getProviderById(@Param('id') id: string, @Res() res) {
-  const result = await this.userService.getProviderById(id);
+  async getProviderById(@Param('id') id: string, @Res() res) {
+    const result = await this.userService.getProviderById(id);
 
-  return sendResponse(res, {
-    success: true,
-    statusCode: HttpStatus.OK,
-    message: 'Provider fetched successfully!',
-    data: result,
-  });
-}
+    return sendResponse(res, {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: 'Provider fetched successfully!',
+      data: result,
+    });
+  }
 
 
   @Get('/:id')
@@ -138,7 +139,17 @@ async getProviderById(@Param('id') id: string, @Res() res) {
 
 
 
+  @Delete(':id')
+  async removeUser(@Req() req, @Res() res, @Param('id') id) {
+    const result = await this.userService.remove(req.user, id);
 
+    return sendResponse(res, {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "User removed successfully!",
+      data: result
+    })
+  }
 
 
 }

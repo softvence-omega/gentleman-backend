@@ -75,30 +75,30 @@ class Booking extends AbstractionEntity {
 
   @Column()
   latitude: string;
-  
+
 
 
   @ManyToOne(() => VehicleTypeEntity, { nullable: true })
   @JoinColumn({ name: 'vehicleTypesId' })
   vehicleType: VehicleTypeEntity;
-  
 
- 
-  @ManyToOne(() => User, (user) => user.bookings)
+
+
+  @ManyToOne(() => User, (user) => user.bookings, { cascade: true })
   @JoinColumn({ name: 'userId' })
   user: User;
 
-  
+
   @ManyToOne(() => User, (user) => user.providedBookings)
   @JoinColumn({ name: 'providerId' })
   provider: User;
 
-  
+
   @ManyToOne(() => CategoryEntity)
   @JoinColumn({ name: 'categoryId' })
   category: CategoryEntity;
 
- 
+
   @OneToOne(() => PaymentEntity, (payment) => payment.booking, { cascade: true })
   payment: PaymentEntity;
 
@@ -106,12 +106,12 @@ class Booking extends AbstractionEntity {
   reviews: Review[];
 
   @OneToMany(() => Report, (report) => report.booking)
-reports: Report[];
+  reports: Report[];
 
 
-@ManyToOne(() => VehicleEntity, { nullable: true })
-@JoinColumn({ name: 'vehicleId' })
-vehicle: VehicleEntity;
+  @ManyToOne(() => VehicleEntity, { nullable: true })
+  @JoinColumn({ name: 'vehicleId' })
+  vehicle: VehicleEntity;
 
 }
 

@@ -6,6 +6,7 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 import ApiError from 'src/common/errors/ApiError';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import Review from 'src/modules/review/enitity/review.entity';
+import { UserRole } from '../dto/create-user.dto';
 
 @Injectable()
 export class UserService {
@@ -19,47 +20,47 @@ export class UserService {
 
   async updateUser(userData: any, payload: UpdateUserDto, image?: Express.Multer.File, certificate?: Express.Multer.File) {
 
-    try{
+    try {
       const user = await this.userRepository.findOneBy({ id: userData.userId });
 
-    if (!user) {
-      throw new ApiError(HttpStatus.NOT_FOUND, 'User not exist!');
-    }
-
-    if (image) {
-      if (user.profileImage) {
-        try {
-          const publicId = this.cloudinary.extractPublicId(user.profileImage);
-          await this.cloudinary.destroyFile(publicId as string);
-        } catch (e) {
-          throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
-        }
+      if (!user) {
+        throw new ApiError(HttpStatus.NOT_FOUND, 'User not exist!');
       }
-      const result = await this.cloudinary.uploadFile(image);
-      user.profileImage = result ? result['secure_url'] : user.profileImage;
-    }
-    if (certificate) {
-      if (user.certificate) {
-        try {
-          const publicId = this.cloudinary.extractPublicId(user.certificate);
-          await this.cloudinary.destroyFile(publicId as string);
-        } catch (e) {
-          throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
+
+      if (image) {
+        if (user.profileImage) {
+          try {
+            const publicId = this.cloudinary.extractPublicId(user.profileImage);
+            await this.cloudinary.destroyFile(publicId as string);
+          } catch (e) {
+            throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
+          }
         }
+        const result = await this.cloudinary.uploadFile(image);
+        user.profileImage = result ? result['secure_url'] : user.profileImage;
       }
-      const result = await this.cloudinary.uploadFile(certificate);
-      user.certificate = result ? result['secure_url'] : user.profileImage;
-    }
+      if (certificate) {
+        if (user.certificate) {
+          try {
+            const publicId = this.cloudinary.extractPublicId(user.certificate);
+            await this.cloudinary.destroyFile(publicId as string);
+          } catch (e) {
+            throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, e.message)
+          }
+        }
+        const result = await this.cloudinary.uploadFile(certificate);
+        user.certificate = result ? result['secure_url'] : user.profileImage;
+      }
 
-    user.name = payload.name ? payload.name : user.name;
-    user.stripeAccountId = payload.stripeAccountId ? payload.stripeAccountId : user.stripeAccountId;
-    user.role = payload.role ? payload.role : user.role;
-    user.serviceCategoryId = payload.serviceCategoryId ? payload.serviceCategoryId : user.serviceCategoryId;
-    user.status = payload.status ? payload.status : user.status;
-    
-    await this.userRepository.save(user);
+      user.name = payload.name ? payload.name : user.name;
+      user.stripeAccountId = payload.stripeAccountId ? payload.stripeAccountId : user.stripeAccountId;
+      user.role = payload.role ? payload.role : user.role;
+      user.serviceCategoryId = payload.serviceCategoryId ? payload.serviceCategoryId : user.serviceCategoryId;
+      user.status = payload.status ? payload.status : user.status;
 
-    return;
+      await this.userRepository.save(user);
+
+      return;
     } catch (error) {
       console.error('Error updating user:', error);
       throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, error.message);
@@ -106,141 +107,42 @@ export class UserService {
   }
 
 
-  //   async getAllProviders() {
-  //   const providers = await this.userRepository
-  //     .createQueryBuilder('provider')
-  //     .leftJoin('provider.providedBookings', 'booking')
-  //     .leftJoin('booking.reviews', 'review')
-  //     .leftJoin('booking.category', 'category') // works via entity relation
-  //     .leftJoin('category.service', 'service')  // works via entity relation
-  //     .where('provider.role = :role', { role: 'provider' })
-  //     .andWhere('provider.isDeleted = false')
-  //     .select('provider.id', 'id')
-  //     .addSelect('provider.name', 'name')
-  //     .addSelect('AVG(review.rating)', 'avgrating')
-  //     .addSelect((qb) => {
-  //       return qb
-  //         .subQuery()
-  //         .select('srv.title')
-  //         .from('booking', 'subBook')
-  //         .leftJoin('category_entity', 'cat', 'subBook.categoryId = cat.id')
-  //         .leftJoin('service_entity', 'srv', 'cat.serviceId = srv.id')
-  //         .where('subBook.providerId = provider.id')
-  //         .andWhere('srv.title IS NOT NULL')
-  //         .groupBy('srv.title')
-  //         .orderBy('COUNT(*)', 'DESC')
-  //         .limit(1);
-  //     }, 'topservice')
-  //     .groupBy('provider.id')
-  //     .addGroupBy('provider.name')
-  //     .orderBy('avgrating', 'ASC')
-  //     .getRawMany();
-
-  //   return providers.map((p) => ({
-  //     id: p.id,
-  //     name: p.name,
-  //     averageRating: parseFloat(p.avgrating) || 0,
-  //     ...(p.topservice ? { mostBookedService: p.topservice } : {}),
-  //   }));
-
-
-  // }
-
-
   async getAllProviders(specialist?: string) {
-  const query = this.userRepository
-    .createQueryBuilder('provider')
-    .leftJoin('provider.providedBookings', 'booking')
-    .leftJoin('booking.reviews', 'review')
-    .leftJoin('booking.category', 'category') 
-    .leftJoin('category.service', 'service')
-    .where('provider.role = :role', { role: 'provider' })
-    .andWhere('provider.isDeleted = false')
-    .select('provider.id', 'id')
-    .addSelect('provider.name', 'name')
-    .addSelect('provider.profileImage', 'profileImage')
-    .addSelect('provider.specialist', 'specialist')
-    .addSelect('AVG(review.rating)', 'avgrating')
-    .groupBy('provider.id')
-    .addGroupBy('provider.name')
-    .addGroupBy('provider.profileImage')
-    .addGroupBy('provider.specialist')
-    .orderBy('avgrating', 'ASC');
+    const query = this.userRepository
+      .createQueryBuilder('provider')
+      .leftJoin('provider.providedBookings', 'booking')
+      .leftJoin('booking.reviews', 'review')
+      .leftJoin('booking.category', 'category')
+      .leftJoin('category.service', 'service')
+      .where('provider.role = :role', { role: 'provider' })
+      .andWhere('provider.isDeleted = false')
+      .select('provider.id', 'id')
+      .addSelect('provider.name', 'name')
+      .addSelect('provider.profileImage', 'profileImage')
+      .addSelect('provider.specialist', 'specialist')
+      .addSelect('AVG(review.rating)', 'avgrating')
+      .groupBy('provider.id')
+      .addGroupBy('provider.name')
+      .addGroupBy('provider.profileImage')
+      .addGroupBy('provider.specialist')
+      .orderBy('avgrating', 'ASC');
 
-  if (specialist) {
-    query.andWhere('provider.specialist = :specialist', { specialist });
+    if (specialist) {
+      query.andWhere('provider.specialist = :specialist', { specialist });
+    }
+
+    const providers = await query.getRawMany();
+
+    return providers.map((p) => ({
+      id: p.id,
+      name: p.name,
+      profileImage: p.profileImage || null,
+      specialist: p.specialist || null,
+      averageRating: parseFloat(p.avgrating) || 0,
+    }));
   }
 
-  const providers = await query.getRawMany();
 
-  return providers.map((p) => ({
-    id: p.id,
-    name: p.name,
-    profileImage: p.profileImage || null,
-    specialist: p.specialist || null,
-    averageRating: parseFloat(p.avgrating) || 0,
-  }));
-}
-
-
-
-
-
-  // async getProviderById(id: string) {
-  //   const provider = await this.userRepository
-  //     .createQueryBuilder('provider')
-  //     .leftJoin('provider.providedBookings', 'booking')
-  //     .leftJoin('booking.reviews', 'review')
-  //     .leftJoin('booking.category', 'category')
-  //     .leftJoin('category.service', 'service')
-  //     .where('provider.id = :id', { id })
-  //     .andWhere('provider.role = :role', { role: 'provider' })
-  //     .andWhere('provider.isDeleted = false')
-  //     .select('provider.id', 'id')
-  //     .addSelect('provider.name', 'name')
-  //     .addSelect('provider.profileImage', 'profileImage') 
-  //     .addSelect('AVG(review.rating)', 'avgrating')
-  //     .addSelect((qb) => {
-  //       return qb
-  //         .subQuery()
-  //         .select('srv.title')
-  //         .from('booking', 'subBook')
-  //         .leftJoin('category_entity', 'cat', 'subBook.categoryId = cat.id')
-  //         .leftJoin('service_entity', 'srv', 'cat.serviceId = srv.id')
-  //         .where('subBook.providerId = :id', { id })
-  //         .andWhere('srv.title IS NOT NULL')
-  //         .groupBy('srv.title')
-  //         .orderBy('COUNT(*)', 'DESC')
-  //         .limit(1);
-  //     }, 'topservice')
-  //     .groupBy('provider.id')
-  //     .addGroupBy('provider.name')
-  //     .addGroupBy('provider.profileImage')  
-  //     .getRawOne();
-
-  //   if (!provider) {
-  //     throw new NotFoundException('Provider not found');
-  //   }
-
-
-  //   const recentReviews = await this.reviewRepository
-  //     .createQueryBuilder('review')
-  //     .innerJoin('review.booking', 'booking')
-  //     .where('booking.providerId = :id', { id })
-  //     .orderBy('review.createdAt', 'DESC')
-  //     .select(['review.comment', 'review.rating', 'review.createdAt'])
-  //     .limit(3)
-  //     .getMany();
-
-  //   return {
-  //     id: provider.id,
-  //     name: provider.name,
-  //     profileImage: provider.profileImage,  // <-- Return here
-  //     averageRating: parseFloat(provider.avgrating) || 0,
-  //     ...(provider.topservice ? { mostBookedService: provider.topservice } : {}),
-  //     recentReviews,
-  //   };
-  // }
 
 
   async getProviderById(id: string) {
@@ -310,43 +212,43 @@ export class UserService {
 
 
   async getFilteredProviders({
-  status,
-  specialist,
-  country,
-  latitude,
-  longitude,
-  rangeInKm,
-  page = 1,
-  limit = 10,
-}: {
-  status?: string;
-  specialist?: string;
-  country?: string;
-  latitude?: number;
-  longitude?: number;
-  rangeInKm?: number;
-  page?: number;
-  limit?: number;
-}) {
-  const query = this.userRepository
-    .createQueryBuilder('user')
-    .where('user.role = :role', { role: 'provider' });
+    status,
+    specialist,
+    country,
+    latitude,
+    longitude,
+    rangeInKm,
+    page = 1,
+    limit = 10,
+  }: {
+    status?: string;
+    specialist?: string;
+    country?: string;
+    latitude?: number;
+    longitude?: number;
+    rangeInKm?: number;
+    page?: number;
+    limit?: number;
+  }) {
+    const query = this.userRepository
+      .createQueryBuilder('user')
+      .where('user.role = :role', { role: 'provider' });
 
-  if (status) {
-    query.andWhere('user.status = :status', { status });
-  }
+    if (status) {
+      query.andWhere('user.status = :status', { status });
+    }
 
-  if (specialist) {
-    query.andWhere('user.specialist = :specialist', { specialist });
-  }
+    if (specialist) {
+      query.andWhere('user.specialist = :specialist', { specialist });
+    }
 
-  if (country) {
-    query.andWhere('user.country = :country', { country });
-  }
+    if (country) {
+      query.andWhere('user.country = :country', { country });
+    }
 
-  if (latitude && longitude && rangeInKm) {
-    query.andWhere(
-      `
+    if (latitude && longitude && rangeInKm) {
+      query.andWhere(
+        `
       (
         6371 * acos(
           cos(radians(:latitude)) * cos(radians(CAST(user.latitude AS DOUBLE PRECISION))) *
@@ -355,28 +257,65 @@ export class UserService {
         )
       ) <= :rangeInKm
     `,
-      {
-        latitude,
-        longitude,
-        rangeInKm,
-      },
-    );
+        {
+          latitude,
+          longitude,
+          rangeInKm,
+        },
+      );
+    }
+
+    const [data, total] = await query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getManyAndCount();
+
+    return {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+      data,
+    };
   }
 
-  const [data, total] = await query
-    .skip((page - 1) * limit)
-    .take(limit)
-    .getManyAndCount();
+  async remove(user, id) {
 
-  return {
-    total,
-    page,
-    limit,
-    totalPages: Math.ceil(total / limit),
-    data,
-  };
-}
+    const isAdmin = await this.userRepository.findOne({
+      where: { id: user.userId }
+    })
+
+    if (!isAdmin) {
+      throw new ApiError(HttpStatus.FORBIDDEN, "Something went wrong!");
+    }
+
+    if (isAdmin.role !== UserRole.ADMIN) {
+      throw new ApiError(HttpStatus.FORBIDDEN, "You are not permitted to remove user");
+    }
 
 
+    const userData = await this.userRepository.findOne({
+      where: { id }
+    });
+
+    if (!userData) {
+      throw new ApiError(HttpStatus.NOT_FOUND, "Something went wrong!");
+    }
+
+    if (userData.id === isAdmin.id) {
+      throw new ApiError(HttpStatus.FORBIDDEN, "You can't remove yourself");
+    }
+
+    if (userData.profileImage) {
+      try {
+        const relativePath = this.cloudinary.extractPublicId(userData.profileImage);
+        await this.cloudinary.destroyFile(relativePath)
+      } catch (e) {
+        throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, e.message);
+      }
+    }
+
+    await this.userRepository.remove(userData);
+  }
 
 }

@@ -17,9 +17,9 @@ export enum RefundStatus {
 }
 
 @Entity('reports')
-export class Report extends AbstractionEntity{
- 
-  @Column('text',{ nullable: true })
+export class Report extends AbstractionEntity {
+
+  @Column('text', { nullable: true })
   note: string;
 
   @Column({
@@ -48,11 +48,11 @@ export class Report extends AbstractionEntity{
   @Column()
   requestedAmount: string;
 
-  @ManyToOne(() => User, (user) => user.reports)
+  @ManyToOne(() => User, (user) => user.reports, { cascade: true })
   user: User;
 
   @ManyToOne(() => Booking, (booking) => booking.reports)
-booking: Booking;
+  booking: Booking;
 
   constructor(entity?: Partial<Report>) {
     super();

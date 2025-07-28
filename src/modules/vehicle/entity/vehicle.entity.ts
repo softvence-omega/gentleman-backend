@@ -18,16 +18,16 @@ export class VehicleEntity extends AbstractionEntity {
   year: string;
 
   @Column()
-  vehicleImage:string
-  @ManyToOne(() => User, (user) => user.vehicles)
+  vehicleImage: string
+  @ManyToOne(() => User, (user) => user.vehicles, { cascade: true })
   @JoinColumn({ name: 'userId' })
   user: User;
 
 
   @OneToOne(() => Booking, (booking) => booking.vehicle)
-booking: Booking;
+  booking: Booking;
 
- 
+
 
   constructor(entity?: Partial<VehicleEntity>) {
     super();
