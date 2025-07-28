@@ -5,15 +5,17 @@ import "reflect-metadata";
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from './common/errors/all-exceptions.filter';
+import { NestExpressApplication } from '@nestjs/platform-express';
+import { join } from 'path';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     rawBody: true,
     bodyParser: true,
   });
   app.enableCors({
-  origin: '*',
-});
+    origin: '*',
+  });
 
   app.useGlobalFilters(new AllExceptionsFilter());
 
@@ -25,7 +27,7 @@ async function bootstrap(): Promise<void> {
       transform: true,
     }),
   );
-  app.setGlobalPrefix('/api/v1/')
+  app.setGlobalPrefix('/api/v1/');
 
   const config = app.get(ConfigService);
   const port = config.get('port') || 3000;
@@ -33,6 +35,10 @@ async function bootstrap(): Promise<void> {
   if (node_env !== 'production') {
     setupSwagger(app);
   }
+
+  app.useStaticAssets(join(__dirname, '..', 'uploads'), {
+    prefix: '/api/v1/uploads/',
+  });
 
   await app.listen(port);
   console.log(`🚀 Application is running successfully!`);
