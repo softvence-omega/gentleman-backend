@@ -188,47 +188,66 @@ export class PaymentService {
     return { received: true, type: event.type };
   }
 
-  async refund(dto: RefundDto) {
-  const { amount, userId, providerId } = dto;
 
-  const user = await this.userRepo.findOne({
-    where: { id: userId },
-    relations: ['payments'],
-  });
+
+async refund(dto: RefundDto) {
+  const { bookingId, amount, userId, providerId } = dto;
+
+  const user = await this.userRepo.findOne({ where: { id: userId } });
   if (!user) throw new NotFoundException('User not found');
 
-  const provider = await this.userRepo.findOneBy({ id: providerId });
+  const provider = await this.userRepo.findOne({ where: { id: providerId } });
   if (!provider) throw new NotFoundException('Provider not found');
+  console.log(provider)
 
   if (Number(provider.balance) < amount) {
     throw new BadRequestException('Provider does not have enough balance for this refund');
   }
 
-
-  const payment = await this.paymentRepo.findOne({
-    where: { status: mainPaymentStatus.COMPLETED,  booking: { user: { id: userId } } },
+  // Get the latest completed payment for a booking made by this user and served by this provider
+  const bookingWithPayment = await this.bookingRepo.findOne({
+    where: {
+      user: { id: userId },
+      provider: { id: providerId },
+      paymentStatus: PaymentStatus.Completed,
+      id: bookingId, // Ensure we are refunding for the specific booking
+    },
     order: { createdAt: 'DESC' },
-    relations: ['booking', 'booking.user'],
+    relations: ['payment', 'user', 'provider'],
   });
-  if (!payment || !payment.senderPaymentTransaction) {
-    throw new BadRequestException('Valid payment not found for refund');
+
+  if (!bookingWithPayment || !bookingWithPayment.payment) {
+    throw new BadRequestException('Valid completed payment not found for this user');
+  }
+
+  const payment = bookingWithPayment.payment;
+
+  if (!payment.senderPaymentTransaction) {
+    throw new BadRequestException('Missing payment intent ID for refund');
+  }
+
+  if (amount > payment.amount) {
+    throw new BadRequestException(`Refund amount exceeds the original payment amount (${payment.amount})`);
   }
 
   const refund = await this.stripe.refunds.create({
     payment_intent: payment.senderPaymentTransaction,
-    amount: amount * 100, 
+    amount: amount * 100, // Convert to cents
   });
 
   if (!refund || refund.status !== 'succeeded') {
     throw new BadRequestException('Refund failed');
   }
 
+  
+  // Update payment based on whether partial or full refund
+  const updatedPaymentData =
+    amount === payment.amount
+      ? { amount: 0, status: mainPaymentStatus.REFUNDED }
+      : { amount: payment.amount - amount }; 
+  await this.paymentRepo.update(payment.id, updatedPaymentData);
 
-  await this.paymentRepo.update(payment.id, {
-    status: mainPaymentStatus.REFUNDED,
-  });
-
-
+  // Deduct amount from provider balance
   provider.balance = parseFloat((+provider.balance - amount).toFixed(2));
   await this.userRepo.save(provider);
 
@@ -238,6 +257,7 @@ export class PaymentService {
     providerBalance: provider.balance,
   };
 }
+
 
 
 

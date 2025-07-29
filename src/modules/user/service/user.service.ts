@@ -262,7 +262,7 @@ export class UserService {
   }) {
     const query = this.userRepository
       .createQueryBuilder('user')
-      .where('user.role = :role', { role: 'provider' });
+      .where('user.role = :role AND user.isDeleted = false', { role: 'provider' });
 
     if (status) {
       query.andWhere('user.status = :status', { status });
@@ -296,6 +296,7 @@ export class UserService {
     }
 
     const [data, total] = await query
+      .orderBy('user.createdAt', 'DESC') 
       .skip((page - 1) * limit)
       .take(limit)
       .getManyAndCount();
@@ -345,7 +346,10 @@ export class UserService {
       }
     }
 
-    await this.userRepository.remove(userData);
+    userData.isDeleted = true;
+  userData.status = 'inactive';
+
+  await this.userRepository.save(userData);
   }
 
 }

@@ -37,6 +37,7 @@ export class DashboardService {
       .leftJoin('booking.payment', 'payment')
       .where('booking.providerId = :providerId', { providerId })
       .andWhere('payment.status = :status', { status: PaymentStatus.COMPLETED })
+      .andWhere('booking.workStatus = :workStatus', { workStatus: BookingWorkStatus.Completed })
       .andWhere('booking.createdAt >= :startOfWeek', { startOfWeek })
       .select('SUM(payment.amount)', 'total')
       .getRawOne();
@@ -47,6 +48,7 @@ export class DashboardService {
       .leftJoin('booking.payment', 'payment')
       .where('booking.providerId = :providerId', { providerId })
       .andWhere('payment.status = :status', { status: PaymentStatus.COMPLETED })
+      .andWhere('booking.workStatus = :workStatus', { workStatus: BookingWorkStatus.Completed })
       .andWhere('booking.createdAt >= :startOfMonth', { startOfMonth })
       .select('SUM(payment.amount)', 'total')
       .getRawOne();

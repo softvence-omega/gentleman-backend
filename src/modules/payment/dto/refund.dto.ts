@@ -9,4 +9,7 @@ export class RefundDto {
 
   @IsString()
   providerId: string;
+
+  @IsString()
+  bookingId: string;
 }
