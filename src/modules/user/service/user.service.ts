@@ -7,6 +7,7 @@ import ApiError from 'src/common/errors/ApiError';
 import { CloudinaryService } from 'src/common/cloudinary/cloudinary.service';
 import Review from 'src/modules/review/enitity/review.entity';
 import { UserRole } from '../dto/create-user.dto';
+import { UpdateUserStatusDto } from '../dto/update-user-status.dto';
 
 @Injectable()
 export class UserService {
@@ -58,6 +59,34 @@ export class UserService {
       user.serviceCategoryId = payload.serviceCategoryId ? payload.serviceCategoryId : user.serviceCategoryId;
       user.status = payload.status ? payload.status : user.status;
       user.fcmToken = payload.fcmToken ? payload.fcmToken : user.fcmToken;
+
+      await this.userRepository.save(user);
+
+      return;
+    } catch (error) {
+      console.error('Error updating user:', error);
+      throw new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, error.message);
+
+    }
+
+  }
+  async updateUserStatus(userData: any, id: string, payload: UpdateUserStatusDto) {
+
+    try {
+      const isAdmin = await this.userRepository.findOne({
+        where: { id: userData.userId, role: UserRole.ADMIN }
+      });
+
+      if( !isAdmin) {
+        throw new ApiError(HttpStatus.FORBIDDEN, "You are not permitted to update user status");
+      }
+
+      const user = await this.userRepository.findOneBy({ id: id });
+
+      if (!user) {
+        throw new ApiError(HttpStatus.NOT_FOUND, 'User not exist!');
+      }
+      user.status = payload.status ? payload.status : user.status;
 
       await this.userRepository.save(user);
 

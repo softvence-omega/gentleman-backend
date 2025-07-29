@@ -16,6 +16,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UserService } from '../service/user.service';
 import { UpdateUserDto } from '../dto/update-user.dto';
 import sendResponse from 'src/common/utils/sendResponse';
+import { UpdateUserStatusDto } from '../dto/update-user-status.dto';
 
 @Controller('users')
 export class UserController {
@@ -101,6 +102,25 @@ export class UserController {
       data: result
     })
   }
+
+
+  @Patch(":id")
+  async updateUserStatus(
+    @Req() req,
+    @Body() payload: UpdateUserStatusDto,
+    @Res() res,
+    @Param('id') id: string,
+  ) {
+    const result = await this.userService.updateUserStatus(req.user, id, payload);
+    sendResponse(res, {
+      success: true,
+      statusCode: HttpStatus.OK,
+      message: "User status updated successfully!",
+      data: result
+    })
+  }
+
+
 
   @Get('/provider/locations')
   async getProviderLocations() {
