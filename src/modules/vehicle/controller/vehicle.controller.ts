@@ -18,7 +18,7 @@ async create(
   @Res() res,
   @UploadedFile() file: Express.Multer.File
 ) {
-  const userId = req.user.id;
+  const userId = req.user.userId;
   const data = await this.vehicleService.createVehicle(userId, dto, file);
 
   return sendResponse(res, {
