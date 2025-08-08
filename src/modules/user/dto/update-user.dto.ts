@@ -43,9 +43,13 @@ export class UpdateUserDto {
 
   @IsOptional()
   @IsString()
-  readonly  stripeAccountId?: string;
+  readonly stripeAccountId?: string;
 
   @IsOptional()
   @IsString()
-  readonly  fcmToken?: string;
+  readonly fcmToken?: string;
+
+  @IsOptional()
+  @IsString()
+  readonly specialist?: string;
 }
