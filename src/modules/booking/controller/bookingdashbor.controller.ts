@@ -14,7 +14,7 @@ export class DashboardController {
 
   @Get('provider-summary')
   async getDashboard(@Req() req, @Res() res: Response) {
-    const providerId = req.user.id;
+    const providerId = req.user.userId;
     const data = await this.dashboardService.getProviderDashboard(providerId);
     return sendResponse(res, {
       statusCode: HttpStatus.OK,
