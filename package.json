@@ -9,7 +9,6 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "NODE_OPTIONS=--max-old-space-size=4096 nest start",
     "build": "NODE_OPTIONS=--max-old-space-size=4096 nest build",
-
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
@@ -46,6 +45,7 @@
     "firebase-admin": "^13.4.0",
     "ioredis": "^5.6.1",
     "nodemailer": "^7.0.3",
+    "openai": "^5.12.2",
     "passport": "^0.7.0",
     "pg": "^8.16.0",
     "reflect-metadata": "^0.2.2",

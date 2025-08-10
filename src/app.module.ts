@@ -26,6 +26,7 @@ import { MessagingModule } from './modules/messaging/messaging.module';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { NotificationModule } from './modules/notifications/notification.module';
+import { ChatbotModule } from './modules/chatbot/chatbot.module';
 // Import other modules here...
 
 @Module({
@@ -66,6 +67,8 @@ import { NotificationModule } from './modules/notifications/notification.module'
     },
   }),
 }),
+
+    ChatbotModule,
     
   ],
 })
