@@ -116,6 +116,12 @@ async handleRefund(
    
   }
 
+    @Get("succesfulpayments")
+  async SuccesFulpayments() {
+
+   return "payment successfully" 
+   
+  }
 
   
 }
