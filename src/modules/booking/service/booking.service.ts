@@ -464,7 +464,6 @@ export class BookingService {
   }
 
   async getPendingBookings(userId: string): Promise<Booking[]> {
-    console.log(userId)
     return this.bookingRepo.find({
       where: {
         status: BookingStatus.Accept,
