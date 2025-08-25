@@ -9,6 +9,7 @@ export class ChatbotController {
   constructor(private readonly chatbotService: ChatbotService) { }
 
   @ApiSecurity("accessToken")
+  
   @Post("ask-question")
   async askQuestion(@Req() req, @Res() res, @Body() payload: ChatBotMessageDto) {
     const result = await this.chatbotService.askQuestion(req.user, payload);

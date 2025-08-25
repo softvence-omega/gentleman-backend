@@ -28,9 +28,10 @@ export class ChatbotService {
 
     async askQuestion(user, payload: ChatBotMessageDto) {
         const userData = await this.userRepo.findOneBy({ id: user.userId });
+        console.log("Fetching conversations for user:", user);
 
         if (!userData) {
-            throw new ApiError(HttpStatus.FORBIDDEN, "Unauthorized user!");
+            throw new ApiError(HttpStatus.FORBIDDEN, "user not found!");
         }
         const sid = payload.sessionId || uuidv4();
 
@@ -69,10 +70,12 @@ export class ChatbotService {
     }
 
     async getAllConversations(user) {
+
+        console.log("Fetching conversations for user:", user);
         // Ensure user exists
         const userData = await this.userRepo.findOneBy({ id: user.userId });
         if (!userData) {
-            throw new ApiError(HttpStatus.FORBIDDEN, "Unauthorized user!");
+            throw new ApiError(HttpStatus.FORBIDDEN, "User not found!");
         }
 
         // Fetch messages
